@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
-INPUT ?= examples/adventure.md
-OUTPUT ?= dist/adventure.pdf
+INPUT ?= ../books/location-armi
+OUTPUT ?= dist/location-armi.pdf
 
 .PHONY: build docker-build clean
 

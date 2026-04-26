@@ -21,7 +21,9 @@ Con questo progetto puoi:
 - `scripts/build.sh`: build locale
 - `scripts/docker-build.sh`: build tramite container
 - `docker/Dockerfile`: immagine con pandoc + XeLaTeX
-- `examples/adventure.md`: esempio completo
+- `books/<nome-libro>/book.md`: frontmatter e metadati del libro
+- `books/<nome-libro>/chapters/*.md`: capitoli, ordinati numericamente per filename
+- `books/<nome-libro>/assets`: immagini specifiche del libro
 
 ## Prerequisiti (locale)
 
@@ -44,14 +46,26 @@ Note:
 
 ```bash
 cd daggerheart-publish
-./scripts/build.sh examples/adventure.md dist/adventure.pdf
+./scripts/build.sh ../books/location-armi
+```
+
+Con questo comando l'output predefinito sara:
+
+```bash
+dist/location-armi.pdf
+```
+
+Puoi comunque specificare un output esplicito:
+
+```bash
+./scripts/build.sh ../books/location-armi dist/mio-libro.pdf
 ```
 
 ### Con Makefile
 
 ```bash
 cd daggerheart-publish
-make build INPUT=examples/adventure.md OUTPUT=dist/adventure.pdf
+make build INPUT=../books/location-armi OUTPUT=dist/location-armi.pdf
 ```
 
 ## Uso Docker
@@ -60,15 +74,36 @@ La build Docker usa solo i file presenti in questo repository.
 
 ```bash
 cd daggerheart-publish
-./scripts/docker-build.sh examples/adventure.md dist/adventure.pdf
+./scripts/docker-build.sh ../books/location-armi
 ```
 
 Oppure:
 
 ```bash
 cd daggerheart-publish
-make docker-build INPUT=examples/adventure.md OUTPUT=dist/adventure.pdf
+make docker-build INPUT=../books/location-armi OUTPUT=dist/location-armi.pdf
 ```
+
+## Formato cartella libro
+
+Ogni libro deve avere questa struttura:
+
+```text
+books/<nome-libro>/
+  book.md
+  assets/
+  chapters/
+    01 - Capitolo.md
+    02 - Capitolo.md
+    ...
+```
+
+Regole di build:
+
+- `book.md` contiene frontmatter e contenuto introduttivo.
+- Tutti i file `chapters/*.md` vengono concatenati automaticamente dopo `book.md`.
+- L'ordine dei capitoli e determinato dal nome file con ordinamento numerico naturale (`sort -V`).
+- Se non passi un output esplicito, il PDF va in `dist/<nome-libro>.pdf`.
 
 ## Formato Markdown supportato
 
@@ -181,7 +216,7 @@ Testo...
 Esempio:
 
 ```bash
-ASSETS_DIR=./assets KEEP_TEX=1 ./scripts/build.sh examples/adventure.md dist/adventure.pdf
+ASSETS_DIR=./assets KEEP_TEX=1 ./scripts/build.sh ../books/location-armi dist/location-armi.pdf
 ```
 
 ## Limiti attuali
@@ -192,3 +227,7 @@ ASSETS_DIR=./assets KEEP_TEX=1 ./scripts/build.sh examples/adventure.md dist/adv
 ## Licenza
 
 Classe, font e asset inclusi seguono le rispettive licenze originali del template di provenienza.
+## Esempio di conversione da odt a md
+``` bash
+pandoc -s "input.odt" -t markdown -o "output.md"
+```

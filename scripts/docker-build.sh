@@ -7,7 +7,7 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/docker-build.sh <input.md> [output.pdf]
+  scripts/docker-build.sh <book-dir> [output.pdf]
 
 Environment variables:
   IMAGE_NAME   Docker image tag (default: daggerheart-publish:latest)
@@ -29,46 +29,44 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
-INPUT_ABS="$(realpath "$1")"
-if [[ ! -f "$INPUT_ABS" ]]; then
-  echo "Input markdown file not found: $INPUT_ABS" >&2
+BOOK_DIR_ABS="$(realpath "$1")"
+if [[ ! -d "$BOOK_DIR_ABS" ]]; then
+  echo "Book directory not found: $BOOK_DIR_ABS" >&2
+  exit 1
+fi
+
+if [[ ! -f "$BOOK_DIR_ABS/book.md" ]]; then
+  echo "Missing book definition file: $BOOK_DIR_ABS/book.md" >&2
+  exit 1
+fi
+
+if [[ ! -d "$BOOK_DIR_ABS/chapters" ]]; then
+  echo "Missing chapters directory: $BOOK_DIR_ABS/chapters" >&2
   exit 1
 fi
 
 if [[ $# -ge 2 ]]; then
   OUTPUT_ABS="$(realpath -m "$2")"
 else
-  OUTPUT_ABS="$ROOT_DIR/dist/$(basename "${INPUT_ABS%.*}").pdf"
+  OUTPUT_ABS="$ROOT_DIR/dist/$(basename "$BOOK_DIR_ABS").pdf"
 fi
 
 mkdir -p "$(dirname "$OUTPUT_ABS")"
+OUTPUT_DIR_ABS="$(dirname "$OUTPUT_ABS")"
+OUTPUT_FILE="$(basename "$OUTPUT_ABS")"
 
-case "$INPUT_ABS" in
-  "$ROOT_DIR"/*) ;;
-  *)
-    echo "Input markdown must be inside project: $ROOT_DIR" >&2
-    exit 1
-    ;;
-esac
-
-case "$OUTPUT_ABS" in
-  "$ROOT_DIR"/*) ;;
-  *)
-    echo "Output PDF must be inside project: $ROOT_DIR" >&2
-    exit 1
-    ;;
-esac
-
-INPUT_IN_CONTAINER="/workspace/${INPUT_ABS#"$ROOT_DIR"/}"
-OUTPUT_IN_CONTAINER="/workspace/${OUTPUT_ABS#"$ROOT_DIR"/}"
+BOOK_DIR_IN_CONTAINER="/workspace/book"
+OUTPUT_IN_CONTAINER="/workspace/out/$OUTPUT_FILE"
 
 IMAGE_NAME="${IMAGE_NAME:-daggerheart-publish:latest}"
 
 docker build -f "$ROOT_DIR/docker/Dockerfile" -t "$IMAGE_NAME" "$ROOT_DIR"
 
 docker run --rm \
-  -v "$ROOT_DIR:/workspace" \
+  -v "$ROOT_DIR:/workspace/project" \
+  -v "$BOOK_DIR_ABS:$BOOK_DIR_IN_CONTAINER:ro" \
+  -v "$OUTPUT_DIR_ABS:/workspace/out" \
   "$IMAGE_NAME" \
-  /workspace/scripts/build.sh "$INPUT_IN_CONTAINER" "$OUTPUT_IN_CONTAINER"
+  /workspace/project/scripts/build.sh "$BOOK_DIR_IN_CONTAINER" "$OUTPUT_IN_CONTAINER"
 
 echo "PDF generated via Docker: $OUTPUT_ABS"
