@@ -53,23 +53,28 @@
 \renewcommand{\footrule}{\hbox to \headwidth{\color{gold}\leaders\hrule height \footrulewidth\hfill}}
 
 \fancyfoot[LE]{
+	\fontsize{6pt}{12pt}\selectfont{
 	\makebox[0pt][l]{
-		\hspace{0.25cm}
 		\colorbox{gold}{
 			\textbf{\quad\thepage\quad}
-		}\textbf{
-			\leftmark \ \  \rightmark
 		}
-	}
+		\enspace
+		\textbf{
+			%\@title%\quad\leftmark\quad\rightmark
+			\@title\text{:}\enspace\nouppercase\leftmark
+		}
+	}}
 }
 
 \fancyfoot[RO]{
-	\fontsize{5pt}{12pt}\selectfont{
+	\fontsize{6pt}{12pt}\selectfont{
 	\makebox[0pt][r]{
-		\footnotesize
 		\textbf{
-			\leftmark \ \  \rightmark \
-		}\colorbox{gold}{
+			%\@title%\quad\leftmark\quad\rightmark
+			\@title\text{:}\enspace\nouppercase\leftmark
+		}
+		\enspace
+		\colorbox{gold}{
 			\textbf{\quad\thepage\quad}
 		}
 		
