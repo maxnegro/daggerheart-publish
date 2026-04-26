@@ -40,6 +40,31 @@
 \RequirePackage{etoolbox}
 \RequirePackage{tikzpagenodes}
 \RequirePackage{eso-pic}
+\usetikzlibrary{calc,fadings}
+\tikzfading[name=dgh fade to white,
+	top color=transparent!100,
+	bottom color=transparent!0]
+
+% Distance from physical paper top to text body top (computed at begin-document)
+\newlength{\dghpagetotext}
+% Image height and title offset for sectionwithbg.
+\newlength{\dghsectionbgheight}
+\newlength{\dghsectionbgraise}
+\newlength{\dghsectionbgbleed}
+\newlength{\dghsectionbgfadeoffset}
+\setlength{\dghsectionbgheight}{150pt}
+\setlength{\dghsectionbgraise}{-24pt}
+\setlength{\dghsectionbgbleed}{1bp}
+% Gradient starts here (distance from page top): height + raise
+% Override manually if needed; recomputed whenever height or raise changes.
+\setlength{\dghsectionbgfadeoffset}{\dimexpr\dghsectionbgheight+\dghsectionbgraise\relax}
+\AtBeginDocument{%
+	\setlength{\dghpagetotext}{1in}%
+	\addtolength{\dghpagetotext}{\voffset}%
+	\addtolength{\dghpagetotext}{\topmargin}%
+	\addtolength{\dghpagetotext}{\headheight}%
+	\addtolength{\dghpagetotext}{\headsep}%
+}
 
 % --------------------
 % Page style
@@ -330,6 +355,7 @@ Path = ./fonts/,
 					\ifdefstring{\dghtitleimageposition}{top}{\dghhalftitleimage}{}%
 				}{}%
 			}%
+			\vspace{62pt}
 			{\eveleth\fontsize{36pt}{36pt}\selectfont\MakeTextUppercase{#1}}\\[1em]
 			{\large\MakeUppercase{#2}}\\[2em]
 			% image between subtitle and author (default, position=middle)
@@ -338,11 +364,12 @@ Path = ./fonts/,
 					\ifdefstring{\dghtitleimageposition}{top}{}{\dghhalftitleimage}%
 				}{}%
 			}%
+			\vspace{48pt}
 			% author + optional date on the same line
 			\ifblank{#4}{%
 				{\normalsize #3}%
 			}{%
-				{\normalsize\begin{tabular}{@{}lr@{}}#3 & #4\end{tabular}}%
+				{\normalsize #3 --- #4}%
 			}%
 		\end{center}
 		\vspace*{\fill}
@@ -549,6 +576,51 @@ Path = ./fonts/,
 	\indaggerfullpagefalse%
 	\begin{multicols}{2}%
 	\raggedcolumns%
+}
+
+% --- Section with background image ---
+% Internal: renders image anchored at physical page top, full paper width,
+% with a white fade over the bottom half of the image.
+\newcommand{\dghsectionbgpicture}[1]{%
+	\begin{tikzpicture}[remember picture, overlay]
+		\begin{scope}
+			\clip
+				($(current page.north west) + (-\dghsectionbgbleed, \dghsectionbgbleed)$)
+				rectangle
+				($(current page.north east) + (\dghsectionbgbleed, -\dghsectionbgheight-\dghsectionbgbleed)$);
+			\node[anchor=north west, inner sep=0pt] at ($(current page.north west) + (-\dghsectionbgbleed, \dghsectionbgbleed)$) {%
+				\includegraphics[width=\dimexpr\paperwidth+2\dghsectionbgbleed\relax]{\detokenize{#1}}%
+			};
+		\end{scope}
+		% white fade: starts at (height+raise) from page top, ends at image bottom
+		\fill[white, path fading=dgh fade to white]
+			% ($(current page.north west) + (-\dghsectionbgbleed, -126pt+\dghsectionbgbleed)$)
+			($(current page.north west) + (-\dghsectionbgbleed, -\dghsectionbgfadeoffset+\dghsectionbgbleed)$)
+			rectangle
+			($(current page.north east) + (\dghsectionbgbleed, -\dghsectionbgheight-\dghsectionbgbleed)$);
+	\end{tikzpicture}%
+}
+
+% \sectionwithbg{imagepath}{title}: h1 with background image.
+% Image is placed at paper top; h1 cap-top aligns with image bottom.
+% Optionally set \dghsectionbgheight before calling to control image height.
+\newcommand{\dghsectionbgrender}[2]{%
+	\AddToShipoutPictureBG*{\dghsectionbgpicture{#1}}%
+	\ifdgresetsectioncoloronnextsection\resetsectioncolor\else\dgapplycurrentsectioncolor\fi
+	\vspace*{\dimexpr\dghsectionbgheight-\dghpagetotext+\dghsectionbgraise\relax}%
+	\oldsection{#2}%
+}
+
+\newcommand{\sectionwithbg}[2]{%
+	\ifindaggerfullpage
+		\dghsectionbgrender{#1}{#2}%
+	\else
+		\end{multicols}%
+		\ifdghonepagebreak\newpage\fi
+		\dghsectionbgrender{#1}{#2}%
+		\begin{multicols}{2}%
+		\raggedcolumns%
+	\fi
 }
 
 \newcommand{\ColoredTable}[3]{%

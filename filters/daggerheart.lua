@@ -105,11 +105,39 @@ function Pandoc(doc)
 end
 
 function Header(el)
-  if h1_newpage and el.level == 1 then
-    return {
-      pandoc.RawBlock("latex", "\\newpage"),
-      el
-    }
+  if el.level == 1 then
+    local bg = el.attributes["bg"] or el.attributes["background"] or el.attributes["section-bg"]
+    if bg and bg ~= "" then
+      local bg_height = el.attributes["bg-height"] or el.attributes["section-bg-height"]
+      local bg_raise = el.attributes["bg-raise"] or el.attributes["section-bg-raise"]
+      local inlines_doc = pandoc.Pandoc({pandoc.Plain(el.content)})
+      local title_latex = pandoc.write(inlines_doc, "latex"):gsub("%s*\n%s*", " "):gsub("^%s+", ""):gsub("%s+$", "")
+      local out = {}
+      if bg_height and bg_height ~= "" then
+        table.insert(out, "\\setlength{\\dghsectionbgheight}{" .. bg_height .. "}")
+      end
+      if bg_raise and bg_raise ~= "" then
+        table.insert(out, "\\setlength{\\dghsectionbgraise}{" .. bg_raise .. "}")
+      else
+        table.insert(out, "\\setlength{\\dghsectionbgraise}{-24pt}")
+      end
+      -- recompute fade offset from current height+raise (unless bg-fade-offset is set explicitly)
+      -- Default: 50pt gradient band above image bottom, avoids degenerate zero-height gradient
+      local bg_fade = el.attributes["bg-fade-offset"]
+      if bg_fade and bg_fade ~= "" then
+        table.insert(out, "\\setlength{\\dghsectionbgfadeoffset}{" .. bg_fade .. "}")
+      else
+        table.insert(out, "\\setlength{\\dghsectionbgfadeoffset}{\\dimexpr\\dghsectionbgheight-50pt\\relax}")
+      end
+      table.insert(out, "\\sectionwithbg{" .. bg .. "}{" .. title_latex .. "}")
+      return pandoc.RawBlock("latex", table.concat(out, "\n"))
+    end
+    if h1_newpage then
+      return {
+        pandoc.RawBlock("latex", "\\newpage"),
+        el
+      }
+    end
   end
   return el
 end
