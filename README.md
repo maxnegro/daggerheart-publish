@@ -1,6 +1,8 @@
 # daggerheart-publish
 
-Pipeline di pubblicazione Markdown -> PDF autosufficiente, con classe LaTeX e asset vendorizzati nel repository.
+Un workflow moderno per creare bellissimi PDF a due colonne per campagne di GdR (come Daggerheart) partendo da semplici file Markdown. Usa un template LaTeX personalizzato, filtri Lua per Pandoc e una struttura di cartelle organizzata per rendere il processo semplice — anche per chi non ha esperienza con LaTeX.
+
+Guarda il [modulo di esempio](dist/example.pdf)!
 
 ## Obiettivo
 
@@ -344,4 +346,12 @@ Ispirazione originale:
 
 ## Licenza
 
-Classe, font e asset inclusi seguono le rispettive licenze originali del template di provenienza.
+Questo progetto è distribuito sotto la **GNU General Public License, versione 3** (o qualsiasi versione successiva). Per maggiori dettagli, consulta il testo completo della licenza.
+
+Questo progetto non è associato né approvato dai creatori di Critical Role, Darrington Press o qualsiasi altra entità commerciale. È un progetto indipendente creato per uso personale ed educativo.
+
+Questo template utilizza i seguenti font:
+
+- **Montserrat** (Google Fonts, SIL Open Font License)
+- **Merriweather** (Google Fonts, SIL Open Font License)
+- **LeagueSpartan** (Google Fonts, SIL Open Font License)

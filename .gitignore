@@ -1,4 +1,5 @@
 dist/*
+!dist/example.pdf
 books/*
 !books/example/
 
