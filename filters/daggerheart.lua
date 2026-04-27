@@ -686,21 +686,21 @@ local function parse_statblock_yaml(text)
         if feat_name then
           current_feat = {
             name = strip_yaml_quotes(feat_name),
-            text = ""
+            text = "",
+            question = ""
           }
           table.insert(parsed.feats, current_feat)
         else
           local feat_text = raw:match("^%s*text%s*:%s*(.-)%s*$")
-          if feat_text and current_feat then
-            current_feat.text = strip_yaml_quotes(feat_text)
+          local feat_question = raw:match("^%s*question%s*:%s*(.-)%s*$")
+          if feat_question and current_feat then
+            current_feat.question = strip_yaml_quotes(feat_question)
+          elseif feat_text and current_feat then
+            current_feat.text = trim(feat_text)
           elseif current_feat then
             local continuation = raw:match("^%s+(.+)$")
             if continuation and continuation ~= "" then
-              if current_feat.text ~= "" then
-                current_feat.text = current_feat.text .. " " .. strip_yaml_quotes(continuation)
-              else
-                current_feat.text = strip_yaml_quotes(continuation)
-              end
+              current_feat.text = current_feat.text .. " " .. trim(continuation)
             end
           end
         end
@@ -745,11 +745,20 @@ local function markdown_inline_to_latex(text)
         table.insert(result, latex_escape(text:sub(i)))
         break
       end
+    elseif text:sub(i, i) == "_" then
+      local close = text:find("_", i+1, true)
+      if close then
+        table.insert(result, "\\textit{" .. latex_escape(text:sub(i+1, close-1)) .. "}")
+        i = close + 1
+      else
+        table.insert(result, latex_escape(text:sub(i)))
+        break
+      end
     else
-      local next_star = text:find("%*", i)
-      if next_star then
-        table.insert(result, latex_escape(text:sub(i, next_star-1)))
-        i = next_star
+      local next_special = text:find("[%*_]", i)
+      if next_special then
+        table.insert(result, latex_escape(text:sub(i, next_special-1)))
+        i = next_special
       else
         table.insert(result, latex_escape(text:sub(i)))
         break
@@ -768,13 +777,21 @@ local function render_feats_latex(feats)
   local out = {}
   for _, feat in ipairs(feats) do
     local name = latex_escape(feat.name or "")
-    local text = markdown_inline_to_latex(feat.text or "")
+    local text = markdown_inline_to_latex(strip_yaml_quotes(feat.text or ""))
+    local question = latex_escape(feat.question or "")
+    local entry = ""
     if name ~= "" and text ~= "" then
-      table.insert(out, "\\textbf{" .. name .. ":} " .. text .. "\\\\")
+      entry = "\\textbf{" .. name .. ":} " .. text
     elseif name ~= "" then
-      table.insert(out, "\\textbf{" .. name .. "}\\\\")
+      entry = "\\textbf{" .. name .. "}"
     elseif text ~= "" then
-      table.insert(out, text .. "\\\\")
+      entry = text
+    end
+    if question ~= "" then
+      entry = entry .. "\\\\\\textit{" .. question .. "}"
+    end
+    if entry ~= "" then
+      table.insert(out, entry .. "\\\\")
     end
   end
 
