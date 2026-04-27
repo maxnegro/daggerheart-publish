@@ -240,6 +240,104 @@ local function attr_or_empty(el, keys)
   return ""
 end
 
+local function latex_image_length(value)
+  if not value or value == "" then
+    return nil
+  end
+
+  local percent = value:match("^%s*([%d%.]+)%%%s*$")
+  if percent then
+    local ratio = tonumber(percent)
+    if ratio then
+      if math.abs(ratio - 100) < 0.0001 then
+        return "\\linewidth"
+      end
+      return string.format("%.6f\\linewidth", ratio / 100)
+    end
+  end
+
+  return value
+end
+
+local function image_latex(el)
+  local options = {}
+  local width = latex_image_length(el.attributes["width"])
+  local height = latex_image_length(el.attributes["height"])
+
+  if width then
+    table.insert(options, "width=" .. width)
+  end
+
+  if height then
+    table.insert(options, "height=" .. height)
+  end
+
+  table.insert(options, "keepaspectratio")
+
+  return "\\includegraphics[" .. table.concat(options, ",") .. "]{\\detokenize{" .. el.src .. "}}"
+end
+
+local function first_image_from_blocks(blocks)
+  for _, block in ipairs(blocks or {}) do
+    if (block.t == "Plain" or block.t == "Para") and block.content then
+      for _, inline in ipairs(block.content) do
+        if inline.t == "Image" then
+          return inline
+        end
+      end
+    end
+  end
+  return nil
+end
+
+function Image(el)
+  if FORMAT ~= "latex" and FORMAT ~= "pdf" then
+    return nil
+  end
+
+  return pandoc.RawInline("latex", image_latex(el))
+end
+
+local function figure_caption_text(fig)
+  if not fig.caption then
+    return ""
+  end
+
+  if fig.caption.long then
+    return pandoc.utils.stringify(fig.caption.long)
+  end
+
+  if fig.caption[2] then
+    return pandoc.utils.stringify(fig.caption[2])
+  end
+
+  return pandoc.utils.stringify(fig.caption)
+end
+
+function Figure(fig)
+  if FORMAT ~= "latex" and FORMAT ~= "pdf" then
+    return nil
+  end
+
+  if fig.content and #fig.content > 0 then
+    local image = first_image_from_blocks(fig.content)
+    local body = image and image_latex(image) or blocks_to_latex(fig.content)
+    local caption = figure_caption_text(fig)
+
+    if caption and caption ~= "" then
+      local latex = "\\begin{center}\n"
+        .. body
+        .. "\\\\[0.4em]\n{\\small\\itshape " .. latex_escape(caption) .. "}\n"
+        .. "\\end{center}"
+      return pandoc.RawBlock("latex", latex)
+    end
+
+    return pandoc.RawBlock("latex", body)
+  end
+
+  return pandoc.Null()
+end
+
 local function render_environment_box(name, body_latex)
   local out = {}
   table.insert(out, "\\begin{" .. name .. "}")
