@@ -334,9 +334,13 @@ pandoc -s "input.odt" -t markdown -o "output.md"
 
 ## Credits
 
-La classe LaTeX `daggerheart.cls` è derivata dal template originale di [roland04](https://github.com/roland04):
+La classe LaTeX `daggerheart.cls` è derivata da:
 
-- **Repository originale**: [roland04/daggerheart-template](https://github.com/roland04/daggerheart-template)
+- **[Gladon4/daggerheart-latex-template](https://github.com/Gladon4/daggerheart-latex-template)** — template LaTeX da cui è derivata la classe
+
+Ispirazione originale:
+
+- **[roland04/daggerheart-template](https://github.com/roland04/daggerheart-template)** — idea originale del template Daggerheart
 
 ## Licenza
 
