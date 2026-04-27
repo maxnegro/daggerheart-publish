@@ -327,10 +327,17 @@ IMAGE_NAME=daggerheart-publish:dev ./scripts/docker-build.sh ../books/location-a
 - Il filtro non trasforma automaticamente tabelle Markdown in `\ColoredTable`.
 - Per statistiche avanzate conviene usare direttamente le macro LaTeX nei blocchi `stats`.
 
-## Licenza
-
-Classe, font e asset inclusi seguono le rispettive licenze originali del template di provenienza.
 ## Esempio di conversione da odt a md
 ``` bash
 pandoc -s "input.odt" -t markdown -o "output.md"
 ```
+
+## Credits
+
+La classe LaTeX `daggerheart.cls` è derivata dal template originale di [roland04](https://github.com/roland04):
+
+- **Repository originale**: [roland04/daggerheart-template](https://github.com/roland04/daggerheart-template)
+
+## Licenza
+
+Classe, font e asset inclusi seguono le rispettive licenze originali del template di provenienza.
