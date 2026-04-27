@@ -452,17 +452,17 @@ Path = ./fonts/,
 }
 
 \newcommand{\dghsetlabelsitalian}{%
-\gdef\dghlabeldifficulty{Difficolta}%
+\gdef\dghlabeldifficulty{Difficoltà}%
 \gdef\dghlabelthresholds{Soglie}%
 \gdef\dghlabelhp{PF}%
 \gdef\dghlabelstress{Stress}%
-\gdef\dghlabelatk{ATK}%
+\gdef\dghlabelatk{ATT}%
 \gdef\dghlabelweapon{Arma}%
 \gdef\dghlabelexperience{Esperienza}%
-\gdef\dghlabelmotivesandtactics{Impulsi e Tattiche}%
-\gdef\dghlabelfeatures{Tratti}%
-\gdef\dghlabelimpulses{Impulsi}%
-\gdef\dghlabelpotentialadversaries{Avversari Potenziali}%
+\gdef\dghlabelmotivesandtactics{Motivazioni e Tattiche}%
+\gdef\dghlabelfeatures{Caratteristiche}%
+\gdef\dghlabelimpulses{Impeti}%
+\gdef\dghlabelpotentialadversaries{Potenziali Avversari}%
 }
 
 \dghsetlabelsenglish
