@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     texlive-latex-extra \
     texlive-fonts-recommended \
     texlive-pictures \
+    texlive-lang-italian \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /work

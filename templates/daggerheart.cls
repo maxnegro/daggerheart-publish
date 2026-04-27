@@ -53,11 +53,11 @@
 \newlength{\dghsectionbgbleed}
 \newlength{\dghsectionbgfadeoffset}
 \setlength{\dghsectionbgheight}{150pt}
-\setlength{\dghsectionbgraise}{-24pt}
+\setlength{\dghsectionbgraise}{-18pt}
 \setlength{\dghsectionbgbleed}{1bp}
-% Gradient starts here (distance from page top): height + raise
+% Default fade start (distance from page top): height - 80pt
 % Override manually if needed; recomputed whenever height or raise changes.
-\setlength{\dghsectionbgfadeoffset}{\dimexpr\dghsectionbgheight+\dghsectionbgraise\relax}
+\setlength{\dghsectionbgfadeoffset}{\dimexpr\dghsectionbgheight-80pt\relax}
 \AtBeginDocument{%
 	\setlength{\dghpagetotext}{1in}%
 	\addtolength{\dghpagetotext}{\voffset}%
@@ -229,12 +229,12 @@ Path = ./fonts/,
 
 \newcommand{\applysectioncolor}[2]{%
 	\titleformat{\section}
-	{\montserratLight\fontsize{24pt}{0pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
+	{\montserratLight\fontsize{24pt}{24pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesection}
 	{1em}
 	{}
 	\titleformat{\subsection}
-	{\eveleth\fontsize{20pt}{0pt}\selectfont\color{#2}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
+	{\eveleth\fontsize{20pt}{20pt}\selectfont\color{#2}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesubsection}
 	{1em}
 	{}
@@ -249,7 +249,7 @@ Path = ./fonts/,
 
 \newcommand{\setsubsubsectioncolor}[1]{%
 	\titleformat{\subsubsection}
-	{\bf\fontsize{15pt}{0pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
+	{\bf\fontsize{15pt}{15pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesubsubsection}
 	{1em}
 	{}
@@ -259,6 +259,12 @@ Path = ./fonts/,
 \newcommand{\resetsectioncolor}{\global\def\dgsectioncolor{h1text}\global\def\dgsubsectioncolor{h2text}\applysectioncolor{\dgsectioncolor}{\dgsubsectioncolor} \setsubsubsectioncolor{h3text}\global\dgresetsectioncoloronnextsectionfalse}
 \newcommand{\dgapplycurrentsectioncolor}{\applysectioncolor{\dgsectioncolor}{\dgsubsectioncolor}}
 \resetsectioncolor
+
+% Keep heading spacing deterministic: default article section skips include
+% stretch/shrink components that can change layout based on remaining page content.
+\titlespacing*{\section}{0pt}{0pt}{0.8em}
+\titlespacing*{\subsection}{0pt}{1.0em}{0.5em}
+\titlespacing*{\subsubsection}{0pt}{0.8em}{0.4em}
 
 \titleformat{\paragraph}[hang]
 	{\normalfont\normalsize\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\bfseries}
@@ -587,7 +593,7 @@ Path = ./fonts/,
 			\clip
 				($(current page.north west) + (-\dghsectionbgbleed, \dghsectionbgbleed)$)
 				rectangle
-				($(current page.north east) + (\dghsectionbgbleed, -\dghsectionbgheight-\dghsectionbgbleed)$);
+				($(current page.north east) + (\dghsectionbgbleed, -\dghsectionbgheight)$);
 			\node[anchor=north west, inner sep=0pt] at ($(current page.north west) + (-\dghsectionbgbleed, \dghsectionbgbleed)$) {%
 				\includegraphics[width=\dimexpr\paperwidth+2\dghsectionbgbleed\relax]{\detokenize{#1}}%
 			};
@@ -595,9 +601,14 @@ Path = ./fonts/,
 		% white fade: starts at (height+raise) from page top, ends at image bottom
 		\fill[white, path fading=dgh fade to white]
 			% ($(current page.north west) + (-\dghsectionbgbleed, -126pt+\dghsectionbgbleed)$)
-			($(current page.north west) + (-\dghsectionbgbleed, -\dghsectionbgfadeoffset+\dghsectionbgbleed)$)
+			($(current page.north west) + (-\dghsectionbgbleed, -\dghsectionbgfadeoffset)$)
 			rectangle
-			($(current page.north east) + (\dghsectionbgbleed, -\dghsectionbgheight-\dghsectionbgbleed)$);
+			($(current page.north east) + (\dghsectionbgbleed, -\dghsectionbgheight)$);
+		% anti-seam mask: hides 1px raster antialiasing at the south clip boundary
+		\fill[white]
+			($(current page.north west) + (-\dghsectionbgbleed, -\dghsectionbgheight+0.5bp)$)
+			rectangle
+			($(current page.north east) + (\dghsectionbgbleed, -\dghsectionbgheight-0.5bp)$);
 	\end{tikzpicture}%
 }
 
@@ -605,7 +616,7 @@ Path = ./fonts/,
 % Image is placed at paper top; h1 cap-top aligns with image bottom.
 % Optionally set \dghsectionbgheight before calling to control image height.
 \newcommand{\dghsectionbgrender}[2]{%
-	\AddToShipoutPictureBG*{\dghsectionbgpicture{#1}}%
+	\dghsectionbgpicture{#1}%
 	\ifdgresetsectioncoloronnextsection\resetsectioncolor\else\dgapplycurrentsectioncolor\fi
 	\vspace*{\dimexpr\dghsectionbgheight-\dghpagetotext+\dghsectionbgraise\relax}%
 	\oldsection{#2}%

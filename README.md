@@ -61,11 +61,34 @@ Puoi comunque specificare un output esplicito:
 ./scripts/build.sh ../books/location-armi dist/mio-libro.pdf
 ```
 
+Per vedere uso e opzioni disponibili:
+
+```bash
+./scripts/build.sh --help
+```
+
+Sintassi:
+
+```bash
+./scripts/build.sh <book-dir> [output.pdf]
+```
+
 ### Con Makefile
 
 ```bash
 cd daggerheart-publish
 make build INPUT=../books/location-armi OUTPUT=dist/location-armi.pdf
+```
+
+Variabili supportate dal target `build`:
+
+- `INPUT`: cartella libro (default: `../books/location-armi`)
+- `OUTPUT`: file PDF di output (default: `dist/location-armi.pdf`)
+
+Pulizia output:
+
+```bash
+make clean
 ```
 
 ## Uso Docker
@@ -82,6 +105,18 @@ Oppure:
 ```bash
 cd daggerheart-publish
 make docker-build INPUT=../books/location-armi OUTPUT=dist/location-armi.pdf
+```
+
+Per vedere uso e opzioni disponibili:
+
+```bash
+./scripts/docker-build.sh --help
+```
+
+Sintassi:
+
+```bash
+./scripts/docker-build.sh <book-dir> [output.pdf]
 ```
 
 ## Formato cartella libro
@@ -106,6 +141,30 @@ Regole di build:
 - Se non passi un output esplicito, il PDF va in `dist/<nome-libro>.pdf`.
 
 ## Formato Markdown supportato
+
+Il parser e impostato a:
+
+```text
+markdown+fenced_divs+bracketed_spans
+```
+
+Questa configurazione viene applicata sia nella build locale sia nella build Docker.
+
+### Estensioni Markdown attive
+
+- `fenced_divs`: abilita i blocchi `:::` con classi e attributi (base dei blocchi `.fullpage`, `.adversary`, `.environment`, `.squarebox`, `.roundedbox`, `.quotebox`, ecc.).
+- `bracketed_spans`: abilita gli span inline con attributi, utili per marcare porzioni di testo senza creare un blocco separato.
+
+Esempi:
+
+```md
+::: {.fullpage}
+# Titolo sezione
+Contenuto della pagina piena.
+:::
+
+[testo annotato]{.tag-personalizzato key="value"}
+```
 
 ### Metadati documento
 
@@ -206,17 +265,61 @@ Testo...
 :::
 ```
 
+### H1 con sfondo (parametri supportati)
+
+Per gli heading di livello 1 puoi usare attributi dedicati per renderizzare uno sfondo di sezione:
+
+```md
+# Titolo sezione {bg="assets/header.png"}
+```
+
+Attributi disponibili:
+
+- `bg`: path immagine di sfondo per l'H1
+- `bg-height`: altezza area sfondo (default: `150pt`)
+- `bg-raise`: offset verticale del titolo rispetto allo sfondo (default: `-18pt`)
+- `bg-fade-offset`: punto di inizio della sfumatura bianca dal top pagina (default: `bg-height - 80pt`)
+
+Alias supportati:
+
+- `background` o `section-bg` al posto di `bg`
+- `section-bg-height` al posto di `bg-height`
+- `section-bg-raise` al posto di `bg-raise`
+
+Esempio completo:
+
+```md
+# Luoghi scoperti {bg="assets/location-section-header.png" bg-height="170pt" bg-raise="-14pt" bg-fade-offset="90pt"}
+```
+
+Note pratiche:
+
+- Se imposti `bg-fade-offset`, il valore non viene ricalcolato automaticamente da `bg-height`.
+- Se `h1-newpage` e attivo (default), anche gli H1 con `bg` iniziano su una nuova pagina.
+
 ## Variabili utili
 
 - `ASSETS_DIR`: path della directory assets (font/foto)
 - `ENABLE_TOC=0`: disabilita indice automatico
 - `KEEP_TEX=1`: salva anche il `.tex` generato
 - `KEEP_WORKDIR=1`: mantiene la cartella temporanea di build
+- `IMAGE_NAME`: tag immagine Docker usata da `docker-build.sh` (default: `daggerheart-publish:latest`)
+
+Note su `ENABLE_TOC`:
+
+- Con `ENABLE_TOC=1` (default), il TOC viene aggiunto solo se nel frontmatter di `book.md` non c'e `toc: false`.
+- Con `ENABLE_TOC=0`, il TOC viene sempre disabilitato.
 
 Esempio:
 
 ```bash
 ASSETS_DIR=./assets KEEP_TEX=1 ./scripts/build.sh ../books/location-armi dist/location-armi.pdf
+```
+
+Esempio Docker con tag immagine personalizzato:
+
+```bash
+IMAGE_NAME=daggerheart-publish:dev ./scripts/docker-build.sh ../books/location-armi dist/location-armi.pdf
 ```
 
 ## Limiti attuali
