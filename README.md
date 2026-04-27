@@ -1,6 +1,6 @@
 # daggerheart-publish
 
-Un workflow moderno per creare bellissimi PDF a due colonne per campagne di GdR (come Daggerheart) partendo da semplici file Markdown. Usa un template LaTeX personalizzato, filtri Lua per Pandoc e una struttura di cartelle organizzata per rendere il processo semplice — anche per chi non ha esperienza con LaTeX.
+Un workflow moderno per creare eleganti PDF a due colonne per campagne di GdR (come Daggerheart) partendo da semplici file Markdown. Usa un template LaTeX personalizzato, filtri Lua per Pandoc e una struttura di cartelle organizzata per rendere il processo semplice — anche per chi non ha esperienza con LaTeX.
 
 Guarda il [modulo di esempio](dist/example.pdf)!
 
