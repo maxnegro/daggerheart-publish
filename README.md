@@ -304,6 +304,23 @@ Testo...
 :::
 ```
 
+### Mappa a pagina intera
+
+Il blocco `.fullpagemap` renderizza un'immagine che occupa l'intera pagina fisica, senza margini e senza footer. Viene usato tipicamente per mappe o illustrazioni full-bleed.
+
+```md
+::: {.fullpagemap src="assets/mappa.png" rotate="90" fit="none"}
+:::
+```
+
+Attributi disponibili:
+
+- `src`: percorso dell'immagine (obbligatorio)
+- `rotate`: rotazione in gradi (default: `0`). Utile per immagini in formato landscape su pagina portrait.
+- `fit`: modalità di adattamento:
+  - `fill`: l'immagine riempie esattamente la pagina (può essere ritagliata)
+  - qualsiasi altro valore (es. `none`, `contain`): mantiene le proporzioni originali (default)
+
 ### H1 con sfondo (parametri supportati)
 
 Per gli heading di livello 1 puoi usare attributi dedicati per renderizzare uno sfondo di sezione:

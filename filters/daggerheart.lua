@@ -906,16 +906,30 @@ function Div(div)
 
     local out = {}
     table.insert(out, "\\beginFullpage")
-    table.insert(out, "\\newgeometry{left=0mm,right=0mm,top=0mm,bottom=0mm}")
-    table.insert(out, "\\csname thispagestyle\\endcsname{empty}")
+    table.insert(out, "\\thispagestyle{empty}")
 
-    local graphic_options = "angle=" .. angle .. ",width=" .. width .. ",height=" .. height
+    local rotate_node = ""
+    local img_w, img_h
+    if angle ~= "0" then
+      rotate_node = "rotate=" .. angle .. ","
+      img_w = "\\paperheight"
+      img_h = "\\paperwidth"
+    else
+      img_w = "\\paperwidth"
+      img_h = "\\paperheight"
+    end
+
+    local graphic_options = "width=" .. img_w .. ",height=" .. img_h
     if fit ~= "fill" then
       graphic_options = graphic_options .. ",keepaspectratio"
     end
 
-    table.insert(out, "\\noindent\\includegraphics[" .. graphic_options .. "]{\\detokenize{" .. src .. "}}")
-    table.insert(out, "\\restoregeometry")
+    table.insert(out, "\\begin{tikzpicture}[remember picture,overlay]")
+    table.insert(out, "  \\node[" .. rotate_node .. "anchor=center,inner sep=0pt] at (current page.center) {")
+    table.insert(out, "    \\includegraphics[" .. graphic_options .. "]{\\detokenize{" .. src .. "}}")
+    table.insert(out, "  };")
+    table.insert(out, "\\end{tikzpicture}")
+    table.insert(out, "\\null")
     table.insert(out, "\\finishFullpage")
 
     return pandoc.RawBlock("latex", table.concat(out, "\n"))
