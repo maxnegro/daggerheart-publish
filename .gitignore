@@ -1,2 +1,5 @@
-dist/*.pdf
-dist/*.tex
+dist/*
+books/*
+!books/example/
+
+!.gitkeep
