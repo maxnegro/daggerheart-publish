@@ -226,30 +226,67 @@ Citazione in stile template.
 
 ### Adversary
 
-```md
-::: {.adversary title="Nome" tier="Tier 1" summary="Descrizione" motives="Motivi"}
-::: {.stats}
-\adversarystats{12}{6/12}{4}{2}{+1}{Morso}{Close}{1d8 phy}
-:::
-
-::: {.features}
-\textbf{Feature - Passive:} testo.
-:::
-:::
+````md
+```statblock
+layout: Daggerheart Adversary
+source: daggerheart-adversary
+name: Acid Burrower
+tier: 1
+type: Solo
+description: A horse-sized insect with digging claws and acidic blood.
+motives_and_tactics: Burrow, drag away, feed, reposition
+difficulty: 14
+thresholds: 8/15
+hp: 8
+stress: 3
+atk: "+3"
+attack: Claws
+range: Very Close
+damage: 1d12+2 phy
+experience: Tremor Sense +2
+feats:
+  - name: Relentless (3) - Passive
+    text: The Burrower can be spotlighted up to three times per GM turn.
+  - name: Earth Eruption - Action
+    text: Mark a Stress to have the Burrower burst out of the ground.
 ```
+````
 
 ### Environment
 
-```md
-::: {.environment title="Nome" tier="Tier 1" summary="Descrizione" impulses="Impulsi"}
-::: {.stats}
-\environmentstats{12}{Avversario A, Avversario B}
-:::
+````md
+```statblock
+layout: Daggerheart Environment
+source: daggerheart-environment
+name: Abandoned Grove
+tier: 1
+type: Exploration
+description: A former druidic grove reclaimed by nature.
+impulses: Draw in the curious, echo the past
+difficulty: 11
+potential_adversaries: Minor Treant, Sylvan Soldier, Young Dryad
+feats:
+  - name: Overgrown Battlefield - Passive
+    text: PCs can inspect traces of a previous battle.
+  - name: Barbed Vines - Action
+    text: Pick a point; targets in Very Close range risk damage and Restrained.
+```
+````
 
-::: {.features}
-\textbf{Feature - Passive:} testo.
-:::
-:::
+Nota: il filtro Lua usa solo il formato `statblock` (layout `Daggerheart Adversary` e `Daggerheart Environment`) per questi blocchi.
+
+### Etichette multilingua (ITA/ENG)
+
+Le etichette generate da template/filter (`Difficulty`, `Features`, `Impulses`, ecc.) vengono localizzate in base a `lang` nel frontmatter:
+
+```yaml
+lang: italian
+```
+
+Oppure:
+
+```yaml
+lang: english
 ```
 
 ### Utility
@@ -299,7 +336,39 @@ Note pratiche:
 - Se imposti `bg-fade-offset`, il valore non viene ricalcolato automaticamente da `bg-height`.
 - Se `h1-newpage` e attivo (default), anche gli H1 con `bg` iniziano su una nuova pagina.
 
-## Variabili utili
+### Colore di sezione
+
+`\setsectioncolor` imposta il colore degli heading (H1 e H2) per la sezione corrente. Il colore si applica automaticamente anche alle **tabelle** (header e righe alternate) e alle **squarebox** che seguono il comando.
+
+Sintassi:
+
+```md
+\setsectioncolor{<colore-h1>}{<colore-h2>}
+```
+
+Il comando va inserito **prima** dell'H1 di sezione. Il colore viene resettato automaticamente all'H1 successivo se non ne viene impostato uno nuovo.
+
+Colori predefiniti disponibili:
+
+| Nome           | Valore hex |
+|----------------|------------|
+| `dg-red`       | `#7a1e1f`  |
+| `dg-darkgreen` | `#56673d`  |
+| `dg-orange`    | `#ae5825`  |
+| `dg-purple`    | `#754084`  |
+
+Puoi anche usare qualsiasi colore definito nel template o aggiungerne di nuovi con `\definecolor` nel frontmatter.
+
+Esempio:
+
+```md
+\setsectioncolor{dg-darkgreen}{dg-darkgreen}
+# Foresta Oscura
+
+Testo della sezione con tabelle e squarebox nella tinta verde della sezione.
+```
+
+
 
 - `ASSETS_DIR`: path della directory assets (font/foto)
 - `ENABLE_TOC=0`: disabilita indice automatico
@@ -326,7 +395,7 @@ IMAGE_NAME=daggerheart-publish:dev ./scripts/docker-build.sh ../books/location-a
 
 ## Limiti attuali
 
-- Il filtro non trasforma automaticamente tabelle Markdown in `\ColoredTable`.
+- Le tabelle Markdown vengono convertite automaticamente in `\ColoredTable`, ma tabelle molto larghe in layout a due colonne possono richiedere contenuti piu brevi per mantenere una resa leggibile.
 - Per statistiche avanzate conviene usare direttamente le macro LaTeX nei blocchi `stats`.
 
 ## Esempio di conversione da odt a md

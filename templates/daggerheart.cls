@@ -168,6 +168,7 @@ Path = ./fonts/,
 }
 \newcommand{\resetboxcolor}{
 	\definecolor{squareboxbg}{HTML}{f1ebf4}
+	\definecolor{squareboxborder}{HTML}{4d2d63}
 }
 
 % --- Custom square box ---
@@ -435,15 +436,60 @@ Path = ./fonts/,
 
 \newcommand{\myseparator}{\par\noindent\rule{\linewidth}{1pt}\par}
 
+% Localized labels (default English). If babel is loaded, labels switch with language.
+\newcommand{\dghsetlabelsenglish}{%
+\gdef\dghlabeldifficulty{Difficulty}%
+\gdef\dghlabelthresholds{Thresholds}%
+\gdef\dghlabelhp{HP}%
+\gdef\dghlabelstress{Stress}%
+\gdef\dghlabelatk{ATK}%
+\gdef\dghlabelweapon{Weapon}%
+\gdef\dghlabelexperience{Experience}%
+\gdef\dghlabelmotivesandtactics{Motives \& Tactics}%
+\gdef\dghlabelfeatures{Features}%
+\gdef\dghlabelimpulses{Impulses}%
+\gdef\dghlabelpotentialadversaries{Potential Adversaries}%
+}
+
+\newcommand{\dghsetlabelsitalian}{%
+\gdef\dghlabeldifficulty{Difficolta}%
+\gdef\dghlabelthresholds{Soglie}%
+\gdef\dghlabelhp{PF}%
+\gdef\dghlabelstress{Stress}%
+\gdef\dghlabelatk{ATK}%
+\gdef\dghlabelweapon{Arma}%
+\gdef\dghlabelexperience{Esperienza}%
+\gdef\dghlabelmotivesandtactics{Impulsi e Tattiche}%
+\gdef\dghlabelfeatures{Tratti}%
+\gdef\dghlabelimpulses{Impulsi}%
+\gdef\dghlabelpotentialadversaries{Avversari Potenziali}%
+}
+
+\dghsetlabelsenglish
+
+\makeatletter
+\AtBeginDocument{%
+\@ifpackageloaded{babel}{%
+\addto\captionsenglish{\dghsetlabelsenglish}%
+\addto\captionsitalian{\dghsetlabelsitalian}%
+\ifcsname languagename\endcsname
+\ifdefstring{\languagename}{italian}{\dghsetlabelsitalian}{\dghsetlabelsenglish}%
+\else
+\dghsetlabelsenglish
+\fi
+}{}%
+}
+\makeatother
+
 
 
 \newcommand{\adversarystats}[8]{
-	\ifstrempty{#1}{}{\textbf{Difficulty:} #1 |}
-	\ifstrempty{#2}{}{\textbf{Thresholds:} #2 |}
-	\ifstrempty{#3}{}{\textbf{HP:} #3 |}
-	\ifstrempty{#4}{}{\textbf{Stress:} #4}
+	\ifstrempty{#1}{}{\textbf{\dghlabeldifficulty:} #1 |}
+	\ifstrempty{#2}{}{\textbf{\dghlabelthresholds:} #2 |}
+	\ifstrempty{#3}{}{\textbf{\dghlabelhp:} #3 |}
+	\ifstrempty{#4}{}{\textbf{\dghlabelstress:} #4}
 	\ifstrempty{#5}{}{\\}
-	\ifstrempty{#5}{}{\textbf{ATK:} #5 	|}
+	\ifstrempty{#5}{}{\textbf{\dghlabelatk:} #5 	|}
 	\ifstrempty{#6}{}{\textbf{#6:} #7 | #8}
 }
 
@@ -466,7 +512,7 @@ Path = ./fonts/,
 			}
 			
 			\ifstrempty{#4}{}{
-				\textbf{Motives \& Tactics:} #4
+				\textbf{\dghlabelmotivesandtactics:} #4
 				\par\smallskip
 			}
 			
@@ -478,7 +524,7 @@ Path = ./fonts/,
 			\par\smallskip
 			
 			\ifstrempty{#6}{}{			
-				\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{Features}
+				\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
 				\normalfont\fontsize{8pt}{8pt}\selectfont
 				
 				#6
@@ -521,8 +567,8 @@ Path = ./fonts/,
 }
 
 \newcommand{\environmentstats}[2]{
-	\ifstrempty{#1}{}{\textbf{Difficulty:} #1 \ifstrempty{#2}{}{\\}}
-	\ifstrempty{#2}{}{\textbf{Potential Adversaries:} #2}
+	\ifstrempty{#1}{}{\textbf{\dghlabeldifficulty:} #1 \ifstrempty{#2}{}{\\}}
+	\ifstrempty{#2}{}{\textbf{\dghlabelpotentialadversaries:} #2}
 }
 
 \newcommand{\environment}[6]{%
@@ -541,7 +587,7 @@ Path = ./fonts/,
 				\par\smallskip
 			}
 			\ifstrempty{#4}{}{
-				\textbf{Impulses:} #4
+				\textbf{\dghlabelimpulses:} #4
 				\par\smallskip
 			}
 			\ifstrempty{#5}{}{
@@ -552,7 +598,7 @@ Path = ./fonts/,
 			\par\smallskip
 			
 			\ifstrempty{#6}{}{
-			\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{Features}
+			\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
 			\normalfont\fontsize{8pt}{8pt}\selectfont
 			
 			#6
@@ -582,6 +628,18 @@ Path = ./fonts/,
 	\indaggerfullpagefalse%
 	\begin{multicols}{2}%
 	\raggedcolumns%
+}
+
+% Force a real page break even when the document body is in multicols.
+\newcommand{\dghpagebreak}{%
+	\ifindaggerfullpage
+		\newpage%
+	\else
+		\end{multicols}%
+		\newpage%
+		\begin{multicols}{2}%
+		\raggedcolumns%
+	\fi
 }
 
 % --- Section with background image ---
@@ -634,13 +692,12 @@ Path = ./fonts/,
 	\fi
 }
 
-\newcommand{\ColoredTable}[3]{%
-	\renewcommand{\arraystretch}{1.5}
-	
-	\rowcolors{2}{#2!20}{white} 
-	\begin{tabularx}{#1}{>{\raggedright\bfseries}p{1.5cm} X X X}
+\newcommand{\ColoredTable}[4]{%
+	\renewcommand{\arraystretch}{1.3}
+	\rowcolors{2}{#2!20}{white}
+	\begin{tabularx}{#1}{#3}
 		\rowcolor{#2}
-		#3
+		#4
 	\end{tabularx}
 }
 

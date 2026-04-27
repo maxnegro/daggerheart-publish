@@ -13,17 +13,27 @@ Obiettivo narrativo: trovare il santuario perduto prima che la nebbia ricopra tu
 
 ## Primo incontro
 
-::: {.adversary title="Custode del Tronco" tier="Tier 1 Standard" summary="Uno spirito ligneo che custodisce il passaggio." motives="Difendere il bosco, respingere intrusi"}
-::: {.stats}
-\adversarystats{13}{7/14}{4}{2}{+2}{Ramo Frustante}{Close}{1d8+1 phy}
-\myseparator
-\textbf{Experiences:} Guardiano del Boschetto +3
-:::
-
-::: {.features}
-\textbf{Radici Vigili - Passive:} quando viene attaccato in mischia, guadagna +1 Difficulty fino al suo prossimo turno.
-:::
-:::
+```statblock
+layout: Daggerheart Adversary
+source: daggerheart-adversary
+name: Custode del Tronco
+tier: 1
+type: Standard
+description: Uno spirito ligneo che custodisce il passaggio.
+motives_and_tactics: Difendere il bosco, respingere intrusi
+difficulty: 13
+thresholds: 7/14
+hp: 4
+stress: 2
+atk: "+2"
+attack: Ramo Frustante
+range: Prossimo
+damage: 1d8+1 (Fisici)
+experience: Guardiano del Boschetto +3
+feats:
+  - name: Radici Vigili - Passiva
+    text: quando viene attaccato in mischia, guadagna +1 Difficulty fino al suo prossimo turno.
+```
 
 ![Custode del Tronco](assets/custode-del-tronco.png){width="100%"}
 
