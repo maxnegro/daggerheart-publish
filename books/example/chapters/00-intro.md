@@ -40,18 +40,20 @@ feats:
 
 ## Traversata
 
-::: {.environment title="Ponte di Radici" tier="Tier 1 Traversal" summary="Un intreccio instabile sopra una gola." impulses="Far perdere l'equilibrio, separare il gruppo"}
-::: {.stats}
-\environmentstats{12}{Custode del Tronco, Sciame di Corvi}
-:::
-
-::: {.columnbreak}
-:::
-
-::: {.features}
-\textbf{Fenditura Nascosta - Passive:} al primo fallimento con Fear, un personaggio resta isolato dall'altra parte.
-:::
-:::
+```statblock
+layout: Daggerheart Environment
+source: daggerheart-environment
+name: Ponte di Radici
+tier: 1
+type: Attraversamento
+description: Un intreccio instabile sopra una gola.
+impulses: Far perdere l'equilibrio, separare il gruppo
+difficulty: 12
+potential_adversaries: Custode del Tronco, Sciame di Corvi
+feats:
+  - name: Fenditura Nascosta - Passiva
+    text: al primo fallimento con Paura, un personaggio resta isolato dall'altra parte.
+```
 
 ::: {.fullpage}
 ## Visione del luogo
