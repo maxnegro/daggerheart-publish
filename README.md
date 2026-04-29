@@ -48,19 +48,19 @@ Note:
 
 ```bash
 cd daggerheart-publish
-./scripts/build.sh ../books/location-armi
+./scripts/build.sh ./books/example
 ```
 
 Con questo comando l'output predefinito sara:
 
 ```bash
-dist/location-armi.pdf
+dist/example.pdf
 ```
 
 Puoi comunque specificare un output esplicito:
 
 ```bash
-./scripts/build.sh ./books/example/mio-libro.pdf
+./scripts/build.sh ./books/example/ mio-libro.pdf
 ```
 
 Per vedere uso e opzioni disponibili:
@@ -79,13 +79,13 @@ Sintassi:
 
 ```bash
 cd daggerheart-publish
-make build INPUT=../books/location-armi OUTPUT=dist/location-armi.pdf
+make build INPUT=./books/example OUTPUT=dist/example.pdf
 ```
 
 Variabili supportate dal target `build`:
 
-- `INPUT`: cartella libro (default: `../books/location-armi`)
-- `OUTPUT`: file PDF di output (default: `dist/location-armi.pdf`)
+- `INPUT`: cartella libro (default: `./books/example`)
+- `OUTPUT`: file PDF di output (default: `dist/example.pdf`)
 
 Pulizia output:
 
@@ -99,14 +99,14 @@ La build Docker usa solo i file presenti in questo repository.
 
 ```bash
 cd daggerheart-publish
-./scripts/docker-build.sh ../books/location-armi
+./scripts/docker-build.sh ./books/example
 ```
 
 Oppure:
 
 ```bash
 cd daggerheart-publish
-make docker-build INPUT=../books/location-armi OUTPUT=dist/location-armi.pdf
+make docker-build INPUT=./books/example OUTPUT=dist/example.pdf
 ```
 
 Per vedere uso e opzioni disponibili:
