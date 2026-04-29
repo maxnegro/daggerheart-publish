@@ -60,7 +60,7 @@ dist/location-armi.pdf
 Puoi comunque specificare un output esplicito:
 
 ```bash
-./scripts/build.sh ../books/location-armi dist/mio-libro.pdf
+./scripts/build.sh ./books/example/mio-libro.pdf
 ```
 
 Per vedere uso e opzioni disponibili:
@@ -268,8 +268,10 @@ potential_adversaries: Minor Treant, Sylvan Soldier, Young Dryad
 feats:
   - name: Overgrown Battlefield - Passive
     text: PCs can inspect traces of a previous battle.
+    question: Do you recognize something in this old battlefield?
   - name: Barbed Vines - Action
     text: Pick a point; targets in Very Close range risk damage and Restrained.
+    question: What do you feel while the vines nail you to the ground?
 ```
 ````
 
@@ -385,7 +387,7 @@ Esempio:
 Testo della sezione con tabelle e squarebox nella tinta verde della sezione.
 ```
 
-
+## Variabili di ambiente
 
 - `ASSETS_DIR`: path della directory assets (font/foto)
 - `ENABLE_TOC=0`: disabilita indice automatico
@@ -401,13 +403,13 @@ Note su `ENABLE_TOC`:
 Esempio:
 
 ```bash
-ASSETS_DIR=./assets KEEP_TEX=1 ./scripts/build.sh ../books/location-armi dist/location-armi.pdf
+ASSETS_DIR=./assets KEEP_TEX=1 ./scripts/build.sh ./books/example/
 ```
 
 Esempio Docker con tag immagine personalizzato:
 
 ```bash
-IMAGE_NAME=daggerheart-publish:dev ./scripts/docker-build.sh ../books/location-armi dist/location-armi.pdf
+IMAGE_NAME=daggerheart-publish:dev ./scripts/docker-build.sh ./books/example/
 ```
 
 ## Limiti attuali
