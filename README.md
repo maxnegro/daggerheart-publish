@@ -275,7 +275,7 @@ feats:
 ```
 ````
 
-Nota: il filtro Lua usa solo il formato `statblock` (layout `Daggerheart Adversary` e `Daggerheart Environment`) per questi blocchi.
+Nota: Rispetto ai formati supportati dal plugin `obsidian fantasy statblocks`, il filtro Lua usa solo il formato `statblock` con layout `Daggerheart Adversary` e `Daggerheart Environment` per questi blocchi.
 
 ### Etichette multilingua (ITA/ENG)
 
