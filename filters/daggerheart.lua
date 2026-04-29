@@ -922,6 +922,7 @@ function Div(div)
     local height = "\\paperheight"
 
     local out = {}
+    table.insert(out, "\\newpage")
     table.insert(out, "\\beginFullpage")
     table.insert(out, "\\thispagestyle{empty}")
 
