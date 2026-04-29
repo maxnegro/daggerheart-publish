@@ -83,7 +83,6 @@ feats:
 ## Avversari ed ambienti
 
 Esempi di rendering per avversari ed ambienti
-:::
 
 ### Ambienti
 
@@ -100,15 +99,24 @@ potential_adversaries: Beasts (Bear, Glass Snake), Elementals (Elemental Spark),
 feats:
   - name: Chaos Magic Locus - Passive
     text: When a PC makes a Spellcast Roll, they must roll two Fear Dice and take the higher result.
+    question: What does it feel like to work magic in this chaos-touched place? What do you fear will happen if you lose control of the spell?
   - name: The Indigo Flame - Passive
     text: PCs who approach the central tree can make a Knowledge Roll to identify the magic that consumed this environment. On a success, they learn three details; on a success with Fear, two; on a failure, mark a Stress to learn one. Details include that this is Fallen magic, spread through ashen moss, cleansable only by a ritual of nature magic with a Progress Countdown (8).
+    question: What Fallen cult corrupted these woods? What have they already done with the cursed wood and sap from this tree?
   - name: Grasping Vines - Action
     text: Animate vines bristling with thorns whip out from the underbrush. A target must succeed on an Agility Reaction Roll or become Restrained and Vulnerable until they break free with a successful Finesse or Strength Roll or by dealing 10 damage to the vines. When escaping, the target takes **1d8+4** physical damage and loses a Hope.
+    question: What painful memories do the vines bring to the surface as they pierce flesh?
   - name: Charcoal Constructs - Action
     text: Warped animals wreathed in indigo flame trample through a point of your choice. All targets within Close range of that point must make an Agility Reaction Roll. Targets who fail take **3d12+3** physical damage; targets who succeed take half.
+    question: Are these real animals consumed by the flame or merely constructs of the corrupting magic?
   - name: Choking Ash - Reaction (Countdown Loop 6)
     text: When the PCs enter, activate the countdown. When it triggers, all characters must make a Strength or Instinct Reaction Roll. Targets who fail take **4d6+5** direct physical damage; targets who succeed take half. Protective masks or clothes grant advantage on the roll.
+    question: What hallucinations does the ash induce? What incongruous taste does it possess?
 ```
+:::
+
+::: {.pagebreak}
+:::
 
 ```statblock
 layout: Daggerheart Environment
@@ -123,16 +131,18 @@ potential_adversaries: Mercenaries (Harrier, Sellsword, Spellblade, Weaponmaster
 feats:
   - name: Secret Entrance - Passive
     text: A PC can find or recall a secret way into the castle with a successful Instinct or Knowledge Roll.
+    question: How do they get in without revealing the pathway to the attackers? Are any of the defenders monitoring this path?
   - name: Siege Weapons - Action (Consequence Countdown 6)
     text: The attacking force deploys siege weapons to raze the defenders' fortifications. Activate the countdown when the siege begins. When it triggers, the defenders' fortifications have been breached, attackers flood inside, you gain 2 Fear, then shift to the Pitched Battle environment.
+    question: What siege weapons are being deployed? Are they magical, mundane, or a mixture of both? What defenses must the characters overcome to storm the castle?
   - name: Reinforcements! - Action
     text: Summon a Knight of the Realm, a number of Tier 3 Minions equal to the number of PCs, and two adversaries of your choice within Far range of a chosen PC. The Knight of the Realm immediately takes the spotlight.
+    question: Who are they targeting first? What formation do they take?
   - name: Collateral Damage - Reaction
     text: When an adversary is defeated, spend a Fear to have a stray siege weapon strike a point on the battlefield. All targets within Very Close range must make an Agility Reaction Roll. Targets who fail take **3d8+3** physical or magic damage and must mark a Stress; targets who succeed must mark a Stress.
+    question: What debris is scattered by the attack? What is broken by the strike that can't be easily mended?
 ```
 ### Avversari
-
-
 
 ```statblock
 layout: Daggerheart Adversary
