@@ -142,6 +142,7 @@ feats:
     text: When an adversary is defeated, spend a Fear to have a stray siege weapon strike a point on the battlefield. All targets within Very Close range must make an Agility Reaction Roll. Targets who fail take **3d8+3** physical or magic damage and must mark a Stress; targets who succeed must mark a Stress.
     question: What debris is scattered by the attack? What is broken by the strike that can't be easily mended?
 ```
+
 ### Avversari
 
 ```statblock
