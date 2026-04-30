@@ -179,6 +179,8 @@ subtitle: Sottotitolo
 author:
   - Nome Autore
 date: 25 aprile 2026
+toc: true
+toc-depth: 2
 ---
 ```
 

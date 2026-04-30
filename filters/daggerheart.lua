@@ -78,6 +78,13 @@ function Meta(meta)
       "titlepage-image-fit"
     }, "fill")
 
+  if meta["toc-depth"] then
+    local depth = pandoc.utils.stringify(meta["toc-depth"])
+    -- Inserisci direttamente nel documento
+    append_header_include(meta, "\\setcounter{tocdepth}{" .. depth .. "}")
+  end
+
+
 local position = get_meta_string(meta, {
         "title-image-position",
         "titlepage-image-position"
