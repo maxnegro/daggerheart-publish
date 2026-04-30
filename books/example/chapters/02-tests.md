@@ -5,18 +5,20 @@
 ```statblock
 layout: Daggerheart Environment
 source: daggerheart-environment
-name: The Dark Forest
+name: La Foresta Oscura
 tier: 1
-type: Exploration
-description: A dense forest filled with shadows and danger.
-impulses: Explore, Survive, Escape
+type: Esplorazione
+description: Una foresta fitta, piena di ombre e pericoli.
+impulses: Esplorare, Sopravvivere, Fuggire
 difficulty: 10
-potential_adversaries: Goblin Scout, Shadow Beast
+potential_adversaries: Esploratore Goblin, Bestia d'Ombra
 feats:
-  - name: Dense Trees - Passive
-    text: Provides cover and concealment.
-  - name: Hidden Paths - Passive
-    text: Allows for stealthy movement.
+  - name: Alberi Fitti - Passiva
+    text: Fornisce copertura e occultamento.
+    question: Quale particolarità noti negli alberi di questa foresta?
+  - name: Sentieri Nascosti - Passiva
+    text: Permette movimenti furtivi.
+    question: Perché questi sentieri non sono immediatamente visibili agli esploratori?
 ```
 
 ::: {.squarebox}
@@ -26,25 +28,25 @@ Test di squarebox per colore
 ```statblock
 layout: Daggerheart Adversary
 source: daggerheart-adversary
-name: Vampire, The Bloodthirsty
+name: Vampiro, L'Assetato
 tier: 2
 type: Solo
-description: A fearsome vampire that preys on the weak.
-motives_and_tactics: Attack from shadows, drain blood
+description: Un vampiro temibile che preda i deboli.
+motives_and_tactics: Attaccare dalle ombre, prosciugare la vittima
 difficulty: 15
 thresholds: 16/30
 hp: 8
 stress: 4
 atk: "+4"
-attack: Fangs
-range: Close
-damage: 2d8+2 (Magical)
-experience: Bloodthirsty Knowledge +3
+attack: Zanne
+range: Ravvicinata
+damage: 2d8+2 (Magico)
+experience: Assetato di Sangue +3
 feats:
-  - name: Blood Drain - Action
-    text: Make an attack against a target within Close range. On a success, deal 2 and the target must mark an Armor Slot without gaining its benefit (they can still use armor to reduce the damage).
-  - name: Shadow Step - Action
-    text: Move to a location within Close range, ignoring terrain.
+  - name: Succhiasangue - Azione
+    text: Effettua un attacco contro un bersaglio a distanza Ravvicinata. In caso di successo, infliggi 2 danni e il bersaglio deve segnare uno Slot Armatura senza ottenerne il beneficio (può comunque usare un altro Slot Armatura per ridurre il danno).
+  - name: Passo velato - Azione
+    text: Spostati in una posizione entro distanza Ravvicinata, ignorando il terreno.
 ```
 
 

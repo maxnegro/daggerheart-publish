@@ -436,33 +436,43 @@ Path = ./fonts/,
 
 \newcommand{\myseparator}{\par\noindent\rule{\linewidth}{1pt}\par}
 
+% Macro per Tier+Type localizzata (definizioni separate per lingua)
+\newcommand{\dghenvironmenttiertypeenglish}[2]{\dghlabeltier\ #1 #2}
+\newcommand{\dghenvironmenttiertypeitalian}[2]{#2 di \dghlabeltier\ #1}
+% Macro attiva (default inglese)
+\newcommand{\dghenvironmenttiertype}[2]{\dghenvironmenttiertypeenglish{#1}{#2}}
+
 % Localized labels (default English). If babel is loaded, labels switch with language.
 \newcommand{\dghsetlabelsenglish}{%
-\gdef\dghlabeldifficulty{Difficulty}%
-\gdef\dghlabelthresholds{Thresholds}%
-\gdef\dghlabelhp{HP}%
-\gdef\dghlabelstress{Stress}%
-\gdef\dghlabelatk{ATK}%
-\gdef\dghlabelweapon{Weapon}%
-\gdef\dghlabelexperience{Experience}%
-\gdef\dghlabelmotivesandtactics{Motives \& Tactics}%
-\gdef\dghlabelfeatures{Features}%
-\gdef\dghlabelimpulses{Impulses}%
-\gdef\dghlabelpotentialadversaries{Potential Adversaries}%
+	\let\dghenvironmenttiertype\dghenvironmenttiertypeenglish
+	\gdef\dghlabeltier{Tier}%
+	\gdef\dghlabeldifficulty{Difficulty}%
+	\gdef\dghlabelthresholds{Thresholds}%
+	\gdef\dghlabelhp{HP}%
+	\gdef\dghlabelstress{Stress}%
+	\gdef\dghlabelatk{ATK}%
+	\gdef\dghlabelweapon{Weapon}%
+	\gdef\dghlabelexperience{Experience}%
+	\gdef\dghlabelmotivesandtactics{Motives \& Tactics}%
+	\gdef\dghlabelfeatures{Features}%
+	\gdef\dghlabelimpulses{Impulses}%
+	\gdef\dghlabelpotentialadversaries{Potential Adversaries}%
 }
 
 \newcommand{\dghsetlabelsitalian}{%
-\gdef\dghlabeldifficulty{Difficoltà}%
-\gdef\dghlabelthresholds{Soglie}%
-\gdef\dghlabelhp{PF}%
-\gdef\dghlabelstress{Stress}%
-\gdef\dghlabelatk{ATT}%
-\gdef\dghlabelweapon{Arma}%
-\gdef\dghlabelexperience{Esperienza}%
-\gdef\dghlabelmotivesandtactics{Motivazioni e Tattiche}%
-\gdef\dghlabelfeatures{Caratteristiche}%
-\gdef\dghlabelimpulses{Impeti}%
-\gdef\dghlabelpotentialadversaries{Potenziali Avversari}%
+	\let\dghenvironmenttiertype\dghenvironmenttiertypeitalian
+	\gdef\dghlabeltier{Rango}%
+	\gdef\dghlabeldifficulty{Difficoltà}%
+	\gdef\dghlabelthresholds{Soglie}%
+	\gdef\dghlabelhp{PF}%
+	\gdef\dghlabelstress{Stress}%
+	\gdef\dghlabelatk{ATT}%
+	\gdef\dghlabelweapon{Arma}%
+	\gdef\dghlabelexperience{Esperienza}%
+	\gdef\dghlabelmotivesandtactics{Motivazioni e Tattiche}%
+	\gdef\dghlabelfeatures{Caratteristiche}%
+	\gdef\dghlabelimpulses{Impeti}%
+	\gdef\dghlabelpotentialadversaries{Potenziali Avversari}%
 }
 
 \dghsetlabelsenglish
