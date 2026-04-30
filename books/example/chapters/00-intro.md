@@ -35,6 +35,8 @@ feats:
     text: quando viene attaccato in mischia, guadagna +1 Difficulty fino al suo prossimo turno.
 ```
 
+[]{.columnbreak}
+
 ![Custode del Tronco](assets/custode-del-tronco.png){width="100%"}
 
 

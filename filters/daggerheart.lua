@@ -2,25 +2,46 @@ local List = require("pandoc.List")
 
 local h1_newpage = true
 local normalize_section_color_blocks
+local normalize_break_blocks
 
 local function meta_to_string(value)
   if value == nil then
     return nil
   end
-
   if type(value) == "string" then
     return value
   end
-
   if value.t == "MetaString" then
     return value.text
   end
-
   if value.t == "MetaInlines" or value.t == "MetaBlocks" then
     return pandoc.utils.stringify(value)
   end
-
   return pandoc.utils.stringify(value)
+end
+
+-- Utility per compatibilità: controlla se una classe è presente
+local function includes_class(classes, name)
+  if type(classes.includes) == "function" then
+    return classes:includes(name)
+  end
+  for _, c in ipairs(classes) do
+    if c == name then return true end
+  end
+  return false
+end
+
+function Span(el)
+  if FORMAT ~= "latex" and FORMAT ~= "pdf" then
+    return nil
+  end
+  if includes_class(el.classes, "columnbreak") then
+    return pandoc.RawInline("latex", "\\columnbreak")
+  end
+  if includes_class(el.classes, "pagebreak") then
+    return pandoc.RawInline("latex", "\\dghpagebreak")
+  end
+  return nil
 end
 
 local function get_meta_string(meta, keys, default)
@@ -104,6 +125,7 @@ end
 
 function Pandoc(doc)
   doc.blocks = normalize_section_color_blocks(doc.blocks)
+  doc.blocks = normalize_break_blocks(doc.blocks)
 
   if not h1_newpage then
     table.insert(doc.blocks, 1, pandoc.RawBlock("latex", "\\dghonepagebreakfalse"))
@@ -231,6 +253,30 @@ normalize_section_color_blocks = function(blocks)
     else
       normalized:insert(block)
       index = index + 1
+    end
+  end
+
+  return normalized
+end
+
+local function is_break_command(text)
+  return text:match("^%s*\\(pagebreak|columnbreak|newpage|clearpage|dghpagebreak)%s*$")
+end
+
+normalize_break_blocks = function(blocks)
+  local normalized = List:new()
+  local last_was_break = false
+
+  for _, block in ipairs(blocks) do
+    if block.t == "RawBlock" and block.format == "latex" and is_break_command(block.text) then
+      if not last_was_break then
+        normalized:insert(block)
+        last_was_break = true
+      end
+      -- Se vuoi sempre inserire, togli il controllo su last_was_break
+    else
+      normalized:insert(block)
+      last_was_break = false
     end
   end
 
@@ -978,7 +1024,7 @@ function Div(div)
   end
 
   if has_class(div, "fullpage") then
-    local body = blocks_to_latex(normalize_section_color_blocks(div.content))
+    local body = blocks_to_latex(normalize_break_blocks(normalize_section_color_blocks(div.content)))
     local latex = "\\beginFullpage\n" .. body .. "\n\\finishFullpage"
     return pandoc.RawBlock("latex", latex)
   end

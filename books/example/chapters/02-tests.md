@@ -78,8 +78,7 @@ feats:
 :::
 
 
-::: {.pagebreak}
-:::
+[]{.pagebreak}
 
 ::: {.fullpage}
 ## Avversari ed ambienti
@@ -117,8 +116,7 @@ feats:
 ```
 :::
 
-::: {.pagebreak}
-:::
+[]{.pagebreak}
 
 ```statblock
 layout: Daggerheart Environment
