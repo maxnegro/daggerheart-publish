@@ -78,6 +78,13 @@ function Meta(meta)
       "titlepage-image-fit"
     }, "fill")
 
+  if meta["toc-depth"] then
+    local depth = pandoc.utils.stringify(meta["toc-depth"])
+    -- Inserisci direttamente nel documento
+    append_header_include(meta, "\\setcounter{tocdepth}{" .. depth .. "}")
+  end
+
+
 local position = get_meta_string(meta, {
         "title-image-position",
         "titlepage-image-position"
@@ -805,9 +812,9 @@ local function render_adversary_statblock(parsed)
   local tier = strip_yaml_quotes(parsed.tier or "")
   local kind = strip_yaml_quotes(parsed.type or "")
   if tier ~= "" and kind ~= "" then
-    tier_text = latex_escape("Tier " .. tier .. " " .. kind)
+    tier_text = "\\dghenvironmenttiertype{" .. latex_escape(tier) .. "}{" .. latex_escape(kind) .. "}"
   elseif tier ~= "" then
-    tier_text = latex_escape("Tier " .. tier)
+    tier_text = "\\dghlabeltier{} " .. latex_escape(tier)
   else
     tier_text = latex_escape(kind)
   end
@@ -851,9 +858,9 @@ local function render_environment_statblock(parsed)
   local tier = strip_yaml_quotes(parsed.tier or "")
   local kind = strip_yaml_quotes(parsed.type or "")
   if tier ~= "" and kind ~= "" then
-    tier_text = latex_escape("Tier " .. tier .. " " .. kind)
+    tier_text = "\\dghenvironmenttiertype{" .. latex_escape(tier) .. "}{" .. latex_escape(kind) .. "}"
   elseif tier ~= "" then
-    tier_text = latex_escape("Tier " .. tier)
+    tier_text = "\\dghlabeltier{} " .. latex_escape(tier)
   else
     tier_text = latex_escape(kind)
   end
@@ -923,6 +930,7 @@ function Div(div)
 
     local out = {}
     table.insert(out, "\\beginFullpage")
+    table.insert(out, "\\newpage")
     table.insert(out, "\\thispagestyle{empty}")
 
     local rotate_node = ""

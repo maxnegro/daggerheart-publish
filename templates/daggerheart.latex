@@ -28,7 +28,7 @@ $if(date)$\date{$date$}$else$\date{}$endif$
 \raggedcolumns
 $if(toc)$
 {\setlength{\parskip}{0pt}\tableofcontents}
-\columnbreak
+%\columnbreak%
 $endif$
 
 $body$

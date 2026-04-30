@@ -48,19 +48,19 @@ Note:
 
 ```bash
 cd daggerheart-publish
-./scripts/build.sh ../books/location-armi
+./scripts/build.sh ./books/example
 ```
 
 Con questo comando l'output predefinito sara:
 
 ```bash
-dist/location-armi.pdf
+dist/example.pdf
 ```
 
 Puoi comunque specificare un output esplicito:
 
 ```bash
-./scripts/build.sh ../books/location-armi dist/mio-libro.pdf
+./scripts/build.sh ./books/example/ mio-libro.pdf
 ```
 
 Per vedere uso e opzioni disponibili:
@@ -79,13 +79,13 @@ Sintassi:
 
 ```bash
 cd daggerheart-publish
-make build INPUT=../books/location-armi OUTPUT=dist/location-armi.pdf
+make build INPUT=./books/example OUTPUT=dist/example.pdf
 ```
 
 Variabili supportate dal target `build`:
 
-- `INPUT`: cartella libro (default: `../books/location-armi`)
-- `OUTPUT`: file PDF di output (default: `dist/location-armi.pdf`)
+- `INPUT`: cartella libro (default: `./books/example`)
+- `OUTPUT`: file PDF di output (default: `dist/example.pdf`)
 
 Pulizia output:
 
@@ -99,14 +99,14 @@ La build Docker usa solo i file presenti in questo repository.
 
 ```bash
 cd daggerheart-publish
-./scripts/docker-build.sh ../books/location-armi
+./scripts/docker-build.sh ./books/example
 ```
 
 Oppure:
 
 ```bash
 cd daggerheart-publish
-make docker-build INPUT=../books/location-armi OUTPUT=dist/location-armi.pdf
+make docker-build INPUT=./books/example OUTPUT=dist/example.pdf
 ```
 
 Per vedere uso e opzioni disponibili:
@@ -179,6 +179,8 @@ subtitle: Sottotitolo
 author:
   - Nome Autore
 date: 25 aprile 2026
+toc: true
+toc-depth: 2
 ---
 ```
 
@@ -268,12 +270,14 @@ potential_adversaries: Minor Treant, Sylvan Soldier, Young Dryad
 feats:
   - name: Overgrown Battlefield - Passive
     text: PCs can inspect traces of a previous battle.
+    question: Do you recognize something in this old battlefield?
   - name: Barbed Vines - Action
     text: Pick a point; targets in Very Close range risk damage and Restrained.
+    question: What do you feel while the vines nail you to the ground?
 ```
 ````
 
-Nota: il filtro Lua usa solo il formato `statblock` (layout `Daggerheart Adversary` e `Daggerheart Environment`) per questi blocchi.
+Nota: Rispetto ai formati supportati dal plugin `obsidian fantasy statblocks`, il filtro Lua usa solo il formato `statblock` con layout `Daggerheart Adversary` e `Daggerheart Environment` per questi blocchi.
 
 ### Etichette multilingua (ITA/ENG)
 
@@ -385,7 +389,7 @@ Esempio:
 Testo della sezione con tabelle e squarebox nella tinta verde della sezione.
 ```
 
-
+## Variabili di ambiente
 
 - `ASSETS_DIR`: path della directory assets (font/foto)
 - `ENABLE_TOC=0`: disabilita indice automatico
@@ -401,13 +405,13 @@ Note su `ENABLE_TOC`:
 Esempio:
 
 ```bash
-ASSETS_DIR=./assets KEEP_TEX=1 ./scripts/build.sh ../books/location-armi dist/location-armi.pdf
+ASSETS_DIR=./assets KEEP_TEX=1 ./scripts/build.sh ./books/example/
 ```
 
 Esempio Docker con tag immagine personalizzato:
 
 ```bash
-IMAGE_NAME=daggerheart-publish:dev ./scripts/docker-build.sh ../books/location-armi dist/location-armi.pdf
+IMAGE_NAME=daggerheart-publish:dev ./scripts/docker-build.sh ./books/example/
 ```
 
 ## Limiti attuali
