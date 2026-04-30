@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.2] - 2026-04-30
+
+- Aggiunta della gestione della tabella dei contenuti con profondità configurabile e commentata la rottura di colonna nel template LaTeX. (228db4b)
+- Aggiornati i nomi e le descrizioni in italiano per alcuni  avversari ed  ambienti di esempio, inclusi miglioramenti alle macro per la gestione dei tipi e dei ranghi. (74f2a5d)
+- Aggiornato l'esempio con una nuova formattazione delle liste e aggiunta di una sezione per le citazioni. (70375a2)
+- Migliorata gestione fullpagemap (a5a6e22)
+- Forzato pagebreak prima di pagine con mappa a tutta pagina (ec27b2b)
+- Aggiornati esempi di rendering per avversari ed ambienti con domande aggiuntive sui tratti (2953543)
+- Aggiornato README.md con percorsi di esempio per la build e output predefiniti (bcff172)
+- Rinominato file LICENSE in LICENSE.md (1c1df66)
+- Aggiornata la nota sui formati supportati dal filtro Lua per chiarire la compatibilità con il plugin 'obsidian fantasy statblocks'. (8244742)
+
 ## [0.0.1] - 2026-04-29
 
 - Aggiunti hook gitflow per gestione release (bb59a55)
