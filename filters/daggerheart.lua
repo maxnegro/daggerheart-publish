@@ -434,6 +434,15 @@ local function trim(text)
   return text:match("^%s*(.-)%s*$")
 end
 
+local function first_non_empty(...)
+  for _, value in ipairs({ ... }) do
+    if value and value ~= "" then
+      return value
+    end
+  end
+  return ""
+end
+
 local function get_first_value(values, keys)
   for _, key in ipairs(keys) do
     local value = values[key]
@@ -444,14 +453,47 @@ local function get_first_value(values, keys)
   return nil
 end
 
+local function inlines_to_config_text(inlines)
+  local parts = {}
+  for _, inline in ipairs(inlines or {}) do
+    if inline.t == "Str" then
+      table.insert(parts, inline.text or inline.c or "")
+    elseif inline.t == "Space" then
+      table.insert(parts, " ")
+    elseif inline.t == "SoftBreak" or inline.t == "LineBreak" then
+      table.insert(parts, "\n")
+    else
+      table.insert(parts, pandoc.utils.stringify(inline))
+    end
+  end
+  return table.concat(parts)
+end
+
 local function markdown_blocks_to_text(blocks)
   if not blocks or #blocks == 0 then
     return ""
   end
 
-  local markdown = pandoc.write(pandoc.Pandoc(blocks), "markdown")
-  markdown = markdown:gsub("\r\n", "\n")
-  return markdown
+  local lines = {}
+  for _, block in ipairs(blocks) do
+    if (block.t == "Para" or block.t == "Plain") and block.content then
+      local text = inlines_to_config_text(block.content)
+      for line in (text .. "\n"):gmatch("(.-)\n") do
+        table.insert(lines, line)
+      end
+    elseif block.t == "BulletList" then
+      for _, item in ipairs(block.content or {}) do
+        local item_text = markdown_blocks_to_text(item)
+        item_text = trim(item_text):gsub("\n+", " ")
+        table.insert(lines, "- " .. item_text)
+      end
+    else
+      table.insert(lines, pandoc.utils.stringify(block))
+    end
+    table.insert(lines, "")
+  end
+
+  return table.concat(lines, "\n"):gsub("\r\n", "\n")
 end
 
 local function parse_key_value_markdown(blocks)
@@ -1104,15 +1146,6 @@ function Div(div)
 
     ensure_cover_defaults_from_meta(PANDOC_STATE.meta)
 
-    local function first_non_empty(...)
-      for _, value in ipairs({ ... }) do
-        if value and value ~= "" then
-          return value
-        end
-      end
-      return ""
-    end
-
     local title_value = first_non_empty(
       div.attributes["title"],
       cover_defaults.title
@@ -1166,13 +1199,25 @@ function Div(div)
   end
 
   if has_class(div, "fullpagemap") then
-    local src = attr_value(div, { "src", "path", "file" }, "")
+    local parsed = parse_key_value_markdown(div.content)
+    local src = trim(first_non_empty(
+      attr_value(div, { "src", "path", "file" }, ""),
+      get_first_value(parsed, { "src", "path", "file" })
+    ))
     if src == "" then
       return nil
     end
 
-    local angle = attr_value(div, { "rotate", "angle" }, "0")
-    local fit = attr_value(div, { "fit" }, "contain")
+    local angle = trim(first_non_empty(
+      attr_value(div, { "rotate", "angle" }, ""),
+      get_first_value(parsed, { "rotate", "angle" }),
+      "0"
+    ))
+    local fit = trim(first_non_empty(
+      attr_value(div, { "fit" }, ""),
+      get_first_value(parsed, { "fit" }),
+      "contain"
+    ))
     local width = "\\paperwidth"
     local height = "\\paperheight"
 

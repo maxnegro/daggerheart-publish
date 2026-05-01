@@ -160,7 +160,7 @@ Questa configurazione viene applicata sia nella build locale sia nella build Doc
 Esempi:
 
 ```md
-::: {.fullpage}
+::: fullpage
 # Titolo sezione
 Contenuto della pagina piena.
 :::
@@ -336,6 +336,8 @@ lang: english
 
 ### Utility
 
+Per `columnbreak` e `pagebreak` sono supportate sia la forma a blocco sia la forma breve inline. La forma breve e in genere piu pratica per break puntuali; quella a blocco resta utile se vuoi che il marker sia piu visibile nel sorgente.
+
 ```md
 ::: {.columnbreak}
 :::
@@ -343,7 +345,11 @@ lang: english
 ::: {.pagebreak}
 :::
 
-::: {.fullpage}
+[]{.columnbreak}
+
+[]{.pagebreak}
+
+::: fullpage
 # Titolo pagina piena
 Testo...
 :::
@@ -351,7 +357,17 @@ Testo...
 
 ### Mappa a pagina intera
 
-Il blocco `.fullpagemap` renderizza un'immagine che occupa l'intera pagina fisica, senza margini e senza footer. Viene usato tipicamente per mappe o illustrazioni full-bleed.
+Il blocco `fullpagemap` renderizza un'immagine che occupa l'intera pagina fisica, senza margini e senza footer. Viene usato tipicamente per mappe o illustrazioni full-bleed.
+
+```md
+::: fullpagemap
+src: assets/mappa.png
+rotate: 90
+fit: none
+:::
+```
+
+In alternativa, resta supportata anche la forma con attributi Pandoc:
 
 ```md
 ::: {.fullpagemap src="assets/mappa.png" rotate="90" fit="none"}
