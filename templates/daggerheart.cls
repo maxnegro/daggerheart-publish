@@ -223,15 +223,14 @@ Path = ./fonts/,
 {\begin{quotebox}}
 {\end{quotebox}}
 
-\usepackage{geometry}
 \usepackage{tikz}
 \usetikzlibrary{shadings}
 
 \definecolor{sfondoCover}{HTML}{295369}
-\definecolor{h1text}{HTML}{F5E6D3}
+\definecolor{h1textlight}{HTML}{F5E6D3}
 
 \newenvironment{dghcoverpage}[7]{%
-    \newgeometry{margin=0pt, top=0pt, bottom=0pt, left=0pt, right=0pt}
+    % \newgeometry{margin=0pt, top=0pt, bottom=0pt, left=0pt, right=0pt}
     \pagecolor{sfondoCover}%
     \begin{titlepage}
     \begin{tikzpicture}[remember picture,overlay]
@@ -241,34 +240,51 @@ Path = ./fonts/,
         };
         % Fading sugli ultimi 28pt (opacità variabile)
         \fill[sfondoCover, path fading=fadeToBg]
-            ([yshift=-0.5\paperheight+28pt] current page.north west)
+            ([yshift=-0.5\paperheight+32pt] current page.north west)
             rectangle
             ([yshift=-0.5\paperheight] current page.north east);
         % Maschera anti‑artefatto da 0.5pt (come nel tuo esempio)
         \fill[sfondoCover]
-            ([yshift=-0.5\paperheight-1bp] current page.north west)
+            ([yshift=-0.5\paperheight-10pt] current page.north west)
             rectangle
             ([yshift=-0.5\paperheight+0.5pt] current page.north east);
     \end{tikzpicture}
     
-    \vspace*{0.5\paperheight}
+	\begin{tikzpicture}[remember picture,overlay]
+		\node[
+			anchor=north east,
+			xshift=-10pt,
+			yshift=-10pt,
+			inner sep=3pt,
+			align=right,
+			fill=black,
+			fill opacity=0.40,
+			text opacity=1,
+			rounded corners=2pt
+		] at (current page.north east) {%
+			{\normalfont\fontsize{8pt}{7pt}\selectfont\bfseries\color{lightgray} Fantasy Castle}\\[-3pt]
+			{\normalfont\fontsize{6pt}{5pt}\selectfont\itshape\color{lightgray} Bob Greyvenstein}%
+		};
+	\end{tikzpicture}
+
+	\vspace*{\dimexpr0.5\paperheight-\dghpagetotext-26pt\relax}
     \raggedright
-    \setlength{\parskip}{0.5\baselineskip}
-    \setlength{\parindent}{0pt}
     
-    {\montserratLight\fontsize{14pt}{16pt}\selectfont\color{white} Fantasy Castle}\par
-    {\montserratLight\fontsize{12pt}{14pt}\selectfont\color{white} Bob Greyvenstein}\par
-    \vspace{0.5cm}
+    {\montserratLight\fontsize{32pt}{34pt}\selectfont\color{h1textlight}\MakeUppercase #1}
+    \vspace{1em}
     
-    {\montserratLight\fontsize{32pt}{34pt}\selectfont\color{h1text}\MakeUppercase #1}\par
-    \vspace{0.5cm}
+    {\normalfont\fontsize{10pt}{13pt}\selectfont\itshape\color{white} #2}\par
+    \vspace{1em}
     
-    {\normalfont\fontsize{11pt}{13pt}\selectfont\color{white} #2}\par
-    \vspace{1cm}
-    
-    {\normalfont\bfseries\color{white} Designed by #3}\par
-    {\normalfont\color{white} Complexity Rating: #4}\par
-    \vspace{1cm}
+    {\normalfont\bfseries\color{white} \dghlabeldesignedby{} #3}\par
+    {\normalfont\color{white}%
+    \ifnum#4>0%
+    \dghlabelcomplexity: 
+      \foreach \dghci in {1,...,#4}{%
+        \tikz[baseline=-0.5ex,inner sep=0pt]{\filldraw[white](0,0)circle(2.0pt);}\kern2pt%
+      }%
+    \fi}\par
+    \vspace{2em}
     
     \begin{tabularx}{\textwidth}{@{}X@{\hspace{1cm}}X@{}}
         \multicolumn{1}{@{}c}{\textbf{\large\color{white} STRUTTURA}} & 
@@ -526,6 +542,8 @@ Path = ./fonts/,
 	\gdef\dghlabelfeatures{Features}%
 	\gdef\dghlabelimpulses{Impulses}%
 	\gdef\dghlabelpotentialadversaries{Potential Adversaries}%
+	\gdef\dghlabeldesignedby{Designed by}%
+	\gdef\dghlabelcomplexity{Complexity rating}%
 }
 
 \newcommand{\dghsetlabelsitalian}{%
@@ -542,6 +560,8 @@ Path = ./fonts/,
 	\gdef\dghlabelfeatures{Caratteristiche}%
 	\gdef\dghlabelimpulses{Impeti}%
 	\gdef\dghlabelpotentialadversaries{Potenziali Avversari}%
+	\gdef\dghlabeldesignedby{Progettato da}%
+	\gdef\dghlabelcomplexity{Livello di Complessit\`a}%
 }
 
 \dghsetlabelsenglish

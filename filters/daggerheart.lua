@@ -134,7 +134,14 @@ function Meta(meta)
     local title = latex_escape(pandoc.utils.stringify(meta.title or ""))
     local subtitle = latex_escape(pandoc.utils.stringify(meta.subtitle or ""))
     local designer = latex_escape(pandoc.utils.stringify(meta.designer or ""))
-    local complexity = latex_escape(tostring(meta.complexity or ""))
+    local complexity_raw = meta_to_string(meta.complexity)
+    local complexity_num = tonumber(complexity_raw)
+    if complexity_num then
+      complexity_num = math.max(1, math.min(5, math.floor(complexity_num + 0.5)))
+    else
+      complexity_num = 0
+    end
+    local complexity = tostring(complexity_num)
     local structure = ""
     if meta.structure then
       local items = {}
