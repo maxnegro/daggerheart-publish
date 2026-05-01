@@ -19,6 +19,7 @@
 \RequirePackage{fontspec}
 \RequirePackage{framed}
 \RequirePackage[table]{xcolor}
+\usepackage{xcolor}
 \RequirePackage{geometry}
 \RequirePackage{multicol}
 \RequirePackage[most]{tcolorbox}
@@ -44,6 +45,11 @@
 \tikzfading[name=dgh fade to white,
 	top color=transparent!100,
 	bottom color=transparent!0]
+
+\tikzfading[name=fadeToBg,
+    top color=transparent!100,   % completamente trasparente
+    bottom color=transparent!0]  % completamente opaco
+
 
 % Distance from physical paper top to text body top (computed at begin-document)
 \newlength{\dghpagetotext}
@@ -107,8 +113,6 @@
 }
 
 \onehalfspacing
-
-
 \setlength{\columnsep}{1.5em}
 
 % --- Fonts ---
@@ -217,7 +221,72 @@ Path = ./fonts/,
 }
 \renewenvironment{quote}
 {\begin{quotebox}}
-	{\end{quotebox}}
+{\end{quotebox}}
+
+\usepackage{geometry}
+\usepackage{tikz}
+\usetikzlibrary{shadings}
+
+\definecolor{sfondoCover}{HTML}{295369}
+\definecolor{h1text}{HTML}{F5E6D3}
+
+\newenvironment{dghcoverpage}[7]{%
+    \newgeometry{margin=0pt, top=0pt, bottom=0pt, left=0pt, right=0pt}
+    \pagecolor{sfondoCover}%
+    \begin{titlepage}
+    \begin{tikzpicture}[remember picture,overlay]
+        % Immagine alta metà pagina
+        \node[anchor=north, inner sep=0pt] at (current page.north) {
+            \includegraphics[height=0.5\paperheight, keepaspectratio]{#7}
+        };
+        % Fading sugli ultimi 28pt (opacità variabile)
+        \fill[sfondoCover, path fading=fadeToBg]
+            ([yshift=-0.5\paperheight+28pt] current page.north west)
+            rectangle
+            ([yshift=-0.5\paperheight] current page.north east);
+        % Maschera anti‑artefatto da 0.5pt (come nel tuo esempio)
+        \fill[sfondoCover]
+            ([yshift=-0.5\paperheight-1bp] current page.north west)
+            rectangle
+            ([yshift=-0.5\paperheight+0.5pt] current page.north east);
+    \end{tikzpicture}
+    
+    \vspace*{0.5\paperheight}
+    \raggedright
+    \setlength{\parskip}{0.5\baselineskip}
+    \setlength{\parindent}{0pt}
+    
+    {\montserratLight\fontsize{14pt}{16pt}\selectfont\color{white} Fantasy Castle}\par
+    {\montserratLight\fontsize{12pt}{14pt}\selectfont\color{white} Bob Greyvenstein}\par
+    \vspace{0.5cm}
+    
+    {\montserratLight\fontsize{32pt}{34pt}\selectfont\color{h1text}\MakeUppercase #1}\par
+    \vspace{0.5cm}
+    
+    {\normalfont\fontsize{11pt}{13pt}\selectfont\color{white} #2}\par
+    \vspace{1cm}
+    
+    {\normalfont\bfseries\color{white} Designed by #3}\par
+    {\normalfont\color{white} Complexity Rating: #4}\par
+    \vspace{1cm}
+    
+    \begin{tabularx}{\textwidth}{@{}X@{\hspace{1cm}}X@{}}
+        \multicolumn{1}{@{}c}{\textbf{\large\color{white} STRUTTURA}} & 
+        \multicolumn{1}{c@{}}{\textbf{\large\color{white} TIER}} \\
+        \begin{minipage}[t]{\linewidth}
+            \color{white}
+            #5
+        \end{minipage}
+        &
+        \begin{minipage}[t]{\linewidth}
+            \color{white}
+            #6
+        \end{minipage} \\
+    \end{tabularx}
+    \vfill
+    \end{titlepage}
+    \restoregeometry
+}{}
 
 % --- Titles ---
 \setcounter{secnumdepth}{0}

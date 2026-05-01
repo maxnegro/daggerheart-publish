@@ -22,7 +22,11 @@ $if(author)$\author{$for(author)$$author$$sep$ \\ $endfor$}$endif$
 $if(date)$\date{$date$}$else$\date{}$endif$
 
 \begin{document}
+$if(frame-title)$
+\dghcoverpage{\coverTitle}{\coverSubtitle}{\coverDesigner}{\coverComplexity}{\coverStructure}{\coverTier}{\coverImage}
+$else$
 \maketitle
+$endif$
 
 \begin{multicols}{2}
 \raggedcolumns

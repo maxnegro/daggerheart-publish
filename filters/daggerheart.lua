@@ -67,6 +67,28 @@ local function ensure_header_includes_list(meta)
   return includes
 end
 
+
+local function latex_escape(text)
+  if not text or text == "" then
+    return ""
+  end
+  -- Prima: sostituisci ogni backslash con il simbolo letterale
+  text = text:gsub("\\", "\\textbackslash{}")
+  -- Poi: escapa tutti gli altri caratteri speciali
+  local replacements = {
+    ["{"] = "\\{",
+    ["}"] = "\\}",
+    ["$"] = "\\$",
+    ["&"] = "\\&",
+    ["#"] = "\\#",
+    ["_"] = "\\_",
+    ["%"] = "\\%",
+    ["~"] = "\\textasciitilde{}",
+    ["^"] = "\\textasciicircum{}"
+  }
+  return (text:gsub("[{}$&#_%%~^]", replacements))
+end
+
 local function append_header_include(meta, latex)
   local includes = ensure_header_includes_list(meta)
   includes:insert(pandoc.MetaBlocks({ pandoc.RawBlock("latex", latex) }))
@@ -105,6 +127,36 @@ function Meta(meta)
     append_header_include(meta, "\\setcounter{tocdepth}{" .. depth .. "}")
   end
 
+  if meta["frame-title"] then
+    -- Assicura che frame-title sia una MetaString per Pandoc
+    local frame_title_raw = pandoc.utils.stringify(meta["frame-title"])
+    meta["frame-title"] = pandoc.MetaString(frame_title_raw)
+    local title = latex_escape(pandoc.utils.stringify(meta.title or ""))
+    local subtitle = latex_escape(pandoc.utils.stringify(meta.subtitle or ""))
+    local designer = latex_escape(pandoc.utils.stringify(meta.designer or ""))
+    local complexity = latex_escape(tostring(meta.complexity or ""))
+    local structure = ""
+    if meta.structure then
+      local items = {}
+      for _, v in ipairs(meta.structure) do
+        table.insert(items, latex_escape(pandoc.utils.stringify(v)))
+      end
+      structure = table.concat(items, "\\\\")
+    end
+    local tier = latex_escape(pandoc.utils.stringify(meta.tier or ""))
+    local cover_image = latex_escape(get_meta_string(meta, {
+      "cover-image",
+      "title-image",
+      "titlepage-image"
+    }, ""))
+    append_header_include(meta, "\\def\\coverTitle{" .. title .. "}")
+    append_header_include(meta, "\\def\\coverSubtitle{" .. subtitle .. "}")
+    append_header_include(meta, "\\def\\coverDesigner{" .. designer .. "}")
+    append_header_include(meta, "\\def\\coverComplexity{" .. complexity .. "}")
+    append_header_include(meta, "\\def\\coverStructure{" .. structure .. "}")
+    append_header_include(meta, "\\def\\coverTier{" .. tier .. "}")
+    append_header_include(meta, "\\def\\coverImage{" .. cover_image .. "}")
+  end
 
 local position = get_meta_string(meta, {
         "title-image-position",
