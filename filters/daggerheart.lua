@@ -396,6 +396,56 @@ local function has_class(el, class_name)
   return false
 end
 
+-- Recursively collects all Header blocks from a block list (including nested Divs).
+local function collect_all_headers(blocks)
+  local headers = {}
+  for _, block in ipairs(blocks) do
+    if block.t == "Header" then
+      table.insert(headers, block)
+    elseif block.t == "Div" and block.content then
+      local nested = collect_all_headers(block.content)
+      for _, h in ipairs(nested) do
+        table.insert(headers, h)
+      end
+    end
+  end
+  return headers
+end
+
+-- Reads a Markdown file and returns headings of `collect_level` found under
+-- the first heading of `from_level` whose text matches `under_title`
+-- (case-insensitive). If `under_title` is empty/nil, collects from the start.
+-- Returns a list of {id, inlines} tables.
+local function collect_headings_under(file_path, under_title, from_level, collect_level)
+  local f = io.open(file_path, "r")
+  if not f then
+    return nil, "headerlist: cannot open file: " .. tostring(file_path)
+  end
+  local content = f:read("*all")
+  f:close()
+
+  local doc = pandoc.read(content, "markdown+fenced_divs+bracketed_spans")
+  local result = {}
+
+  local scope_active = (under_title == nil or under_title == "")
+  local target = under_title and under_title:lower():match("^%s*(.-)%s*$") or ""
+
+  for _, block in ipairs(collect_all_headers(doc.blocks)) do
+    if block.level == from_level then
+      local title_text = pandoc.utils.stringify(block.content):lower():match("^%s*(.-)%s*$")
+      if target == "" then
+        scope_active = true
+      else
+        scope_active = (title_text == target)
+      end
+    elseif block.level == collect_level and scope_active then
+      table.insert(result, { id = block.identifier or "", inlines = block.content })
+    end
+  end
+
+  return result, nil
+end
+
 local function blocks_to_latex(blocks)
   if not blocks or #blocks == 0 then
     return ""
@@ -1173,6 +1223,67 @@ function CodeBlock(el)
 end
 
 function Div(div)
+  if has_class(div, "headerlist") then
+    local parsed = parse_key_value_markdown(div.content)
+
+    local src = trim(first_non_empty(
+      attr_value(div, { "src", "file", "path" }, ""),
+      get_first_value(parsed, { "src", "file", "path" })
+    ))
+    if src == "" then
+      return pandoc.RawBlock("latex", "% headerlist: missing src attribute")
+    end
+
+    local under = trim(first_non_empty(
+      attr_value(div, { "under", "section" }, ""),
+      get_first_value(parsed, { "under", "section" })
+    ))
+
+    local from_level = tonumber(first_non_empty(
+      attr_value(div, { "from" }, ""),
+      get_first_value(parsed, { "from" })
+    )) or 1
+
+    local collect_level = tonumber(first_non_empty(
+      attr_value(div, { "collect" }, ""),
+      get_first_value(parsed, { "collect" })
+    )) or (from_level + 1)
+
+    -- Resolve relative to the first input file's directory
+    local base_dir = ""
+    if PANDOC_STATE and PANDOC_STATE.input_files and #PANDOC_STATE.input_files > 0 then
+      local first = PANDOC_STATE.input_files[1]
+      base_dir = first:match("^(.*[/\\])") or ""
+    end
+    local full_path = base_dir .. src
+
+    local items, err = collect_headings_under(full_path, under, from_level, collect_level)
+
+    if err then
+      io.stderr:write(err .. "\n")
+      return pandoc.RawBlock("latex", "% " .. err)
+    end
+
+    if #items == 0 then
+      return pandoc.RawBlock("latex", "% headerlist: no headings found")
+    end
+
+    -- Emit a LaTeX itemize with \hyperlink for clickable entries
+    local out = { "\\begin{itemize}" }
+    for _, entry in ipairs(items) do
+      local label = entry.id ~= "" and entry.id or ""
+      local text  = latex_escape(pandoc.utils.stringify(entry.inlines))
+      if label ~= "" then
+        table.insert(out, "  \\item \\hyperlink{" .. label .. "}{" .. text .. "}")
+      else
+        table.insert(out, "  \\item " .. text)
+      end
+    end
+    table.insert(out, "\\end{itemize}")
+
+    return pandoc.RawBlock("latex", table.concat(out, "\n"))
+  end
+
   if has_class(div, "framecoverpage") then
     if FORMAT ~= "latex" and FORMAT ~= "pdf" then
       return nil

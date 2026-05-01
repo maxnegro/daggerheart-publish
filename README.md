@@ -417,6 +417,41 @@ Attributi disponibili:
   - `fill`: l'immagine riempie esattamente la pagina (può essere ritagliata)
   - qualsiasi altro valore (es. `none`, `contain`): mantiene le proporzioni originali (default)
 
+### Indice automatico da heading (headerlist)
+
+Il blocco `headerlist` genera una lista numerata cliccabile (PDF) raccogliendo gli heading di un determinato livello presenti sotto uno specifico heading padre in un altro file Markdown.
+
+Forma YAML inline (consigliata):
+
+```md
+::: headerlist
+src: chapters/03-location.md
+under: Luoghi scoperti
+from: 1
+collect: 2
+:::
+```
+
+Forma con attributi Pandoc (equivalente):
+
+```md
+::: {.headerlist src="chapters/03-location.md" under="Luoghi scoperti" from="1" collect="2"}
+:::
+```
+
+Attributi disponibili:
+
+- `src` (o `file`, `path`): percorso del file Markdown sorgente, relativo alla cartella del libro (obbligatorio)
+- `under` (o `section`): testo dell'heading padre da cui iniziare la raccolta (case-insensitive). Se omesso, raccoglie dal primo heading di livello `from` trovato nel file.
+- `from`: livello dell'heading padre (default: `1`)
+- `collect`: livello degli heading da raccogliere (default: `from + 1`, quindi `2` se `from` è `1`)
+
+Note:
+
+- Gli heading raccolti diventano voci della lista numerate con `\hyperlink`, cliccabili nel PDF.
+- I link di destinazione (`\hypertarget`) vengono generati automaticamente da Pandoc quando lo stesso file viene incluso nella build.
+- Se `under` non viene trovato o non ci sono heading di livello `collect` sotto di esso, il blocco produce un commento LaTeX e non genera output visibile.
+
 ### H1 con sfondo (parametri supportati)
 
 Per gli heading di livello 1 puoi usare attributi dedicati per renderizzare uno sfondo di sezione:
