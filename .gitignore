@@ -2,5 +2,6 @@ dist/*
 !dist/example.pdf
 books/*
 !books/example/
+!books/example-frame/
 
 !.gitkeep

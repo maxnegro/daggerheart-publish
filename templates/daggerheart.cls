@@ -14,29 +14,22 @@
 \RequirePackage{amsmath,amssymb}
 \RequirePackage{graphicx}
 \RequirePackage{fancyhdr}
-\RequirePackage{tabularx}        
+\RequirePackage{tabularx}
 \RequirePackage{multicol}
 \RequirePackage{fontspec}
 \RequirePackage{framed}
 \RequirePackage[table]{xcolor}
-\RequirePackage{geometry}
-\RequirePackage{multicol}
 \RequirePackage[most]{tcolorbox}
 \RequirePackage{titlesec}
-\RequirePackage{setspace}
 \RequirePackage{parskip}
 \RequirePackage{enumitem}
 \RequirePackage{quoting}
 \RequirePackage[colorlinks=true, linkcolor=darkgray]{hyperref}
 \RequirePackage{needspace}
 \RequirePackage{textcase}
-\RequirePackage{graphicx}
 \RequirePackage{tabulary}
 \RequirePackage{array}
-\RequirePackage{cuted} 
-\RequirePackage{titlesec}
-\RequirePackage{enumitem}
-\RequirePackage{tcolorbox}
+\RequirePackage{cuted}
 \RequirePackage{etoolbox}
 \RequirePackage{tikzpagenodes}
 \RequirePackage{eso-pic}
@@ -44,6 +37,11 @@
 \tikzfading[name=dgh fade to white,
 	top color=transparent!100,
 	bottom color=transparent!0]
+
+\tikzfading[name=fadeToBg,
+	top color=transparent!100,   % completamente trasparente
+	bottom color=transparent!0]  % completamente opaco
+
 
 % Distance from physical paper top to text body top (computed at begin-document)
 \newlength{\dghpagetotext}
@@ -85,7 +83,7 @@
 		}
 		\enspace
 		\textbf{
-			%\@title%\quad\leftmark\quad\rightmark
+			%@title%\quad\leftmark\quad\rightmark
 			\@title\text{:}\enspace\nouppercase\leftmark
 		}
 	}}
@@ -107,8 +105,6 @@
 }
 
 \onehalfspacing
-
-
 \setlength{\columnsep}{1.5em}
 
 % --- Fonts ---
@@ -217,7 +213,125 @@ Path = ./fonts/,
 }
 \renewenvironment{quote}
 {\begin{quotebox}}
-	{\end{quotebox}}
+{\end{quotebox}}
+
+\usepackage{tikz}
+\usetikzlibrary{shadings}
+
+\definecolor{sfondoCover}{HTML}{295369}
+\definecolor{h1textlight}{HTML}{F5E6D3}
+
+\newenvironment{framecoverpage}[5]{%
+    % \newgeometry{margin=0pt, top=0pt, bottom=0pt, left=0pt, right=0pt}
+    \pagecolor{sfondoCover}%
+    \begin{titlepage}
+	\ifstrempty{#5}{}{%
+	\begin{tikzpicture}[remember picture,overlay]
+		% Immagine alta metà pagina, ritagliata a 0.5\paperheight
+		\begin{scope}
+			\clip (current page.north west) rectangle ([yshift=-0.5\paperheight] current page.north east);
+			\node[anchor=north, inner sep=0pt] at (current page.north) {
+				\includegraphics[width=\paperwidth, keepaspectratio]{#5}
+			};
+		\end{scope}
+		% Fading sugli ultimi 28pt (opacità variabile)
+		\fill[sfondoCover, path fading=fadeToBg]
+			([yshift=-0.5\paperheight+32pt] current page.north west)
+			rectangle
+			([yshift=-0.5\paperheight] current page.north east);
+		% Maschera anti‑artefatto da 0.5pt (come nel tuo esempio)
+		\fill[sfondoCover]
+			([yshift=-0.5\paperheight-10pt] current page.north west)
+			rectangle
+			([yshift=-0.5\paperheight+0.5pt] current page.north east);
+	\end{tikzpicture}
+	}
+    
+	\ifnum\dghcoverimagecreditenabled>0\relax
+		\begin{tikzpicture}[remember picture,overlay]
+			\node[
+				anchor=north east,
+				xshift=-10pt,
+				yshift=-10pt,
+				inner sep=3pt,
+				align=right,
+				fill=black,
+				fill opacity=0.40,
+				text opacity=1,
+				rounded corners=2pt
+			] at (current page.north east) {%
+				\ifnum\dghcoverimagetitleenabled>0\relax
+					{\normalfont\fontsize{8pt}{7pt}\selectfont\bfseries\color{lightgray} \dghcoverimagetitle}%
+				\fi
+				\ifnum\dghcoverimageauthorenabled>0\relax
+					\ifnum\dghcoverimagetitleenabled>0\relax\\[-3pt]\fi
+					{\normalfont\fontsize{6pt}{5pt}\selectfont\itshape\color{lightgray} \dghcoverimageauthor}%
+				\fi
+			};
+		\end{tikzpicture}
+	\fi
+
+	\vspace*{\dimexpr0.5\paperheight-\dghpagetotext-26pt\relax}
+    
+    {\montserratLight\fontsize{32pt}{34pt}\selectfont\raggedright\color{h1textlight}\MakeUppercase #1}
+    \vspace{1em}
+    
+	{\normalfont\fontsize{10pt}{13pt}\selectfont\itshape\color{white}\setlength{\parindent}{0pt}\setlength{\parskip}{0.35em}\rightskip=0pt\relax #2\par}    
+    {\normalfont\fontsize{8pt}{6pt}\selectfont\color{white} \dghlabeldesignedby{} #3}\par
+	\vspace{0.5em}
+
+    {\normalfont\color{white}%
+    \ifnum#4>0%
+    \bfseries\dghlabelcomplexity: 
+      \foreach \dghci in {1,...,#4}{%
+        \tikz[baseline=-0.5ex,inner sep=0pt]{\filldraw[white](0,0)circle(2.0pt);}\kern2pt%
+      }%
+    \fi}\par
+    % \vspace{1em}
+    
+	\begingroup
+	\color{white}
+	\setlength{\parindent}{1em}
+	\setlength{\parskip}{0.25em}
+	\renewcommand{\section}[1]{%
+		\needspace{6\baselineskip}%
+		\vspace{0.7em}%
+		{\noindent\montserratLight\fontsize{13pt}{14pt}\selectfont\color{white}\MakeTextUppercase{##1}\par}%
+		\nopagebreak[4]%
+		\vspace{0.25em}%
+	}
+	\renewcommand{\subsection}[1]{%
+		\needspace{5\baselineskip}%
+		\vspace{0.5em}%
+		{\noindent\eveleth\fontsize{11pt}{12pt}\selectfont\color{white}\MakeTextUppercase{##1}\par}%
+		\nopagebreak[4]%
+		\vspace{0.2em}%
+	}
+	\renewcommand{\subsubsection}[1]{%
+		\needspace{4\baselineskip}%
+		\vspace{0.4em}%
+		{\noindent\bfseries\fontsize{9pt}{10pt}\selectfont\color{white}\MakeTextUppercase{##1}\par}%
+		\nopagebreak[4]%
+		\vspace{0.15em}%
+	}
+	\renewcommand{\paragraph}[1]{%
+		\needspace{3\baselineskip}%
+		\vspace{0.25em}%
+		{\noindent\bfseries\fontsize{8.5pt}{9.5pt}\selectfont\color{white}##1\par}%
+		\nopagebreak[4]%
+	}
+	\begin{multicols}{2}
+	\raggedcolumns
+}{%
+	\end{multicols}
+	\endgroup
+	\vfill
+	\end{titlepage}
+	\nopagecolor
+	\color{maintext}
+	\pagestyle{fancy}
+	\restoregeometry
+}{}
 
 % --- Titles ---
 \setcounter{secnumdepth}{0}
@@ -327,6 +441,15 @@ Path = ./fonts/,
 \newcommand{\dghtitleimageheight}{0.5\paperheight}
 \newcommand{\dghtitleimagefit}{fill}
 \newcommand{\dghtitleimageposition}{middle}
+\newcommand{\dghcovertitle}{}
+\newcommand{\dghcoversubtitle}{}
+\newcommand{\dghcoverdesigner}{}
+\newcommand{\dghcovercomplexity}{0}
+\newcommand{\dghcoverimagetitle}{}
+\newcommand{\dghcoverimageauthor}{}
+\newcommand{\dghcoverimagecreditenabled}{0}
+\newcommand{\dghcoverimagetitleenabled}{0}
+\newcommand{\dghcoverimageauthorenabled}{0}
 
 \newcommand{\settitlepageimagemode}[1]{\gdef\dghtitleimagemode{#1}}
 \newcommand{\settitlepageimagepath}[1]{\gdef\dghtitleimagepath{#1}}
@@ -457,6 +580,8 @@ Path = ./fonts/,
 	\gdef\dghlabelfeatures{Features}%
 	\gdef\dghlabelimpulses{Impulses}%
 	\gdef\dghlabelpotentialadversaries{Potential Adversaries}%
+	\gdef\dghlabeldesignedby{Designed by}%
+	\gdef\dghlabelcomplexity{Complexity rating}%
 }
 
 \newcommand{\dghsetlabelsitalian}{%
@@ -473,6 +598,8 @@ Path = ./fonts/,
 	\gdef\dghlabelfeatures{Caratteristiche}%
 	\gdef\dghlabelimpulses{Impeti}%
 	\gdef\dghlabelpotentialadversaries{Potenziali Avversari}%
+	\gdef\dghlabeldesignedby{Progettato da}%
+	\gdef\dghlabelcomplexity{Livello di Complessit\`a}%
 }
 
 \dghsetlabelsenglish

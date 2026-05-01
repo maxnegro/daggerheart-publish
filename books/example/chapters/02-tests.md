@@ -1,6 +1,4 @@
-# Prove di rendering
-\setsectioncolor{dg-red}{dg-red}
-
+# Prove di rendering {.sectioncolor h1=dg-red}
 
 ```statblock
 layout: Daggerheart Environment
@@ -78,8 +76,7 @@ feats:
 :::
 
 
-::: {.pagebreak}
-:::
+[]{.pagebreak}
 
 ::: {.fullpage}
 ## Avversari ed ambienti
@@ -117,8 +114,7 @@ feats:
 ```
 :::
 
-::: {.pagebreak}
-:::
+[]{.pagebreak}
 
 ```statblock
 layout: Daggerheart Environment

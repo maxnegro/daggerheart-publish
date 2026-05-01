@@ -61,11 +61,17 @@ fi
 mkdir -p "$(dirname "$OUTPUT_PDF")"
 
 CLASS_FILE="$ROOT_DIR/templates/daggerheart.cls"
+FILTER_FILE="$ROOT_DIR/filters/daggerheart.lua"
 ASSETS_DIR="${ASSETS_DIR:-$ROOT_DIR/assets}"
 ASSETS_DIR="$(realpath "$ASSETS_DIR")"
 
 if [[ ! -f "$CLASS_FILE" ]]; then
   echo "Could not find local class file: $CLASS_FILE" >&2
+  exit 1
+fi
+
+if [[ ! -f "$FILTER_FILE" ]]; then
+  echo "Could not find Lua filter file: $FILTER_FILE" >&2
   exit 1
 fi
 
@@ -104,7 +110,9 @@ if [[ -d "$ASSETS_DIR/photos" ]]; then
 fi
 
 if [[ ! -f "$WORKDIR/fonts/LeagueSpartan-Extrabold.ttf" && -f "$WORKDIR/fonts/LeagueSpartan-ExtraBold.ttf" ]]; then
-  cp "$WORKDIR/fonts/LeagueSpartan-ExtraBold.ttf" "$WORKDIR/fonts/LeagueSpartan-Extrabold.ttf"
+  if ! cp "$WORKDIR/fonts/LeagueSpartan-ExtraBold.ttf" "$WORKDIR/fonts/LeagueSpartan-Extrabold.ttf"; then
+    echo "Warning: failed to copy font fallback LeagueSpartan-ExtraBold.ttf -> LeagueSpartan-Extrabold.ttf" >&2
+  fi
 fi
 
 BOOK_ASSETS_DIR="$BOOK_DIR/assets"
@@ -120,7 +128,7 @@ PANDOC_ARGS=(
   --pdf-engine=xelatex
   --resource-path "$RESOURCE_PATH"
   --template "$ROOT_DIR/templates/daggerheart.latex"
-  --lua-filter "$ROOT_DIR/filters/daggerheart.lua"
+  --lua-filter "$FILTER_FILE"
   -V documentclass=daggerheart
 )
 

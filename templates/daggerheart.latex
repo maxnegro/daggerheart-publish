@@ -22,7 +22,11 @@ $if(author)$\author{$for(author)$$author$$sep$ \\ $endfor$}$endif$
 $if(date)$\date{$date$}$else$\date{}$endif$
 
 \begin{document}
+% The custom cover div renders the title page when cover-page is set to custom.
+$if(custom-cover-page)$
+$else$
 \maketitle
+$endif$
 
 \begin{multicols}{2}
 \raggedcolumns

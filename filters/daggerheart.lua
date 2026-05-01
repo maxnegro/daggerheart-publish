@@ -2,25 +2,53 @@ local List = require("pandoc.List")
 
 local h1_newpage = true
 local normalize_section_color_blocks
+local normalize_break_blocks
+local cover_defaults = {
+  title = "",
+  subtitle = "",
+  designer = "",
+  complexity = "0",
+  image = ""
+}
 
 local function meta_to_string(value)
   if value == nil then
     return nil
   end
-
   if type(value) == "string" then
     return value
   end
-
   if value.t == "MetaString" then
     return value.text
   end
-
   if value.t == "MetaInlines" or value.t == "MetaBlocks" then
     return pandoc.utils.stringify(value)
   end
-
   return pandoc.utils.stringify(value)
+end
+
+-- Utility per compatibilità: controlla se una classe è presente
+local function includes_class(classes, name)
+  if type(classes.includes) == "function" then
+    return classes:includes(name)
+  end
+  for _, c in ipairs(classes) do
+    if c == name then return true end
+  end
+  return false
+end
+
+function Span(el)
+  if FORMAT ~= "latex" and FORMAT ~= "pdf" then
+    return nil
+  end
+  if includes_class(el.classes, "columnbreak") then
+    return pandoc.RawInline("latex", "\\columnbreak")
+  end
+  if includes_class(el.classes, "pagebreak") then
+    return pandoc.RawInline("latex", "\\dghpagebreak")
+  end
+  return nil
 end
 
 local function get_meta_string(meta, keys, default)
@@ -46,15 +74,150 @@ local function ensure_header_includes_list(meta)
   return includes
 end
 
+
+local function latex_escape(text)
+  if not text or text == "" then
+    return ""
+  end
+
+  local replacements = {
+    ["\\"] = "\\textbackslash{}",
+    ["{"] = "\\{",
+    ["}"] = "\\}",
+    ["$"] = "\\$",
+    ["&"] = "\\&",
+    ["#"] = "\\#",
+    ["_"] = "\\_",
+    ["%"] = "\\%",
+    ["~"] = "\\textasciitilde{}",
+    ["^"] = "\\textasciicircum{}"
+  }
+
+  return (text:gsub("[\\{}$&#_%%~^]", replacements))
+end
+
 local function append_header_include(meta, latex)
   local includes = ensure_header_includes_list(meta)
   includes:insert(pandoc.MetaBlocks({ pandoc.RawBlock("latex", latex) }))
+end
+
+local function meta_to_latex(value)
+  if value == nil then
+    return ""
+  end
+  if type(value) == "string" then
+    return latex_escape(value)
+  end
+  if value.t == "MetaString" then
+    return latex_escape(value.text)
+  end
+
+  local value_type = pandoc.utils.type(value)
+  local doc = nil
+  if value_type == "Inlines" then
+    doc = pandoc.Pandoc({ pandoc.Para(value) })
+  elseif value_type == "Blocks" then
+    doc = pandoc.Pandoc(value)
+  else
+    return latex_escape(pandoc.utils.stringify(value))
+  end
+
+  return pandoc.write(doc, "latex"):gsub("%s+$", "")
+end
+
+local function complexity_to_string(value)
+  local complexity_num = tonumber(meta_to_string(value))
+  if complexity_num then
+    complexity_num = math.max(1, math.min(5, math.floor(complexity_num + 0.5)))
+  else
+    complexity_num = 0
+  end
+  return tostring(complexity_num)
+end
+
+local function trim_inline(text)
+  if not text then
+    return ""
+  end
+  return text:match("^%s*(.-)%s*$")
+end
+
+local function ensure_cover_defaults_from_meta(meta)
+  if not meta then
+    return
+  end
+
+  local title = pandoc.utils.stringify(meta.title or "")
+  if title ~= "" then
+    cover_defaults.title = title
+  end
+
+  local subtitle = meta_to_latex(meta.subtitle)
+  if subtitle ~= "" then
+    cover_defaults.subtitle = subtitle
+  end
+
+  local designer = pandoc.utils.stringify(meta.designer or "")
+  if designer ~= "" then
+    cover_defaults.designer = designer
+  end
+
+  local complexity = complexity_to_string(meta.complexity)
+  if complexity ~= "0" or cover_defaults.complexity == "" then
+    cover_defaults.complexity = complexity
+  end
+
+  local image = get_meta_string(meta, {
+    "cover-image",
+    "title-image",
+    "titlepage-image"
+  }, "")
+  if image ~= "" then
+    cover_defaults.image = image
+  end
 end
 
 function Meta(meta)
   if meta["h1-newpage"] ~= nil then
     h1_newpage = meta["h1-newpage"]
   end
+
+  ensure_cover_defaults_from_meta(meta)
+
+  local cover_page_mode = trim_inline(get_meta_string(meta, {
+    "cover-page"
+  }, "")):lower()
+  if cover_page_mode == "custom" then
+    meta["custom-cover-page"] = pandoc.MetaBool(true)
+  else
+    meta["custom-cover-page"] = nil
+  end
+
+  if meta["toc-depth"] then
+    local depth = pandoc.utils.stringify(meta["toc-depth"])
+    append_header_include(meta, "\\setcounter{tocdepth}{" .. depth .. "}")
+  end
+
+  local cover_image_title = latex_escape(trim_inline(get_meta_string(meta, {
+    "cover-image-title",
+    "cover-image-tile"
+  }, "")))
+  local cover_image_author = latex_escape(trim_inline(get_meta_string(meta, {
+    "cover-image-author"
+  }, "")))
+  local title_enabled = cover_image_title ~= "" and "1" or "0"
+  local author_enabled = cover_image_author ~= "" and "1" or "0"
+  local credit_enabled = (title_enabled == "1" or author_enabled == "1") and "1" or "0"
+
+  append_header_include(meta, "\\gdef\\dghcoverdesigner{" .. latex_escape(cover_defaults.designer or "") .. "}")
+  append_header_include(meta, "\\gdef\\dghcovercomplexity{" .. (cover_defaults.complexity or "0") .. "}")
+  append_header_include(meta, "\\gdef\\dghcovertitle{" .. latex_escape(cover_defaults.title or "") .. "}")
+  append_header_include(meta, "\\long\\gdef\\dghcoversubtitle{" .. (cover_defaults.subtitle or "") .. "}")
+  append_header_include(meta, "\\gdef\\dghcoverimagetitle{" .. cover_image_title .. "}")
+  append_header_include(meta, "\\gdef\\dghcoverimageauthor{" .. cover_image_author .. "}")
+  append_header_include(meta, "\\gdef\\dghcoverimagetitleenabled{" .. title_enabled .. "}")
+  append_header_include(meta, "\\gdef\\dghcoverimageauthorenabled{" .. author_enabled .. "}")
+  append_header_include(meta, "\\gdef\\dghcoverimagecreditenabled{" .. credit_enabled .. "}")
 
   local title_image = get_meta_string(meta, {
     "title-image",
@@ -77,25 +240,17 @@ function Meta(meta)
       "title-image-fit",
       "titlepage-image-fit"
     }, "fill")
-
-  if meta["toc-depth"] then
-    local depth = pandoc.utils.stringify(meta["toc-depth"])
-    -- Inserisci direttamente nel documento
-    append_header_include(meta, "\\setcounter{tocdepth}{" .. depth .. "}")
-  end
-
-
-local position = get_meta_string(meta, {
+    local position = get_meta_string(meta, {
         "title-image-position",
         "titlepage-image-position"
       }, nil)
 
-      append_header_include(meta, "\\settitlepageimagemode{" .. mode .. "}")
-      append_header_include(meta, "\\settitlepageimageheight{" .. image_height .. "}")
-      append_header_include(meta, "\\settitlepageimagefit{" .. fit .. "}")
-      if position and position ~= "" then
-        append_header_include(meta, "\\settitlepageimageposition{" .. position .. "}")
-      end
+    append_header_include(meta, "\\settitlepageimagemode{" .. mode .. "}")
+    append_header_include(meta, "\\settitlepageimageheight{" .. image_height .. "}")
+    append_header_include(meta, "\\settitlepageimagefit{" .. fit .. "}")
+    if position and position ~= "" then
+      append_header_include(meta, "\\settitlepageimageposition{" .. position .. "}")
+    end
     append_header_include(meta, "\\settitlepageimagepath{\\detokenize{" .. title_image .. "}}")
   end
 
@@ -104,6 +259,7 @@ end
 
 function Pandoc(doc)
   doc.blocks = normalize_section_color_blocks(doc.blocks)
+  doc.blocks = normalize_break_blocks(doc.blocks)
 
   if not h1_newpage then
     table.insert(doc.blocks, 1, pandoc.RawBlock("latex", "\\dghonepagebreakfalse"))
@@ -111,8 +267,65 @@ function Pandoc(doc)
   return doc
 end
 
+local function section_colors_from_header(el)
+  local classes = el and el.classes or {}
+  local attributes = el and el.attributes or {}
+
+  local has_sectioncolor_class = false
+  local h1 = nil
+  local h2 = nil
+
+  for _, class_name in ipairs(classes) do
+    if class_name == "sectioncolor" then
+      has_sectioncolor_class = true
+    end
+  end
+
+  if has_sectioncolor_class then
+    local attr_h1 = trim_inline(attributes["h1"] or attributes["section-h1"])
+    local attr_h2 = trim_inline(attributes["h2"] or attributes["section-h2"])
+
+    if attr_h1 ~= "" then
+      h1 = attr_h1
+    end
+    if attr_h2 ~= "" then
+      h2 = attr_h2
+    end
+  else
+    return nil, nil
+  end
+
+  if h1 and h1 ~= "" and (not h2 or h2 == "") then
+    h2 = h1
+  elseif (not h1 or h1 == "") and h2 and h2 ~= "" then
+    -- If only h2 is provided, keep H1 at the template default color.
+    h1 = "h1text"
+  end
+
+  return h1, h2
+end
+
 function Header(el)
   if el.level == 1 then
+    local section_color, subsection_color = section_colors_from_header(el)
+    local section_color_before = nil
+    local section_color_after = nil
+
+    if (section_color and section_color ~= "") or (subsection_color and subsection_color ~= "") then
+      if not section_color or section_color == "" then
+        section_color = "h1text"
+      end
+      if not subsection_color or subsection_color == "" then
+        subsection_color = section_color
+      end
+      section_color_before = pandoc.RawBlock(
+        "latex",
+        "\\setsectioncolor{" .. section_color .. "}{" .. subsection_color .. "}\n"
+          .. "\\global\\dgresetsectioncoloronnextsectionfalse"
+      )
+      section_color_after = pandoc.RawBlock("latex", "\\global\\dgresetsectioncoloronnextsectiontrue")
+    end
+
     local bg = el.attributes["bg"] or el.attributes["background"] or el.attributes["section-bg"]
     if bg and bg ~= "" then
       local bg_height = el.attributes["bg-height"] or el.attributes["section-bg-height"]
@@ -139,52 +352,48 @@ function Header(el)
       end
       table.insert(out, "\\sectionwithbg{" .. bg .. "}{" .. title_latex .. "}")
       local section_bg_block = pandoc.RawBlock("latex", table.concat(out, "\n"))
+      local blocks = {}
       if h1_newpage then
-        return {
-          pandoc.RawBlock("latex", "\\newpage"),
-          section_bg_block
-        }
+        table.insert(blocks, pandoc.RawBlock("latex", "\\newpage"))
       end
-      return section_bg_block
+      if section_color_before then
+        table.insert(blocks, section_color_before)
+      end
+      table.insert(blocks, section_bg_block)
+      if section_color_after then
+        table.insert(blocks, section_color_after)
+      end
+      if #blocks == 1 then
+        return blocks[1]
+      end
+      return blocks
     end
+
+    local out = {}
     if h1_newpage then
-      return {
-        pandoc.RawBlock("latex", "\\newpage"),
-        el
-      }
+      table.insert(out, pandoc.RawBlock("latex", "\\newpage"))
+    end
+    if section_color_before then
+      table.insert(out, section_color_before)
+      table.insert(out, el)
+      table.insert(out, section_color_after)
+      return out
+    end
+    if #out > 0 then
+      table.insert(out, el)
+      return out
     end
   end
   return el
 end
 
 local function has_class(el, class_name)
-  for _, c in ipairs(el.classes) do
+  for _, c in ipairs(el.classes or {}) do
     if c == class_name then
       return true
     end
   end
   return false
-end
-
-local function latex_escape(text)
-  if not text or text == "" then
-    return ""
-  end
-
-  local replacements = {
-    ["\\"] = "\\textbackslash{}",
-    ["{"] = "\\{",
-    ["}"] = "\\}",
-    ["$"] = "\\$",
-    ["&"] = "\\&",
-    ["#"] = "\\#",
-    ["_"] = "\\_",
-    ["%"] = "\\%",
-    ["~"] = "\\textasciitilde{}",
-    ["^"] = "\\textasciicircum{}"
-  }
-
-  return (text:gsub("[\\{}$&#_%%~^]", replacements))
 end
 
 local function blocks_to_latex(blocks)
@@ -237,14 +446,28 @@ normalize_section_color_blocks = function(blocks)
   return normalized
 end
 
-local function attr_or_empty(el, keys)
-  for _, key in ipairs(keys) do
-    local value = el.attributes[key]
-    if value and value ~= "" then
-      return latex_escape(value)
+local function is_break_command(text)
+  return text:match("^%s*\\(pagebreak|columnbreak|newpage|clearpage|dghpagebreak)%s*$")
+end
+
+normalize_break_blocks = function(blocks)
+  local normalized = List:new()
+  local last_was_break = false
+
+  for _, block in ipairs(blocks) do
+    if block.t == "RawBlock" and block.format == "latex" and is_break_command(block.text) then
+      if not last_was_break then
+        normalized:insert(block)
+        last_was_break = true
+      end
+      -- Se vuoi sempre inserire, togli il controllo su last_was_break
+    else
+      normalized:insert(block)
+      last_was_break = false
     end
   end
-  return ""
+
+  return normalized
 end
 
 local function trim(text)
@@ -252,6 +475,15 @@ local function trim(text)
     return ""
   end
   return text:match("^%s*(.-)%s*$")
+end
+
+local function first_non_empty(...)
+  for _, value in ipairs({ ... }) do
+    if value and value ~= "" then
+      return value
+    end
+  end
+  return ""
 end
 
 local function get_first_value(values, keys)
@@ -264,14 +496,47 @@ local function get_first_value(values, keys)
   return nil
 end
 
+local function inlines_to_config_text(inlines)
+  local parts = {}
+  for _, inline in ipairs(inlines or {}) do
+    if inline.t == "Str" then
+      table.insert(parts, inline.text or inline.c or "")
+    elseif inline.t == "Space" then
+      table.insert(parts, " ")
+    elseif inline.t == "SoftBreak" or inline.t == "LineBreak" then
+      table.insert(parts, "\n")
+    else
+      table.insert(parts, pandoc.utils.stringify(inline))
+    end
+  end
+  return table.concat(parts)
+end
+
 local function markdown_blocks_to_text(blocks)
   if not blocks or #blocks == 0 then
     return ""
   end
 
-  local markdown = pandoc.write(pandoc.Pandoc(blocks), "markdown")
-  markdown = markdown:gsub("\r\n", "\n")
-  return markdown
+  local lines = {}
+  for _, block in ipairs(blocks) do
+    if (block.t == "Para" or block.t == "Plain") and block.content then
+      local text = inlines_to_config_text(block.content)
+      for line in (text .. "\n"):gmatch("(.-)\n") do
+        table.insert(lines, line)
+      end
+    elseif block.t == "BulletList" then
+      for _, item in ipairs(block.content or {}) do
+        local item_text = markdown_blocks_to_text(item)
+        item_text = trim(item_text):gsub("\n+", " ")
+        table.insert(lines, "- " .. item_text)
+      end
+    else
+      table.insert(lines, pandoc.utils.stringify(block))
+    end
+    table.insert(lines, "")
+  end
+
+  return table.concat(lines, "\n"):gsub("\r\n", "\n")
 end
 
 local function parse_key_value_markdown(blocks)
@@ -329,7 +594,7 @@ local function build_adversary_stats_from_markdown(parsed)
   local difficulty = latex_escape(get_first_value(parsed, { "difficulty" }) or "")
   local thresholds = latex_escape(get_first_value(parsed, { "thresholds" }) or "")
   local hp = latex_escape(get_first_value(parsed, { "hp" }) or "")
-  local stress = latex_escape(get_first_value(parsed, { "stress", "srtess" }) or "")
+  local stress = latex_escape(get_first_value(parsed, { "stress" }) or "")
   local atk = latex_escape(get_first_value(parsed, { "atk" }) or "")
 
   local weapon_name = ""
@@ -884,21 +1149,12 @@ local function render_environment_statblock(parsed)
     .. latex_arg(features)
 end
 
-local function codeblock_has_class(el, class_name)
-  for _, c in ipairs(el.classes or {}) do
-    if c == class_name then
-      return true
-    end
-  end
-  return false
-end
-
 function CodeBlock(el)
   if FORMAT ~= "latex" and FORMAT ~= "pdf" then
     return nil
   end
 
-  if not codeblock_has_class(el, "statblock") then
+  if not has_class(el, "statblock") then
     return nil
   end
 
@@ -917,14 +1173,85 @@ function CodeBlock(el)
 end
 
 function Div(div)
+  if has_class(div, "framecoverpage") then
+    if FORMAT ~= "latex" and FORMAT ~= "pdf" then
+      return nil
+    end
+
+    ensure_cover_defaults_from_meta(PANDOC_STATE.meta)
+
+    local title_value = first_non_empty(
+      div.attributes["title"],
+      cover_defaults.title
+    )
+    local title = title_value ~= "" and latex_escape(title_value) or "\\dghcovertitle"
+
+    local subtitle_value = first_non_empty(
+      div.attributes["subtitle"],
+      cover_defaults.subtitle
+    )
+    local subtitle = subtitle_value ~= "" and latex_escape(subtitle_value) or "\\dghcoversubtitle"
+
+    local designer_value = first_non_empty(
+      div.attributes["designer"],
+      cover_defaults.designer
+    )
+    local designer = designer_value ~= "" and latex_escape(designer_value) or "\\dghcoverdesigner"
+
+    local complexity_value = first_non_empty(
+      div.attributes["complexity"],
+      cover_defaults.complexity,
+      "0"
+    )
+    local complexity = (complexity_value ~= "" and complexity_value ~= "0")
+      and complexity_to_string(complexity_value)
+      or "\\dghcovercomplexity"
+
+    local image_path = first_non_empty(
+      div.attributes["cover-image"],
+      div.attributes["image"],
+      cover_defaults.image
+    )
+    local image = (image_path ~= "") and ("\\detokenize{" .. image_path .. "}") or "\\dghtitleimagepath"
+
+    local body = blocks_to_latex(div.content)
+    local out = {}
+    table.insert(out, "\\end{multicols}")
+    table.insert(out,
+      "\\begin{framecoverpage}"
+      .. latex_arg(title)
+      .. latex_arg(subtitle)
+      .. latex_arg(designer)
+      .. latex_arg(complexity)
+      .. latex_arg(image)
+    )
+    table.insert(out, body)
+    table.insert(out, "\\end{framecoverpage}")
+    table.insert(out, "\\begin{multicols}{2}")
+    table.insert(out, "\\raggedcolumns")
+    return pandoc.RawBlock("latex", table.concat(out, "\n"))
+  end
+
   if has_class(div, "fullpagemap") then
-    local src = attr_value(div, { "src", "path", "file" }, "")
+    local parsed = parse_key_value_markdown(div.content)
+    local src = trim(first_non_empty(
+      attr_value(div, { "src", "path", "file" }, ""),
+      get_first_value(parsed, { "src", "path", "file" })
+    ))
     if src == "" then
       return nil
     end
 
-    local angle = attr_value(div, { "rotate", "angle" }, "0")
-    local fit = attr_value(div, { "fit" }, "contain")
+    local angle = trim(first_non_empty(
+      attr_value(div, { "rotate", "angle" }, ""),
+      get_first_value(parsed, { "rotate", "angle" }),
+      "0"
+    ))
+    local fit = trim(first_non_empty(
+      attr_value(div, { "fit" }, ""),
+      get_first_value(parsed, { "fit" }),
+      "contain"
+    ))
     local width = "\\paperwidth"
     local height = "\\paperheight"
 
@@ -978,7 +1305,7 @@ function Div(div)
   end
 
   if has_class(div, "fullpage") then
-    local body = blocks_to_latex(normalize_section_color_blocks(div.content))
+    local body = blocks_to_latex(normalize_break_blocks(normalize_section_color_blocks(div.content)))
     local latex = "\\beginFullpage\n" .. body .. "\n\\finishFullpage"
     return pandoc.RawBlock("latex", latex)
   end

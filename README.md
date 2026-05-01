@@ -27,14 +27,15 @@ Con questo progetto puoi:
 - `books/<nome-libro>/chapters/*.md`: capitoli, ordinati numericamente per filename
 - `books/<nome-libro>/assets`: immagini specifiche del libro
 
-## Prerequisiti (locale)
+## Prerequisiti e installazione
 
-Su Ubuntu/Debian:
+Per istruzioni dettagliate su Linux, macOS e Windows (nativo e Docker) consulta [INSTALL.md](INSTALL.md).
 
-```bash
-sudo apt update
-sudo apt install -y pandoc texlive-xetex texlive-latex-extra texlive-fonts-recommended texlive-pictures
-```
+In sintesi:
+
+- **Linux/macOS**: installa `pandoc` e `texlive-xetex` con il package manager, poi usa `./scripts/build.sh`.
+- **Windows**: installa Pandoc e MiKTeX, poi usa `.\scripts\build.ps1` su PowerShell oppure `scripts\build.bat` da `cmd.exe`.
+- **Docker**: usa `./scripts/docker-build.sh` su shell POSIX, `.\scripts\docker-build.ps1` su PowerShell oppure `scripts\docker-build.bat` da `cmd.exe`; non richiede LaTeX locale.
 
 Note:
 
@@ -49,6 +50,18 @@ Note:
 ```bash
 cd daggerheart-publish
 ./scripts/build.sh ./books/example
+```
+
+Su Windows PowerShell:
+
+```powershell
+.\scripts\build.ps1 .\books\example
+```
+
+Su Windows `cmd.exe`:
+
+```bat
+scripts\build.bat .\books\example
 ```
 
 Con questo comando l'output predefinito sara:
@@ -100,6 +113,18 @@ La build Docker usa solo i file presenti in questo repository.
 ```bash
 cd daggerheart-publish
 ./scripts/docker-build.sh ./books/example
+```
+
+Su Windows PowerShell:
+
+```powershell
+.\scripts\docker-build.ps1 .\books\example
+```
+
+Su Windows `cmd.exe`:
+
+```bat
+scripts\docker-build.bat .\books\example
 ```
 
 Oppure:
@@ -160,7 +185,7 @@ Questa configurazione viene applicata sia nella build locale sia nella build Doc
 Esempi:
 
 ```md
-::: {.fullpage}
+::: fullpage
 # Titolo sezione
 Contenuto della pagina piena.
 :::
@@ -184,7 +209,7 @@ toc-depth: 2
 ---
 ```
 
-Per personalizzare la title page con un'immagine:
+Per personalizzare la title page standard con un'immagine:
 
 ```yaml
 ---
@@ -210,21 +235,64 @@ Alias compatibili:
 - `titlepage-image` o `cover-image` al posto di `title-image`
 - `titlepage-image-mode`, `titlepage-image-height`, `titlepage-image-fit`
 
+### Cover personalizzata
+
+Per usare la cover personalizzata nel body del documento, imposta nel frontmatter:
+
+```yaml
+---
+title: Titolo
+subtitle: Sottotitolo
+designer: Nome Designer
+complexity: 2
+cover-image: assets/copertina.jpg
+cover-image-title: Titolo immagine
+cover-image-author: Nome autore immagine
+cover-page: custom
+---
+```
+
+Poi inserisci nel body un blocco `framecoverpage`:
+
+```md
+::: framecoverpage
+## Struttura
+
+- Primo beat
+- Secondo beat
+
+## Tier
+
+**Tier consigliato:** Tier 1
+**Durata stimata:** 2h
+:::
+```
+
+Note:
+
+- `cover-page: custom` attiva la cover personalizzata e disabilita `\maketitle` nel template.
+- `subtitle` nel frontmatter della cover personalizzata supporta markdown inline, hard line breaks Markdown (due spazi a fine riga) e paragrafi multipli.
+- Il contenuto di `::: framecoverpage` viene renderizzato nella cover in due colonne.
+- `cover-image-title` e `cover-image-author` popolano il box crediti in alto a destra.
+- Se `cover-image-title` e `cover-image-author` sono entrambi assenti o vuoti, il box crediti non viene generato.
+
 ### Box
 
 ```md
-::: {.squarebox}
+::: squarebox
 Testo nel box quadrato.
 :::
 
-::: {.roundedbox}
+::: roundedbox
 Testo nel box arrotondato.
 :::
 
-::: {.quotebox}
+::: quotebox
 Citazione in stile template.
 :::
 ```
+
+In alternativa è supportata anche la forma con attributi Pandoc: `::: {.squarebox}`, `::: {.roundedbox}`, `::: {.quotebox}`.
 
 ### Adversary
 
@@ -295,14 +363,28 @@ lang: english
 
 ### Utility
 
+**Interruzione di colonna** — forma breve consigliata per uso inline; la forma a blocco è un'alternativa più visibile nel sorgente:
+
 ```md
+[]{.columnbreak}
+
 ::: {.columnbreak}
 :::
+```
+
+**Interruzione di pagina** — stessa logica:
+
+```md
+[]{.pagebreak}
 
 ::: {.pagebreak}
 :::
+```
 
-::: {.fullpage}
+**Pagina intera** (senza colonne, senza footer):
+
+```md
+::: fullpage
 # Titolo pagina piena
 Testo...
 :::
@@ -310,7 +392,17 @@ Testo...
 
 ### Mappa a pagina intera
 
-Il blocco `.fullpagemap` renderizza un'immagine che occupa l'intera pagina fisica, senza margini e senza footer. Viene usato tipicamente per mappe o illustrazioni full-bleed.
+Il blocco `fullpagemap` renderizza un'immagine che occupa l'intera pagina fisica, senza margini e senza footer. Viene usato tipicamente per mappe o illustrazioni full-bleed.
+
+```md
+::: fullpagemap
+src: assets/mappa.png
+rotate: 90
+fit: none
+:::
+```
+
+In alternativa, resta supportata anche la forma con attributi Pandoc:
 
 ```md
 ::: {.fullpagemap src="assets/mappa.png" rotate="90" fit="none"}
@@ -320,7 +412,7 @@ Il blocco `.fullpagemap` renderizza un'immagine che occupa l'intera pagina fisic
 Attributi disponibili:
 
 - `src`: percorso dell'immagine (obbligatorio)
-- `rotate`: rotazione in gradi (default: `0`). Utile per immagini in formato landscape su pagina portrait.
+- `rotate`: rotazione in gradi (default: `0`). Utile per immagini in formato landscape su pagina portrait. Nota: con rotazione attiva, il filtro scambia larghezza e altezza della pagina nel calcolo delle dimensioni dell'immagine (`\paperwidth` ↔ `\paperheight`).
 - `fit`: modalità di adattamento:
   - `fill`: l'immagine riempie esattamente la pagina (può essere ritagliata)
   - qualsiasi altro valore (es. `none`, `contain`): mantiene le proporzioni originali (default)
@@ -359,15 +451,30 @@ Note pratiche:
 
 ### Colore di sezione
 
-`\setsectioncolor` imposta il colore degli heading (H1 e H2) per la sezione corrente. Il colore si applica automaticamente anche alle **tabelle** (header e righe alternate) e alle **squarebox** che seguono il comando.
+Il modo consigliato per impostare il colore di sezione e usare classi sull'H1. Il colore si applica automaticamente anche alle **tabelle** (header e righe alternate) e alle **squarebox** della sezione.
 
-Sintassi:
+Sintassi consigliata:
 
 ```md
-\setsectioncolor{<colore-h1>}{<colore-h2>}
+# Titolo sezione {.sectioncolor h1=dg-darkgreen}
 ```
 
-Il comando va inserito **prima** dell'H1 di sezione. Il colore viene resettato automaticamente all'H1 successivo se non ne viene impostato uno nuovo.
+Con solo `h1`, H1 e H2 usano lo stesso colore.
+
+Con solo `h2`, H1 resta al colore standard (`h1text`, default `#444444`) e H2 usa il colore specificato.
+
+Per differenziare H1 e H2:
+
+```md
+# Titolo sezione {.sectioncolor h1=dg-darkgreen h2=dg-orange}
+```
+
+Il colore viene resettato automaticamente all'H1 successivo se non ne viene impostato uno nuovo.
+
+Compatibilita:
+
+- consigliata: `.sectioncolor` con attributi `h1`/`h2`
+- legacy deprecata: il comando `\setsectioncolor{<colore-h1>}{<colore-h2>}` resta supportato dal parser, ma e consigliato migrare alla sintassi a classi
 
 Colori predefiniti disponibili:
 
@@ -383,8 +490,7 @@ Puoi anche usare qualsiasi colore definito nel template o aggiungerne di nuovi c
 Esempio:
 
 ```md
-\setsectioncolor{dg-darkgreen}{dg-darkgreen}
-# Foresta Oscura
+# Foresta Oscura {.sectioncolor h1=dg-darkgreen}
 
 Testo della sezione con tabelle e squarebox nella tinta verde della sezione.
 ```

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.0.3] - 2026-05-01
+
+- Ultimi ritocchi  alla generazione coverpage stile frame ed esempio relativo (359b79a)
+- Supporto build per MacOS e Windows (101a6fe)
+- Refactor di \setsectioncolor per diventare una classe di h1 (1a25a4c)
+- Giro di pulizia di codice e documentazione + rimozione dead code (e790a08)
+- Miglioramenti alla gestione dei blocchi Markdown e supporto per attributi nei div (974f484)
+- Prima implementazione framecoverpage completata (d6f3742)
+- Lavoro sulla coverpage di frame (7784489)
+- Bozza cover page modello frame (2b6e3ec)
+- Aggiunta sintassi alternativa per comandi di interruzione di pagina e colonna nel filtro LaTeX (afac059)
+- Aggiornato il changelog per la versione 0.0.2. (8b3620b)
+
 ## [0.0.2] - 2026-04-30
 
 - Aggiunta della gestione della tabella dei contenuti con profondità configurabile e commentata la rottura di colonna nel template LaTeX. (228db4b)
