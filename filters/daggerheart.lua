@@ -267,8 +267,65 @@ function Pandoc(doc)
   return doc
 end
 
+local function section_colors_from_header(el)
+  local classes = el and el.classes or {}
+  local attributes = el and el.attributes or {}
+
+  local has_sectioncolor_class = false
+  local h1 = nil
+  local h2 = nil
+
+  for _, class_name in ipairs(classes) do
+    if class_name == "sectioncolor" then
+      has_sectioncolor_class = true
+    end
+  end
+
+  if has_sectioncolor_class then
+    local attr_h1 = trim_inline(attributes["h1"] or attributes["section-h1"])
+    local attr_h2 = trim_inline(attributes["h2"] or attributes["section-h2"])
+
+    if attr_h1 ~= "" then
+      h1 = attr_h1
+    end
+    if attr_h2 ~= "" then
+      h2 = attr_h2
+    end
+  else
+    return nil, nil
+  end
+
+  if h1 and h1 ~= "" and (not h2 or h2 == "") then
+    h2 = h1
+  elseif (not h1 or h1 == "") and h2 and h2 ~= "" then
+    -- If only h2 is provided, keep H1 at the template default color.
+    h1 = "h1text"
+  end
+
+  return h1, h2
+end
+
 function Header(el)
   if el.level == 1 then
+    local section_color, subsection_color = section_colors_from_header(el)
+    local section_color_before = nil
+    local section_color_after = nil
+
+    if (section_color and section_color ~= "") or (subsection_color and subsection_color ~= "") then
+      if not section_color or section_color == "" then
+        section_color = "h1text"
+      end
+      if not subsection_color or subsection_color == "" then
+        subsection_color = section_color
+      end
+      section_color_before = pandoc.RawBlock(
+        "latex",
+        "\\setsectioncolor{" .. section_color .. "}{" .. subsection_color .. "}\n"
+          .. "\\global\\dgresetsectioncoloronnextsectionfalse"
+      )
+      section_color_after = pandoc.RawBlock("latex", "\\global\\dgresetsectioncoloronnextsectiontrue")
+    end
+
     local bg = el.attributes["bg"] or el.attributes["background"] or el.attributes["section-bg"]
     if bg and bg ~= "" then
       local bg_height = el.attributes["bg-height"] or el.attributes["section-bg-height"]
@@ -295,19 +352,36 @@ function Header(el)
       end
       table.insert(out, "\\sectionwithbg{" .. bg .. "}{" .. title_latex .. "}")
       local section_bg_block = pandoc.RawBlock("latex", table.concat(out, "\n"))
+      local blocks = {}
       if h1_newpage then
-        return {
-          pandoc.RawBlock("latex", "\\newpage"),
-          section_bg_block
-        }
+        table.insert(blocks, pandoc.RawBlock("latex", "\\newpage"))
       end
-      return section_bg_block
+      if section_color_before then
+        table.insert(blocks, section_color_before)
+      end
+      table.insert(blocks, section_bg_block)
+      if section_color_after then
+        table.insert(blocks, section_color_after)
+      end
+      if #blocks == 1 then
+        return blocks[1]
+      end
+      return blocks
     end
+
+    local out = {}
     if h1_newpage then
-      return {
-        pandoc.RawBlock("latex", "\\newpage"),
-        el
-      }
+      table.insert(out, pandoc.RawBlock("latex", "\\newpage"))
+    end
+    if section_color_before then
+      table.insert(out, section_color_before)
+      table.insert(out, el)
+      table.insert(out, section_color_after)
+      return out
+    end
+    if #out > 0 then
+      table.insert(out, el)
+      return out
     end
   end
   return el

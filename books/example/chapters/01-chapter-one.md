@@ -1,7 +1,5 @@
 ::: {.fullpage}
-# Capitolo Uno {bg="assets/section-header.png"}
-\setsectioncolor{dg-darkgreen}{dg-darkgreen}
-
+# Capitolo Uno {bg="assets/section-header.png" .sectioncolor h2=dg-darkgreen}
 
 ## Oltre il sentiero
 

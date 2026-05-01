@@ -426,15 +426,30 @@ Note pratiche:
 
 ### Colore di sezione
 
-`\setsectioncolor` imposta il colore degli heading (H1 e H2) per la sezione corrente. Il colore si applica automaticamente anche alle **tabelle** (header e righe alternate) e alle **squarebox** che seguono il comando.
+Il modo consigliato per impostare il colore di sezione e usare classi sull'H1. Il colore si applica automaticamente anche alle **tabelle** (header e righe alternate) e alle **squarebox** della sezione.
 
-Sintassi:
+Sintassi consigliata:
 
 ```md
-\setsectioncolor{<colore-h1>}{<colore-h2>}
+# Titolo sezione {.sectioncolor h1=dg-darkgreen}
 ```
 
-Il comando va inserito **prima** dell'H1 di sezione. Il colore viene resettato automaticamente all'H1 successivo se non ne viene impostato uno nuovo.
+Con solo `h1`, H1 e H2 usano lo stesso colore.
+
+Con solo `h2`, H1 resta al colore standard (`h1text`, default `#444444`) e H2 usa il colore specificato.
+
+Per differenziare H1 e H2:
+
+```md
+# Titolo sezione {.sectioncolor h1=dg-darkgreen h2=dg-orange}
+```
+
+Il colore viene resettato automaticamente all'H1 successivo se non ne viene impostato uno nuovo.
+
+Compatibilita:
+
+- consigliata: `.sectioncolor` con attributi `h1`/`h2`
+- legacy deprecata: il comando `\setsectioncolor{<colore-h1>}{<colore-h2>}` resta supportato dal parser, ma e consigliato migrare alla sintassi a classi
 
 Colori predefiniti disponibili:
 
@@ -450,8 +465,7 @@ Puoi anche usare qualsiasi colore definito nel template o aggiungerne di nuovi c
 Esempio:
 
 ```md
-\setsectioncolor{dg-darkgreen}{dg-darkgreen}
-# Foresta Oscura
+# Foresta Oscura {.sectioncolor h1=dg-darkgreen}
 
 Testo della sezione con tabelle e squarebox nella tinta verde della sezione.
 ```

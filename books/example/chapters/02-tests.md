@@ -1,6 +1,4 @@
-# Prove di rendering
-\setsectioncolor{dg-red}{dg-red}
-
+# Prove di rendering {.sectioncolor h1=dg-red}
 
 ```statblock
 layout: Daggerheart Environment
