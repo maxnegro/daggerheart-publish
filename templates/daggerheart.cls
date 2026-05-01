@@ -227,10 +227,13 @@ Path = ./fonts/,
     \begin{titlepage}
 	\ifstrempty{#5}{}{%
 	\begin{tikzpicture}[remember picture,overlay]
-		% Immagine alta metà pagina
-		\node[anchor=north, inner sep=0pt] at (current page.north) {
-			\includegraphics[height=0.5\paperheight, keepaspectratio]{#5}
-		};
+		% Immagine alta metà pagina, ritagliata a 0.5\paperheight
+		\begin{scope}
+			\clip (current page.north west) rectangle ([yshift=-0.5\paperheight] current page.north east);
+			\node[anchor=north, inner sep=0pt] at (current page.north) {
+				\includegraphics[width=\paperwidth, keepaspectratio]{#5}
+			};
+		\end{scope}
 		% Fading sugli ultimi 28pt (opacità variabile)
 		\fill[sfondoCover, path fading=fadeToBg]
 			([yshift=-0.5\paperheight+32pt] current page.north west)
@@ -269,23 +272,22 @@ Path = ./fonts/,
 	\fi
 
 	\vspace*{\dimexpr0.5\paperheight-\dghpagetotext-26pt\relax}
-    \raggedright
     
-    {\montserratLight\fontsize{32pt}{34pt}\selectfont\color{h1textlight}\MakeUppercase #1}
+    {\montserratLight\fontsize{32pt}{34pt}\selectfont\raggedright\color{h1textlight}\MakeUppercase #1}
     \vspace{1em}
     
-	{\normalfont\fontsize{10pt}{13pt}\selectfont\itshape\color{white}\setlength{\parindent}{0pt}\setlength{\parskip}{0.35em}#2\par}
-    \vspace{1em}
-    
-    {\normalfont\bfseries\color{white} \dghlabeldesignedby{} #3}\par
+	{\normalfont\fontsize{10pt}{13pt}\selectfont\itshape\color{white}\setlength{\parindent}{0pt}\setlength{\parskip}{0.35em}\rightskip=0pt\relax #2\par}    
+    {\normalfont\fontsize{8pt}{6pt}\selectfont\color{white} \dghlabeldesignedby{} #3}\par
+	\vspace{0.5em}
+
     {\normalfont\color{white}%
     \ifnum#4>0%
-    \dghlabelcomplexity: 
+    \bfseries\dghlabelcomplexity: 
       \foreach \dghci in {1,...,#4}{%
         \tikz[baseline=-0.5ex,inner sep=0pt]{\filldraw[white](0,0)circle(2.0pt);}\kern2pt%
       }%
     \fi}\par
-    \vspace{2em}
+    % \vspace{1em}
     
 	\begingroup
 	\color{white}
