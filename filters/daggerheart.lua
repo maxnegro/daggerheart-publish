@@ -79,10 +79,9 @@ local function latex_escape(text)
   if not text or text == "" then
     return ""
   end
-  -- Prima: sostituisci ogni backslash con il simbolo letterale
-  text = text:gsub("\\", "\\textbackslash{}")
-  -- Poi: escapa tutti gli altri caratteri speciali
+
   local replacements = {
+    ["\\"] = "\\textbackslash{}",
     ["{"] = "\\{",
     ["}"] = "\\}",
     ["$"] = "\\$",
@@ -93,7 +92,8 @@ local function latex_escape(text)
     ["~"] = "\\textasciitilde{}",
     ["^"] = "\\textasciicircum{}"
   }
-  return (text:gsub("[{}$&#_%%~^]", replacements))
+
+  return (text:gsub("[\\{}$&#_%%~^]", replacements))
 end
 
 local function append_header_include(meta, latex)
@@ -314,33 +314,12 @@ function Header(el)
 end
 
 local function has_class(el, class_name)
-  for _, c in ipairs(el.classes) do
+  for _, c in ipairs(el.classes or {}) do
     if c == class_name then
       return true
     end
   end
   return false
-end
-
-local function latex_escape(text)
-  if not text or text == "" then
-    return ""
-  end
-
-  local replacements = {
-    ["\\"] = "\\textbackslash{}",
-    ["{"] = "\\{",
-    ["}"] = "\\}",
-    ["$"] = "\\$",
-    ["&"] = "\\&",
-    ["#"] = "\\#",
-    ["_"] = "\\_",
-    ["%"] = "\\%",
-    ["~"] = "\\textasciitilde{}",
-    ["^"] = "\\textasciicircum{}"
-  }
-
-  return (text:gsub("[\\{}$&#_%%~^]", replacements))
 end
 
 local function blocks_to_latex(blocks)
@@ -415,16 +394,6 @@ normalize_break_blocks = function(blocks)
   end
 
   return normalized
-end
-
-local function attr_or_empty(el, keys)
-  for _, key in ipairs(keys) do
-    local value = el.attributes[key]
-    if value and value ~= "" then
-      return latex_escape(value)
-    end
-  end
-  return ""
 end
 
 local function trim(text)
@@ -551,7 +520,7 @@ local function build_adversary_stats_from_markdown(parsed)
   local difficulty = latex_escape(get_first_value(parsed, { "difficulty" }) or "")
   local thresholds = latex_escape(get_first_value(parsed, { "thresholds" }) or "")
   local hp = latex_escape(get_first_value(parsed, { "hp" }) or "")
-  local stress = latex_escape(get_first_value(parsed, { "stress", "srtess" }) or "")
+  local stress = latex_escape(get_first_value(parsed, { "stress" }) or "")
   local atk = latex_escape(get_first_value(parsed, { "atk" }) or "")
 
   local weapon_name = ""
@@ -1106,21 +1075,12 @@ local function render_environment_statblock(parsed)
     .. latex_arg(features)
 end
 
-local function codeblock_has_class(el, class_name)
-  for _, c in ipairs(el.classes or {}) do
-    if c == class_name then
-      return true
-    end
-  end
-  return false
-end
-
 function CodeBlock(el)
   if FORMAT ~= "latex" and FORMAT ~= "pdf" then
     return nil
   end
 
-  if not codeblock_has_class(el, "statblock") then
+  if not has_class(el, "statblock") then
     return nil
   end
 

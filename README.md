@@ -254,18 +254,20 @@ Note:
 ### Box
 
 ```md
-::: {.squarebox}
+::: squarebox
 Testo nel box quadrato.
 :::
 
-::: {.roundedbox}
+::: roundedbox
 Testo nel box arrotondato.
 :::
 
-::: {.quotebox}
+::: quotebox
 Citazione in stile template.
 :::
 ```
+
+In alternativa è supportata anche la forma con attributi Pandoc: `::: {.squarebox}`, `::: {.roundedbox}`, `::: {.quotebox}`.
 
 ### Adversary
 
@@ -336,19 +338,27 @@ lang: english
 
 ### Utility
 
-Per `columnbreak` e `pagebreak` sono supportate sia la forma a blocco sia la forma breve inline. La forma breve e in genere piu pratica per break puntuali; quella a blocco resta utile se vuoi che il marker sia piu visibile nel sorgente.
+**Interruzione di colonna** — forma breve consigliata per uso inline; la forma a blocco è un'alternativa più visibile nel sorgente:
 
 ```md
+[]{.columnbreak}
+
 ::: {.columnbreak}
 :::
+```
+
+**Interruzione di pagina** — stessa logica:
+
+```md
+[]{.pagebreak}
 
 ::: {.pagebreak}
 :::
+```
 
-[]{.columnbreak}
+**Pagina intera** (senza colonne, senza footer):
 
-[]{.pagebreak}
-
+```md
 ::: fullpage
 # Titolo pagina piena
 Testo...
@@ -377,7 +387,7 @@ In alternativa, resta supportata anche la forma con attributi Pandoc:
 Attributi disponibili:
 
 - `src`: percorso dell'immagine (obbligatorio)
-- `rotate`: rotazione in gradi (default: `0`). Utile per immagini in formato landscape su pagina portrait.
+- `rotate`: rotazione in gradi (default: `0`). Utile per immagini in formato landscape su pagina portrait. Nota: con rotazione attiva, il filtro scambia larghezza e altezza della pagina nel calcolo delle dimensioni dell'immagine (`\paperwidth` ↔ `\paperheight`).
 - `fit`: modalità di adattamento:
   - `fill`: l'immagine riempie esattamente la pagina (può essere ritagliata)
   - qualsiasi altro valore (es. `none`, `contain`): mantiene le proporzioni originali (default)
