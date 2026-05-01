@@ -27,14 +27,15 @@ Con questo progetto puoi:
 - `books/<nome-libro>/chapters/*.md`: capitoli, ordinati numericamente per filename
 - `books/<nome-libro>/assets`: immagini specifiche del libro
 
-## Prerequisiti (locale)
+## Prerequisiti e installazione
 
-Su Ubuntu/Debian:
+Per istruzioni dettagliate su Linux, macOS e Windows (nativo e Docker) consulta [INSTALL.md](INSTALL.md).
 
-```bash
-sudo apt update
-sudo apt install -y pandoc texlive-xetex texlive-latex-extra texlive-fonts-recommended texlive-pictures
-```
+In sintesi:
+
+- **Linux/macOS**: installa `pandoc` e `texlive-xetex` con il package manager, poi usa `./scripts/build.sh`.
+- **Windows**: installa Pandoc e MiKTeX, poi usa `.\scripts\build.ps1` su PowerShell oppure `scripts\build.bat` da `cmd.exe`.
+- **Docker**: usa `./scripts/docker-build.sh` su shell POSIX, `.\scripts\docker-build.ps1` su PowerShell oppure `scripts\docker-build.bat` da `cmd.exe`; non richiede LaTeX locale.
 
 Note:
 
@@ -49,6 +50,18 @@ Note:
 ```bash
 cd daggerheart-publish
 ./scripts/build.sh ./books/example
+```
+
+Su Windows PowerShell:
+
+```powershell
+.\scripts\build.ps1 .\books\example
+```
+
+Su Windows `cmd.exe`:
+
+```bat
+scripts\build.bat .\books\example
 ```
 
 Con questo comando l'output predefinito sara:
@@ -100,6 +113,18 @@ La build Docker usa solo i file presenti in questo repository.
 ```bash
 cd daggerheart-publish
 ./scripts/docker-build.sh ./books/example
+```
+
+Su Windows PowerShell:
+
+```powershell
+.\scripts\docker-build.ps1 .\books\example
+```
+
+Su Windows `cmd.exe`:
+
+```bat
+scripts\docker-build.bat .\books\example
 ```
 
 Oppure:
