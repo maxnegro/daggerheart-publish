@@ -47,8 +47,8 @@
 	bottom color=transparent!0]
 
 \tikzfading[name=fadeToBg,
-    top color=transparent!100,   % completamente trasparente
-    bottom color=transparent!0]  % completamente opaco
+	top color=transparent!100,   % completamente trasparente
+	bottom color=transparent!0]  % completamente opaco
 
 
 % Distance from physical paper top to text body top (computed at begin-document)
@@ -91,7 +91,7 @@
 		}
 		\enspace
 		\textbf{
-			%\@title%\quad\leftmark\quad\rightmark
+			%@title%\quad\leftmark\quad\rightmark
 			\@title\text{:}\enspace\nouppercase\leftmark
 		}
 	}}
@@ -229,43 +229,52 @@ Path = ./fonts/,
 \definecolor{sfondoCover}{HTML}{295369}
 \definecolor{h1textlight}{HTML}{F5E6D3}
 
-\newenvironment{dghcoverpage}[7]{%
+\newenvironment{framecoverpage}[5]{%
     % \newgeometry{margin=0pt, top=0pt, bottom=0pt, left=0pt, right=0pt}
     \pagecolor{sfondoCover}%
     \begin{titlepage}
-    \begin{tikzpicture}[remember picture,overlay]
-        % Immagine alta metà pagina
-        \node[anchor=north, inner sep=0pt] at (current page.north) {
-            \includegraphics[height=0.5\paperheight, keepaspectratio]{#7}
-        };
-        % Fading sugli ultimi 28pt (opacità variabile)
-        \fill[sfondoCover, path fading=fadeToBg]
-            ([yshift=-0.5\paperheight+32pt] current page.north west)
-            rectangle
-            ([yshift=-0.5\paperheight] current page.north east);
-        % Maschera anti‑artefatto da 0.5pt (come nel tuo esempio)
-        \fill[sfondoCover]
-            ([yshift=-0.5\paperheight-10pt] current page.north west)
-            rectangle
-            ([yshift=-0.5\paperheight+0.5pt] current page.north east);
-    \end{tikzpicture}
-    
+	\ifstrempty{#5}{}{%
 	\begin{tikzpicture}[remember picture,overlay]
-		\node[
-			anchor=north east,
-			xshift=-10pt,
-			yshift=-10pt,
-			inner sep=3pt,
-			align=right,
-			fill=black,
-			fill opacity=0.40,
-			text opacity=1,
-			rounded corners=2pt
-		] at (current page.north east) {%
-			{\normalfont\fontsize{8pt}{7pt}\selectfont\bfseries\color{lightgray} Fantasy Castle}\\[-3pt]
-			{\normalfont\fontsize{6pt}{5pt}\selectfont\itshape\color{lightgray} Bob Greyvenstein}%
+		% Immagine alta metà pagina
+		\node[anchor=north, inner sep=0pt] at (current page.north) {
+			\includegraphics[height=0.5\paperheight, keepaspectratio]{#5}
 		};
+		% Fading sugli ultimi 28pt (opacità variabile)
+		\fill[sfondoCover, path fading=fadeToBg]
+			([yshift=-0.5\paperheight+32pt] current page.north west)
+			rectangle
+			([yshift=-0.5\paperheight] current page.north east);
+		% Maschera anti‑artefatto da 0.5pt (come nel tuo esempio)
+		\fill[sfondoCover]
+			([yshift=-0.5\paperheight-10pt] current page.north west)
+			rectangle
+			([yshift=-0.5\paperheight+0.5pt] current page.north east);
 	\end{tikzpicture}
+	}
+    
+	\ifnum\dghcoverimagecreditenabled>0\relax
+		\begin{tikzpicture}[remember picture,overlay]
+			\node[
+				anchor=north east,
+				xshift=-10pt,
+				yshift=-10pt,
+				inner sep=3pt,
+				align=right,
+				fill=black,
+				fill opacity=0.40,
+				text opacity=1,
+				rounded corners=2pt
+			] at (current page.north east) {%
+				\ifnum\dghcoverimagetitleenabled>0\relax
+					{\normalfont\fontsize{8pt}{7pt}\selectfont\bfseries\color{lightgray} \dghcoverimagetitle}%
+				\fi
+				\ifnum\dghcoverimageauthorenabled>0\relax
+					\ifnum\dghcoverimagetitleenabled>0\relax\\[-3pt]\fi
+					{\normalfont\fontsize{6pt}{5pt}\selectfont\itshape\color{lightgray} \dghcoverimageauthor}%
+				\fi
+			};
+		\end{tikzpicture}
+	\fi
 
 	\vspace*{\dimexpr0.5\paperheight-\dghpagetotext-26pt\relax}
     \raggedright
@@ -273,7 +282,7 @@ Path = ./fonts/,
     {\montserratLight\fontsize{32pt}{34pt}\selectfont\color{h1textlight}\MakeUppercase #1}
     \vspace{1em}
     
-    {\normalfont\fontsize{10pt}{13pt}\selectfont\itshape\color{white} #2}\par
+	{\normalfont\fontsize{10pt}{13pt}\selectfont\itshape\color{white}\setlength{\parindent}{0pt}\setlength{\parskip}{0.35em}#2\par}
     \vspace{1em}
     
     {\normalfont\bfseries\color{white} \dghlabeldesignedby{} #3}\par
@@ -286,22 +295,48 @@ Path = ./fonts/,
     \fi}\par
     \vspace{2em}
     
-    \begin{tabularx}{\textwidth}{@{}X@{\hspace{1cm}}X@{}}
-        \multicolumn{1}{@{}c}{\textbf{\large\color{white} STRUTTURA}} & 
-        \multicolumn{1}{c@{}}{\textbf{\large\color{white} TIER}} \\
-        \begin{minipage}[t]{\linewidth}
-            \color{white}
-            #5
-        \end{minipage}
-        &
-        \begin{minipage}[t]{\linewidth}
-            \color{white}
-            #6
-        \end{minipage} \\
-    \end{tabularx}
-    \vfill
-    \end{titlepage}
-    \restoregeometry
+	\begingroup
+	\color{white}
+	\setlength{\parindent}{1em}
+	\setlength{\parskip}{0.25em}
+	\renewcommand{\section}[1]{%
+		\needspace{6\baselineskip}%
+		\vspace{0.7em}%
+		{\noindent\montserratLight\fontsize{13pt}{14pt}\selectfont\color{white}\MakeTextUppercase{##1}\par}%
+		\nopagebreak[4]%
+		\vspace{0.25em}%
+	}
+	\renewcommand{\subsection}[1]{%
+		\needspace{5\baselineskip}%
+		\vspace{0.5em}%
+		{\noindent\eveleth\fontsize{11pt}{12pt}\selectfont\color{white}\MakeTextUppercase{##1}\par}%
+		\nopagebreak[4]%
+		\vspace{0.2em}%
+	}
+	\renewcommand{\subsubsection}[1]{%
+		\needspace{4\baselineskip}%
+		\vspace{0.4em}%
+		{\noindent\bfseries\fontsize{9pt}{10pt}\selectfont\color{white}\MakeTextUppercase{##1}\par}%
+		\nopagebreak[4]%
+		\vspace{0.15em}%
+	}
+	\renewcommand{\paragraph}[1]{%
+		\needspace{3\baselineskip}%
+		\vspace{0.25em}%
+		{\noindent\bfseries\fontsize{8.5pt}{9.5pt}\selectfont\color{white}##1\par}%
+		\nopagebreak[4]%
+	}
+	\begin{multicols}{2}
+	\raggedcolumns
+}{%
+	\end{multicols}
+	\endgroup
+	\vfill
+	\end{titlepage}
+	\nopagecolor
+	\color{maintext}
+	\pagestyle{fancy}
+	\restoregeometry
 }{}
 
 % --- Titles ---
@@ -412,6 +447,15 @@ Path = ./fonts/,
 \newcommand{\dghtitleimageheight}{0.5\paperheight}
 \newcommand{\dghtitleimagefit}{fill}
 \newcommand{\dghtitleimageposition}{middle}
+\newcommand{\dghcovertitle}{}
+\newcommand{\dghcoversubtitle}{}
+\newcommand{\dghcoverdesigner}{}
+\newcommand{\dghcovercomplexity}{0}
+\newcommand{\dghcoverimagetitle}{}
+\newcommand{\dghcoverimageauthor}{}
+\newcommand{\dghcoverimagecreditenabled}{0}
+\newcommand{\dghcoverimagetitleenabled}{0}
+\newcommand{\dghcoverimageauthorenabled}{0}
 
 \newcommand{\settitlepageimagemode}[1]{\gdef\dghtitleimagemode{#1}}
 \newcommand{\settitlepageimagepath}[1]{\gdef\dghtitleimagepath{#1}}

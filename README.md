@@ -184,7 +184,7 @@ toc-depth: 2
 ---
 ```
 
-Per personalizzare la title page con un'immagine:
+Per personalizzare la title page standard con un'immagine:
 
 ```yaml
 ---
@@ -209,6 +209,47 @@ Alias compatibili:
 
 - `titlepage-image` o `cover-image` al posto di `title-image`
 - `titlepage-image-mode`, `titlepage-image-height`, `titlepage-image-fit`
+
+### Cover personalizzata
+
+Per usare la cover personalizzata nel body del documento, imposta nel frontmatter:
+
+```yaml
+---
+title: Titolo
+subtitle: Sottotitolo
+designer: Nome Designer
+complexity: 2
+cover-image: assets/copertina.jpg
+cover-image-title: Titolo immagine
+cover-image-author: Nome autore immagine
+cover-page: custom
+---
+```
+
+Poi inserisci nel body un blocco `framecoverpage`:
+
+```md
+::: framecoverpage
+## Struttura
+
+- Primo beat
+- Secondo beat
+
+## Tier
+
+**Tier consigliato:** Tier 1
+**Durata stimata:** 2h
+:::
+```
+
+Note:
+
+- `cover-page: custom` attiva la cover personalizzata e disabilita `\maketitle` nel template.
+- `subtitle` nel frontmatter della cover personalizzata supporta markdown inline, hard line breaks Markdown (due spazi a fine riga) e paragrafi multipli.
+- Il contenuto di `::: framecoverpage` viene renderizzato nella cover in due colonne.
+- `cover-image-title` e `cover-image-author` popolano il box crediti in alto a destra.
+- Se `cover-image-title` e `cover-image-author` sono entrambi assenti o vuoti, il box crediti non viene generato.
 
 ### Box
 

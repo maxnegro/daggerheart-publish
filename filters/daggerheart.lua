@@ -3,6 +3,13 @@ local List = require("pandoc.List")
 local h1_newpage = true
 local normalize_section_color_blocks
 local normalize_break_blocks
+local cover_defaults = {
+  title = "",
+  subtitle = "",
+  designer = "",
+  complexity = "0",
+  image = ""
+}
 
 local function meta_to_string(value)
   if value == nil then
@@ -94,10 +101,123 @@ local function append_header_include(meta, latex)
   includes:insert(pandoc.MetaBlocks({ pandoc.RawBlock("latex", latex) }))
 end
 
+local function meta_to_latex(value)
+  if value == nil then
+    return ""
+  end
+  if type(value) == "string" then
+    return latex_escape(value)
+  end
+  if value.t == "MetaString" then
+    return latex_escape(value.text)
+  end
+
+  local value_type = pandoc.utils.type(value)
+  local doc = nil
+  if value_type == "Inlines" then
+    doc = pandoc.Pandoc({ pandoc.Para(value) })
+  elseif value_type == "Blocks" then
+    doc = pandoc.Pandoc(value)
+  else
+    return latex_escape(pandoc.utils.stringify(value))
+  end
+
+  return pandoc.write(doc, "latex"):gsub("%s+$", "")
+end
+
+local function complexity_to_string(value)
+  local complexity_num = tonumber(meta_to_string(value))
+  if complexity_num then
+    complexity_num = math.max(1, math.min(5, math.floor(complexity_num + 0.5)))
+  else
+    complexity_num = 0
+  end
+  return tostring(complexity_num)
+end
+
+local function trim_inline(text)
+  if not text then
+    return ""
+  end
+  return text:match("^%s*(.-)%s*$")
+end
+
+local function ensure_cover_defaults_from_meta(meta)
+  if not meta then
+    return
+  end
+
+  local title = pandoc.utils.stringify(meta.title or "")
+  if title ~= "" then
+    cover_defaults.title = title
+  end
+
+  local subtitle = meta_to_latex(meta.subtitle)
+  if subtitle ~= "" then
+    cover_defaults.subtitle = subtitle
+  end
+
+  local designer = pandoc.utils.stringify(meta.designer or "")
+  if designer ~= "" then
+    cover_defaults.designer = designer
+  end
+
+  local complexity = complexity_to_string(meta.complexity)
+  if complexity ~= "0" or cover_defaults.complexity == "" then
+    cover_defaults.complexity = complexity
+  end
+
+  local image = get_meta_string(meta, {
+    "cover-image",
+    "title-image",
+    "titlepage-image"
+  }, "")
+  if image ~= "" then
+    cover_defaults.image = image
+  end
+end
+
 function Meta(meta)
   if meta["h1-newpage"] ~= nil then
     h1_newpage = meta["h1-newpage"]
   end
+
+  ensure_cover_defaults_from_meta(meta)
+
+  local cover_page_mode = trim_inline(get_meta_string(meta, {
+    "cover-page"
+  }, "")):lower()
+  if cover_page_mode == "custom" then
+    meta["custom-cover-page"] = pandoc.MetaBool(true)
+  else
+    meta["custom-cover-page"] = nil
+  end
+
+  if meta["toc-depth"] then
+    local depth = pandoc.utils.stringify(meta["toc-depth"])
+    append_header_include(meta, "\\setcounter{tocdepth}{" .. depth .. "}")
+  end
+
+  local cover_image_title = latex_escape(trim_inline(get_meta_string(meta, {
+    "cover-image-title",
+    "cover-image-tile"
+  }, "")))
+  local cover_image_author = latex_escape(trim_inline(get_meta_string(meta, {
+    "cover-image-author"
+  }, "")))
+  local title_enabled = cover_image_title ~= "" and "1" or "0"
+  local author_enabled = cover_image_author ~= "" and "1" or "0"
+  local credit_enabled = (title_enabled == "1" or author_enabled == "1") and "1" or "0"
+
+  append_header_include(meta, "\\gdef\\dghcoverdesigner{" .. latex_escape(cover_defaults.designer or "") .. "}")
+  append_header_include(meta, "\\gdef\\dghcovercomplexity{" .. (cover_defaults.complexity or "0") .. "}")
+  append_header_include(meta, "\\gdef\\dghcovertitle{" .. latex_escape(cover_defaults.title or "") .. "}")
+  append_header_include(meta, "\\long\\gdef\\dghcoversubtitle{" .. (cover_defaults.subtitle or "") .. "}")
+  append_header_include(meta, "\\gdef\\dghcoverimagetitle{" .. cover_image_title .. "}")
+  append_header_include(meta, "\\gdef\\dghcoverimageauthor{" .. cover_image_author .. "}")
+  append_header_include(meta, "\\gdef\\dghcoverimagetitleenabled{" .. title_enabled .. "}")
+  append_header_include(meta, "\\gdef\\dghcoverimageauthorenabled{" .. author_enabled .. "}")
+  append_header_include(meta, "\\gdef\\dghcoverimagecreditenabled{" .. credit_enabled .. "}")
 
   local title_image = get_meta_string(meta, {
     "title-image",
@@ -120,62 +240,17 @@ function Meta(meta)
       "title-image-fit",
       "titlepage-image-fit"
     }, "fill")
-
-  if meta["toc-depth"] then
-    local depth = pandoc.utils.stringify(meta["toc-depth"])
-    -- Inserisci direttamente nel documento
-    append_header_include(meta, "\\setcounter{tocdepth}{" .. depth .. "}")
-  end
-
-  if meta["frame-title"] then
-    -- Assicura che frame-title sia una MetaString per Pandoc
-    local frame_title_raw = pandoc.utils.stringify(meta["frame-title"])
-    meta["frame-title"] = pandoc.MetaString(frame_title_raw)
-    local title = latex_escape(pandoc.utils.stringify(meta.title or ""))
-    local subtitle = latex_escape(pandoc.utils.stringify(meta.subtitle or ""))
-    local designer = latex_escape(pandoc.utils.stringify(meta.designer or ""))
-    local complexity_raw = meta_to_string(meta.complexity)
-    local complexity_num = tonumber(complexity_raw)
-    if complexity_num then
-      complexity_num = math.max(1, math.min(5, math.floor(complexity_num + 0.5)))
-    else
-      complexity_num = 0
-    end
-    local complexity = tostring(complexity_num)
-    local structure = ""
-    if meta.structure then
-      local items = {}
-      for _, v in ipairs(meta.structure) do
-        table.insert(items, latex_escape(pandoc.utils.stringify(v)))
-      end
-      structure = table.concat(items, "\\\\")
-    end
-    local tier = latex_escape(pandoc.utils.stringify(meta.tier or ""))
-    local cover_image = latex_escape(get_meta_string(meta, {
-      "cover-image",
-      "title-image",
-      "titlepage-image"
-    }, ""))
-    append_header_include(meta, "\\def\\coverTitle{" .. title .. "}")
-    append_header_include(meta, "\\def\\coverSubtitle{" .. subtitle .. "}")
-    append_header_include(meta, "\\def\\coverDesigner{" .. designer .. "}")
-    append_header_include(meta, "\\def\\coverComplexity{" .. complexity .. "}")
-    append_header_include(meta, "\\def\\coverStructure{" .. structure .. "}")
-    append_header_include(meta, "\\def\\coverTier{" .. tier .. "}")
-    append_header_include(meta, "\\def\\coverImage{" .. cover_image .. "}")
-  end
-
-local position = get_meta_string(meta, {
+    local position = get_meta_string(meta, {
         "title-image-position",
         "titlepage-image-position"
       }, nil)
 
-      append_header_include(meta, "\\settitlepageimagemode{" .. mode .. "}")
-      append_header_include(meta, "\\settitlepageimageheight{" .. image_height .. "}")
-      append_header_include(meta, "\\settitlepageimagefit{" .. fit .. "}")
-      if position and position ~= "" then
-        append_header_include(meta, "\\settitlepageimageposition{" .. position .. "}")
-      end
+    append_header_include(meta, "\\settitlepageimagemode{" .. mode .. "}")
+    append_header_include(meta, "\\settitlepageimageheight{" .. image_height .. "}")
+    append_header_include(meta, "\\settitlepageimagefit{" .. fit .. "}")
+    if position and position ~= "" then
+      append_header_include(meta, "\\settitlepageimageposition{" .. position .. "}")
+    end
     append_header_include(meta, "\\settitlepageimagepath{\\detokenize{" .. title_image .. "}}")
   end
 
@@ -1022,6 +1097,74 @@ function CodeBlock(el)
 end
 
 function Div(div)
+  if has_class(div, "framecoverpage") then
+    if FORMAT ~= "latex" and FORMAT ~= "pdf" then
+      return nil
+    end
+
+    ensure_cover_defaults_from_meta(PANDOC_STATE.meta)
+
+    local function first_non_empty(...)
+      for _, value in ipairs({ ... }) do
+        if value and value ~= "" then
+          return value
+        end
+      end
+      return ""
+    end
+
+    local title_value = first_non_empty(
+      div.attributes["title"],
+      cover_defaults.title
+    )
+    local title = title_value ~= "" and latex_escape(title_value) or "\\dghcovertitle"
+
+    local subtitle_value = first_non_empty(
+      div.attributes["subtitle"],
+      cover_defaults.subtitle
+    )
+    local subtitle = subtitle_value ~= "" and latex_escape(subtitle_value) or "\\dghcoversubtitle"
+
+    local designer_value = first_non_empty(
+      div.attributes["designer"],
+      cover_defaults.designer
+    )
+    local designer = designer_value ~= "" and latex_escape(designer_value) or "\\dghcoverdesigner"
+
+    local complexity_value = first_non_empty(
+      div.attributes["complexity"],
+      cover_defaults.complexity,
+      "0"
+    )
+    local complexity = (complexity_value ~= "" and complexity_value ~= "0")
+      and complexity_to_string(complexity_value)
+      or "\\dghcovercomplexity"
+
+    local image_path = first_non_empty(
+      div.attributes["cover-image"],
+      div.attributes["image"],
+      cover_defaults.image
+    )
+    local image = (image_path ~= "") and ("\\detokenize{" .. image_path .. "}") or "\\dghtitleimagepath"
+
+    local body = blocks_to_latex(div.content)
+    local out = {}
+    table.insert(out, "\\end{multicols}")
+    table.insert(out,
+      "\\begin{framecoverpage}"
+      .. latex_arg(title)
+      .. latex_arg(subtitle)
+      .. latex_arg(designer)
+      .. latex_arg(complexity)
+      .. latex_arg(image)
+    )
+    table.insert(out, body)
+    table.insert(out, "\\end{framecoverpage}")
+    table.insert(out, "\\begin{multicols}{2}")
+    table.insert(out, "\\raggedcolumns")
+    return pandoc.RawBlock("latex", table.concat(out, "\n"))
+  end
+
   if has_class(div, "fullpagemap") then
     local src = attr_value(div, { "src", "path", "file" }, "")
     if src == "" then

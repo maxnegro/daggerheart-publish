@@ -22,8 +22,8 @@ $if(author)$\author{$for(author)$$author$$sep$ \\ $endfor$}$endif$
 $if(date)$\date{$date$}$else$\date{}$endif$
 
 \begin{document}
-$if(frame-title)$
-\dghcoverpage{\coverTitle}{\coverSubtitle}{\coverDesigner}{\coverComplexity}{\coverStructure}{\coverTier}{\coverImage}
+% The custom cover div renders the title page when cover-page is set to custom.
+$if(custom-cover-page)$
 $else$
 \maketitle
 $endif$
