@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.4] - 2026-05-05
+
+- Aggiunta di example-frame.pdf al .gitignore e creazione del file dist/example-frame.pdf (6cf9472)
+- Aggiunta del blocco `headerlist` per generare un indice automatico da heading in Markdown (0f2817d)
+- Aggiornato CHANGELOG e pulito TODO (9a3a170)
+
 ## [0.0.3] - 2026-05-01
 
 - Ultimi ritocchi  alla generazione coverpage stile frame ed esempio relativo (359b79a)
