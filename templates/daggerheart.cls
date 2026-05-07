@@ -569,6 +569,8 @@ Path = ./fonts/,
 \newcommand{\dghsetlabelsenglish}{%
 	\let\dghenvironmenttiertype\dghenvironmenttiertypeenglish
 	\gdef\dghlabeltier{Tier}%
+	\gdef\dghlabelsize{Size}%
+	\gdef\dghlabelsegments{Segments}%
 	\gdef\dghlabeldifficulty{Difficulty}%
 	\gdef\dghlabelthresholds{Thresholds}%
 	\gdef\dghlabelhp{HP}%
@@ -577,6 +579,7 @@ Path = ./fonts/,
 	\gdef\dghlabelweapon{Weapon}%
 	\gdef\dghlabelexperience{Experience}%
 	\gdef\dghlabelmotivesandtactics{Motives \& Tactics}%
+	\gdef\dghlabeladjacentsegments{Adjacent Segments}%
 	\gdef\dghlabelfeatures{Features}%
 	\gdef\dghlabelimpulses{Impulses}%
 	\gdef\dghlabelpotentialadversaries{Potential Adversaries}%
@@ -587,6 +590,8 @@ Path = ./fonts/,
 \newcommand{\dghsetlabelsitalian}{%
 	\let\dghenvironmenttiertype\dghenvironmenttiertypeitalian
 	\gdef\dghlabeltier{Rango}%
+	\gdef\dghlabelsize{Dimensioni}%
+	\gdef\dghlabelsegments{Segmenti}%
 	\gdef\dghlabeldifficulty{Difficoltà}%
 	\gdef\dghlabelthresholds{Soglie}%
 	\gdef\dghlabelhp{PF}%
@@ -595,6 +600,7 @@ Path = ./fonts/,
 	\gdef\dghlabelweapon{Arma}%
 	\gdef\dghlabelexperience{Esperienza}%
 	\gdef\dghlabelmotivesandtactics{Motivazioni e Tattiche}%
+	\gdef\dghlabeladjacentsegments{Segmenti Adiacenti}%
 	\gdef\dghlabelfeatures{Caratteristiche}%
 	\gdef\dghlabelimpulses{Impeti}%
 	\gdef\dghlabelpotentialadversaries{Potenziali Avversari}%
@@ -619,15 +625,21 @@ Path = ./fonts/,
 \makeatother
 
 
+\newcommand{\dghexperienceseparator}{\noindent\rule{\linewidth}{0.25pt}}
 
-\newcommand{\adversarystats}[8]{
-	\ifstrempty{#1}{}{\textbf{\dghlabeldifficulty:} #1 |}
-	\ifstrempty{#2}{}{\textbf{\dghlabelthresholds:} #2 |}
-	\ifstrempty{#3}{}{\textbf{\dghlabelhp:} #3 |}
-	\ifstrempty{#4}{}{\textbf{\dghlabelstress:} #4}
-	\ifstrempty{#5}{}{\\}
-	\ifstrempty{#5}{}{\textbf{\dghlabelatk:} #5 	|}
-	\ifstrempty{#6}{}{\textbf{#6:} #7 | #8}
+\newcommand{\dghformatadjacentsegments}[1]{\textbf{\dghlabeladjacentsegments:}\ \mdseries\upshape #1}
+
+
+\newcommand{\adversarystats}[9]{
+	\ifstrempty{#1}{}{\textbf{\dghlabelsize:} #1\\}
+	\ifstrempty{#2}{}{\textbf{\dghlabelsegments:} #2\\}
+	\ifstrempty{#3}{}{\textbf{\dghlabeldifficulty:} #3 |}
+	\ifstrempty{#4}{}{\textbf{\dghlabelthresholds:} #4 |}
+	\ifstrempty{#5}{}{\textbf{\dghlabelhp:} #5 |}
+	\ifstrempty{#6}{}{\textbf{\dghlabelstress:} #6}
+	\ifstrempty{#7}{}{\\}
+	\ifstrempty{#7}{}{\textbf{\dghlabelatk:} #7 	|}
+	\ifstrempty{#8}{}{\textbf{#8:} #9}
 }
 
 
@@ -668,6 +680,45 @@ Path = ./fonts/,
 			}
 		}%
 	\end{adversarybox}%
+}
+
+\newcommand{\colossusadversary}[6]{%
+	\begin{environmentbox}{}%
+		{\color{maintext}%
+			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#1}
+			\par\smallskip
+			\normalfont\fontsize{8pt}{8pt}\selectfont
+
+			\ifstrempty{#2}{}{
+				\textbf{\emph{#2}}
+				\par\smallskip
+			}
+
+			\ifstrempty{#3}{}{
+				\emph{#3}
+				\par\smallskip
+			}
+
+			\ifstrempty{#4}{}{
+				\textbf{\dghlabelmotivesandtactics:} #4
+				\par\smallskip
+			}
+
+			\ifstrempty{#5}{}{
+				\begin{environmentinnerbox}
+					#5
+				\end{environmentinnerbox}
+			}
+			\par\smallskip
+
+			\ifstrempty{#6}{}{
+				\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
+				\normalfont\fontsize{8pt}{8pt}\selectfont
+
+				#6
+			}
+		}%
+	\end{environmentbox}%
 }
 
 % --- Main Box ---

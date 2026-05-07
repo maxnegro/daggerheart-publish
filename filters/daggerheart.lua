@@ -641,6 +641,8 @@ local function is_markdown_kv_block(parsed, keys)
 end
 
 local function build_adversary_stats_from_markdown(parsed)
+  local size = latex_escape(get_first_value(parsed, { "size" }) or "")
+  local segments = latex_escape(get_first_value(parsed, { "segments" }) or "")
   local difficulty = latex_escape(get_first_value(parsed, { "difficulty" }) or "")
   local thresholds = latex_escape(get_first_value(parsed, { "thresholds" }) or "")
   local hp = latex_escape(get_first_value(parsed, { "hp" }) or "")
@@ -648,8 +650,7 @@ local function build_adversary_stats_from_markdown(parsed)
   local atk = latex_escape(get_first_value(parsed, { "atk" }) or "")
 
   local weapon_name = ""
-  local weapon_range = ""
-  local weapon_damage = ""
+  local weapon_details = ""
 
   local weapons_value = parsed["weapons"]
   if type(weapons_value) == "table" and #weapons_value > 0 then
@@ -659,33 +660,35 @@ local function build_adversary_stats_from_markdown(parsed)
       weapon_name = latex_escape(trim(name))
       local range, damage = details:match("^([^|]+)|%s*(.+)$")
       if range and damage then
-        weapon_range = latex_escape(trim(range))
-        weapon_damage = latex_escape(trim(damage))
+        weapon_details = latex_escape(trim(range) .. " | " .. trim(damage))
       else
-        weapon_range = latex_escape(trim(details))
+        weapon_details = latex_escape(trim(details))
       end
     else
       weapon_name = "\\dghlabelweapon"
-      weapon_range = latex_escape(trim(first_weapon))
+      weapon_details = latex_escape(trim(first_weapon))
     end
   elseif type(weapons_value) == "string" and weapons_value ~= "" then
     weapon_name = "\\dghlabelweapon"
-    weapon_range = latex_escape(weapons_value)
+    weapon_details = latex_escape(weapons_value)
   end
 
   local stats = "\\adversarystats"
+    .. latex_arg(size)
+    .. latex_arg(segments)
     .. latex_arg(difficulty)
     .. latex_arg(thresholds)
     .. latex_arg(hp)
     .. latex_arg(stress)
     .. latex_arg(atk)
     .. latex_arg(weapon_name)
-    .. latex_arg(weapon_range)
-    .. latex_arg(weapon_damage)
+    .. latex_arg(weapon_details)
 
   local experience = get_first_value(parsed, { "experience" })
   if experience and experience ~= "" then
     stats = stats
+      .. string.rep("\\", 3)
+      .. "dghexperienceseparator"
       .. string.rep("\\", 3)
       .. "textbf{\\dghlabelexperience:} "
       .. latex_escape(experience)
@@ -1126,7 +1129,12 @@ local function render_adversary_statblock(parsed)
   local tier_text = ""
   local tier = strip_yaml_quotes(parsed.tier or "")
   local kind = strip_yaml_quotes(parsed.type or "")
-  if tier ~= "" and kind ~= "" then
+  local adjacent = strip_yaml_quotes(parsed.adjacent or "")
+  local kind_lower = kind:lower()
+  
+  if adjacent ~= "" then
+    tier_text = "\\dghformatadjacentsegments{" .. latex_escape(adjacent) .. "}"
+  elseif tier ~= "" and kind ~= "" then
     tier_text = "\\dghenvironmenttiertype{" .. latex_escape(tier) .. "}{" .. latex_escape(kind) .. "}"
   elseif tier ~= "" then
     tier_text = "\\dghlabeltier{} " .. latex_escape(tier)
@@ -1137,19 +1145,35 @@ local function render_adversary_statblock(parsed)
   local summary = latex_escape(parsed.description or "")
   local motives = latex_escape(parsed.motives_and_tactics or parsed.tactics or "")
 
+  local size = latex_escape(parsed.size or "")
+  local segments = latex_escape(parsed.segments or "")
+
   local stats = "\\adversarystats"
+    .. latex_arg(size)
+    .. latex_arg(segments)
     .. latex_arg(latex_escape(parsed.difficulty or ""))
     .. latex_arg(latex_escape(parsed.thresholds or ""))
     .. latex_arg(latex_escape(parsed.hp or ""))
     .. latex_arg(latex_escape(parsed.stress or ""))
     .. latex_arg(latex_escape(parsed.atk or ""))
     .. latex_arg(latex_escape(parsed.attack or ""))
-    .. latex_arg(latex_escape(parsed.range or ""))
-    .. latex_arg(latex_escape(parsed.damage or ""))
+    .. latex_arg((function()
+      local range = latex_escape(parsed.range or "")
+      local damage = latex_escape(parsed.damage or "")
+      if range ~= "" and damage ~= "" then
+        return range .. " | " .. damage
+      end
+      if range ~= "" then
+        return range
+      end
+      return damage
+    end)())
 
   local experience = strip_yaml_quotes(parsed.experience or "")
   if experience ~= "" then
     stats = stats
+      .. string.rep("\\", 3)
+      .. "dghexperienceseparator"
       .. string.rep("\\", 3)
       .. "textbf{\\dghlabelexperience:} "
       .. latex_escape(experience)
@@ -1157,7 +1181,17 @@ local function render_adversary_statblock(parsed)
 
   local features = render_feats_latex(parsed.feats)
 
-  return "\\adversary"
+  local is_colossus = false
+  if kind_lower:find("colosso", 1, true) or kind_lower:find("colossus", 1, true) then
+    is_colossus = true
+  end
+
+  local macro = "\\adversary"
+  if is_colossus then
+    macro = "\\colossusadversary"
+  end
+
+  return macro
     .. latex_arg(title)
     .. latex_arg(tier_text)
     .. latex_arg(summary)
