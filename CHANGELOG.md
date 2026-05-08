@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.0.5] - 2026-05-08
+
+- Aggiornati esempi e documentazione. (e5b3011)
+- Titolo della TOC in due colonne (be0250b)
+- Modifica rappresentazione autori e data in titlepage (65ff18f)
+- Aggiunta del supporto per RawInline e Math in LaTeX, e nuove macro per la gestione dei separatori di sezione (cfebb67)
+- Rimozione di spaziature non necessarie nei blocchi di testo per una migliore formattazione (d0d0d5e)
+- Errore per gli header all'interno di blocchi fullpage (cf4a441)
+- Modifica della spaziatura nei blocchi di testo in LaTeX per una migliore formattazione (1903062)
+- Feature in italico e grassetto (ddf5b17)
+- Supporto per liste puntate nelle feature degli ambienti, usando yaml block scalar (8f19869)
+- Changes to support Colossi adversaries and segments (f07deac)
+
 ## [0.0.4] - 2026-05-05
 
 - Aggiunta di example-frame.pdf al .gitignore e creazione del file dist/example-frame.pdf (6cf9472)

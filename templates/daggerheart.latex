@@ -31,8 +31,11 @@ $endif$
 \begin{multicols}{2}
 \raggedcolumns
 $if(toc)$
+\end{multicols}
+{\montserratThin\fontsize{24pt}{28pt}\selectfont\MakeTextUppercase{$if(toc-title)$$toc-title$$else$\contentsname$endif$}}
+\begin{multicols}{2}
+\raggedcolumns
 {\setlength{\parskip}{0pt}\tableofcontents}
-%\columnbreak%
 $endif$
 
 $body$
