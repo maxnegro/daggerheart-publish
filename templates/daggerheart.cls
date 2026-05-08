@@ -495,11 +495,11 @@ Path = ./fonts/,
 				}{}%
 			}%
 			\vspace{48pt}
-			% author + optional date on the same line
-			\ifblank{#4}{%
-				{\normalsize #3}%
-			}{%
-				{\normalsize #3 --- #4}%
+			% authors block, then date on a separate line
+			{\normalsize #3}%
+			\ifblank{#4}{}{%
+				\\[1em]%
+				{\normalsize #4}%
 			}%
 		\end{center}
 		\vspace*{\fill}
