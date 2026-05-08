@@ -703,7 +703,7 @@ local function build_features_from_markdown(parsed)
   if type(features_value) == "table" and #features_value > 0 then
     local items = {}
     for _, item in ipairs(features_value) do
-      table.insert(items, "\\textbf{-} " .. latex_escape(item) .. "\\\\")
+      table.insert(items, "\\textit{\\textbf{-}} " .. latex_escape(item) .. "\\\\")
     end
     return table.concat(items, "\n")
   end
@@ -1133,9 +1133,9 @@ local function render_feats_latex(feats)
 
     local entry = ""
     if name ~= "" and text ~= "" then
-      entry = "\\textbf{" .. name .. ":} " .. text
+      entry = "\\textit{\\textbf{" .. name .. ":}} " .. text
     elseif name ~= "" then
-      entry = "\\textbf{" .. name .. "}"
+      entry = "\\textit{\\textbf{" .. name .. "}}"
     elseif text ~= "" then
       entry = text
     end
