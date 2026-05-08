@@ -516,8 +516,9 @@ Path = ./fonts/,
 }
 
 % --- Table of contents ---
+% Title and multicols handling is done in daggerheart.latex template.
+% This macro only emits the TOC entries.
 \renewcommand{\tableofcontents}{%
-	{\montserratThin\fontsize{24pt}{28pt}\selectfont\MakeTextUppercase{\contentsname}}%
 	\@starttoc{toc}%
 }
 \makeatother
