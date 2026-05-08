@@ -1155,7 +1155,7 @@ local function render_feats_latex(feats)
   -- Wrap in a group that tightens \parskip so the spacing inside the statblock
   -- box stays compact regardless of the document-level parskip setting.
   local body = table.concat(out, "\\par\n")
-  return "{\\setlength{\\parskip}{4pt}\\setlength{\\parindent}{0pt}" .. body .. "\\par\\vspace{-\\parskip}}"
+  return "{\\setlength{\\parskip}{3pt}\\setlength{\\parindent}{0pt}" .. body .. "\\par\\vspace{-\\parskip}}"
 end
 
 local function render_adversary_statblock(parsed)

@@ -768,22 +768,22 @@ Path = ./fonts/,
 			
 			\ifstrempty{#2}{}{
 				\textbf{\emph{#2}}
-				\par\smallskip
+				\\%\par\smallskip
 			}
 			\ifstrempty{#3}{}{
 				\emph{#3}
-				\par\smallskip
+				\par%\smallskip
 			}
 			\ifstrempty{#4}{}{
 				\textbf{\dghlabelimpulses:} #4
-				\par\smallskip
+				\par%\smallskip
 			}
 			\ifstrempty{#5}{}{
 				\begin{environmentinnerbox}
 					#5
 				\end{environmentinnerbox}
 			}
-			\par\smallskip
+			\par%\smallskip
 			
 			\ifstrempty{#6}{}{
 			\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
