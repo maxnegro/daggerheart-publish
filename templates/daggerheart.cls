@@ -652,19 +652,16 @@ Path = ./fonts/,
 			
 			\ifstrempty{#2}{}{
 				\textbf{\emph{#2}}
-				\par\smallskip
+				\\%\par\smallskip
 			}
-			
 			\ifstrempty{#3}{}{
 				\emph{#3}
-				\par\smallskip
+				\par%\smallskip
 			}
-			
 			\ifstrempty{#4}{}{
 				\textbf{\dghlabelmotivesandtactics:} #4
-				\par\smallskip
+				\par%\smallskip
 			}
-			
 			\ifstrempty{#5}{}{
 				\begin{adversaryinnerbox}
 					#5
@@ -691,19 +688,16 @@ Path = ./fonts/,
 
 			\ifstrempty{#2}{}{
 				\textbf{\emph{#2}}
-				\par\smallskip
+				\\%\par%\smallskip
 			}
-
 			\ifstrempty{#3}{}{
 				\emph{#3}
-				\par\smallskip
+				\par%\smallskip
 			}
-
 			\ifstrempty{#4}{}{
 				\textbf{\dghlabelmotivesandtactics:} #4
-				\par\smallskip
+				\par%\smallskip
 			}
-
 			\ifstrempty{#5}{}{
 				\begin{environmentinnerbox}
 					#5
