@@ -1100,6 +1100,15 @@ local function blocks_to_latex(blocks)
   for _, block in ipairs(blocks) do
     if block.t == "Para" or block.t == "Plain" then
       parts[#parts+1] = inlines_to_latex(block.content)
+    elseif block.t == "Header" then
+      local rendered = Header(block)
+      local header_blocks = rendered
+      if rendered == nil then
+        header_blocks = { block }
+      elseif rendered.t ~= nil then
+        header_blocks = { rendered }
+      end
+      parts[#parts+1] = pandoc.write(pandoc.Pandoc(header_blocks), "latex"):gsub("%s+$", "")
     elseif block.t == "BulletList" then
       local items = {}
       for _, item_blocks in ipairs(block.content) do
