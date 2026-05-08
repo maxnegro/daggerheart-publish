@@ -2,12 +2,12 @@
 
 Un vento tiepido muove le foglie morte mentre il sentiero si perde nel bosco.
 
-::: {.squarebox}
-Questa avventura e progettata per un gruppo al Tier 1.  
+::: squarebox
+Questa avventura è progettata per un gruppo al Tier 1.
 Usa un tono misterioso, con segnali sottili prima di ogni minaccia.
 :::
 
-::: {.roundedbox}
+::: roundedbox
 Obiettivo narrativo: trovare il santuario perduto prima che la nebbia ricopra tutto il vallone.
 :::
 
@@ -57,7 +57,7 @@ feats:
     text: al primo fallimento con Paura, un personaggio resta isolato dall'altra parte.
 ```
 
-::: {.fullpage}
+::: fullpage
 ## Visione del luogo
 
 ![Ponte di radici](assets/panorama.png){width="400pt"}

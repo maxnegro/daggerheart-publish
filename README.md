@@ -322,6 +322,79 @@ feats:
 ```
 ````
 
+### Adversary Colossus
+
+I Colossi sono avversari componibili formati da più segmenti (es. testa, torace, braccia, gambe). Ogni segmento ha blocchi statistiche indipendenti, ma condividono il controllo centrale di un blocco principale:
+
+````md
+```statblock
+layout: Daggerheart Adversary
+source: daggerheart-adversary
+name: Colosso Massiccio
+tier: 1
+type: Colosso
+description: Una figura imponente di roccia e cristallo.
+motives_and_tactics: Calpestare, schiacciare, proteggere
+size: "30 metri di altezza, 15 metri di larghezza"
+segments: "2 Gambe, 2 Braccia, 1 Torace, 1 Testa"
+thresholds: 11/22
+stress: 6
+experience: Immenso +3, Inesorabile +2
+feats:
+  - name: Forza Colossale - Reazione
+    text: Quando il Colosso fallisce un attacco, ottenete una Paura.
+  - name: Volontà del Colosso - Azione
+    text: Spendete una Paura per costringere i PG a superare un Tiro Reazione.
+```
+
+```statblock
+layout: Daggerheart Adversary
+source: daggerheart-adversary
+name: Testa del Colosso
+type: Segmento
+adjacent: Torace
+difficulty: 16
+hp: 5
+atk: "+2"
+attack: Sguardo ustionante
+range: Lontana
+damage: 1d10+1 mag
+feats:
+  - name: Fatale - Passiva
+    text: Quando la Testa viene *Distrutta*, il Colosso viene sconfitto.
+  - name: Sguardo Sinistro - Azione
+    text: I bersagli entro distanza Lontana devono superare un Tiro Reazione.
+```
+
+```statblock
+layout: Daggerheart Adversary
+source: daggerheart-adversary
+name: Braccio del Colosso (x2)
+type: Segmento
+adjacent: Torace
+difficulty: 13
+hp: "3 (ciascuno)"
+atk: "+2"
+attack: Pugno possente
+range: Prossima
+damage: 1d8+6 fis
+feats:
+  - name: Coesione (A) - Passiva
+    text: Quando tutti i segmenti in Coesione A vengono *Distrutti*, l'Emanazione viene sconfitta.
+```
+````
+
+Regole per i Colossi:
+
+- **Blocco principale**: contiene descrizione, dimensioni, motivi e tattiche, feats globali (es. reazioni). Non ha `difficulty` o `hp` — controlla tutti i segmenti.
+- **Blocchi segmento**: uno per tipo di segmento (Testa, Torace, Braccia, Gambe). Ogni blocco ha `type: Segmento` e specifica:
+  - `adjacent`: segmenti adiacenti (separati da virgola)
+  - `difficulty`: difficoltà del segmento
+  - `hp`: punti ferita del segmento (può essere "N (ciascuno)" se multipli)
+  - `feats`: caratteristiche specifiche del segmento
+
+Nel filtro Lua, il blocco principale viene renderizzato con `\colossusadversary`, mentre i segmenti mantengono il formato standard `\adversary`.
+
 ### Environment
 
 ````md
@@ -340,7 +413,10 @@ feats:
     text: PCs can inspect traces of a previous battle.
     question: Do you recognize something in this old battlefield?
   - name: Barbed Vines - Action
-    text: Pick a point; targets in Very Close range risk damage and Restrained.
+    text: |
+      Pick a point; targets in Very Close range risk damage and Restrained. Make the target do a reaction roll.
+        * Success: target is *Restrained*
+        * Failure: target is *Restrained* and takes 1d8 physical damage
     question: What do you feel while the vines nail you to the ground?
 ```
 ````
@@ -558,7 +634,7 @@ IMAGE_NAME=daggerheart-publish:dev ./scripts/docker-build.sh ./books/example/
 ## Limiti attuali
 
 - Le tabelle Markdown vengono convertite automaticamente in `\ColoredTable`, ma tabelle molto larghe in layout a due colonne possono richiedere contenuti piu brevi per mantenere una resa leggibile.
-- Per statistiche avanzate conviene usare direttamente le macro LaTeX nei blocchi `stats`.
+- I blocchi statistiche sono resi con tabelle non spezzabili. Blocchi particolarmente lunghi possono creare problemi con l'impaginazione automatica in ambito multicolonna.
 
 ## Esempio di conversione da odt a md
 ``` bash
