@@ -989,8 +989,32 @@ local function parse_statblock_yaml(text)
   for line in (text .. "\n"):gmatch("(.-)\n") do
     local raw = line:gsub("\r", "")
 
+    -- ── Block scalar continuation (text: |) ──────────────────────────────────
+    if current_feat and current_feat._block_scalar then
+      if raw:match("^%s*$") then
+        -- blank line inside block: preserve as empty line for Markdown
+        current_feat.text = current_feat.text .. "\n"
+        goto continue
+      end
+      local indent_len = #(raw:match("^(%s*)"))
+      if current_feat._block_indent == nil then
+        current_feat._block_indent = indent_len
+      end
+      if indent_len >= current_feat._block_indent then
+        local content = raw:sub(current_feat._block_indent + 1)
+        current_feat.text = current_feat.text == ""
+          and content
+          or (current_feat.text .. "\n" .. content)
+        goto continue
+      else
+        -- indent dropped: end of block scalar, fall through to normal parse
+        current_feat._block_scalar = false
+      end
+    end
+
+    -- ── Normal line processing ───────────────────────────────────────────────
     if raw:match("^%s*$") then
-      -- skip
+      -- skip blank lines
     else
       local top_key, top_value = raw:match("^([%a][%w_]*)%s*:%s*(.-)%s*$")
 
@@ -1010,19 +1034,27 @@ local function parse_statblock_yaml(text)
         local feat_name = raw:match("^%s*%-%s*name%s*:%s*(.-)%s*$")
         if feat_name then
           current_feat = {
-            name = strip_yaml_quotes(feat_name),
-            text = "",
-            question = ""
+            name          = strip_yaml_quotes(feat_name),
+            text          = "",
+            question      = "",
+            _block_scalar = false,
+            _block_indent = nil,
           }
           table.insert(parsed.feats, current_feat)
-        else
-          local feat_text = raw:match("^%s*text%s*:%s*(.-)%s*$")
+        elseif current_feat then
           local feat_question = raw:match("^%s*question%s*:%s*(.-)%s*$")
-          if feat_question and current_feat then
+          local feat_text_raw = raw:match("^%s*text%s*:%s*(.-)%s*$")
+          if feat_question then
             current_feat.question = strip_yaml_quotes(feat_question)
-          elseif feat_text and current_feat then
-            current_feat.text = trim(feat_text)
-          elseif current_feat then
+          elseif feat_text_raw == "|" then
+            -- YAML literal block scalar
+            current_feat._block_scalar = true
+            current_feat._block_indent = nil
+            current_feat.text = ""
+          elseif feat_text_raw then
+            current_feat.text = trim(feat_text_raw)
+          else
+            -- plain continuation line
             local continuation = raw:match("^%s+(.+)$")
             if continuation and continuation ~= "" then
               current_feat.text = current_feat.text .. " " .. trim(continuation)
@@ -1031,67 +1063,61 @@ local function parse_statblock_yaml(text)
         end
       end
     end
+
+    ::continue::
   end
 
   return parsed
 end
 
-local function markdown_inline_to_latex(text)
-  if not text or text == "" then
-    return ""
-  end
-
-  local result = {}
-  local i = 1
-  local len = #text
-
-  while i <= len do
-    if text:sub(i, i+1) == "**" then
-      local close = text:find("%*%*", i+2)
-      if close then
-        table.insert(result, "\\textbf{" .. latex_escape(text:sub(i+2, close-1)) .. "}")
-        i = close + 2
-      else
-        local next_star = text:find("%*", i+1)
-        if next_star then
-          table.insert(result, latex_escape(text:sub(i, next_star-1)))
-          i = next_star
-        else
-          table.insert(result, latex_escape(text:sub(i)))
-          break
-        end
-      end
-    elseif text:sub(i, i) == "*" then
-      local close = text:find("%*", i+1)
-      if close then
-        table.insert(result, "\\textit{" .. latex_escape(text:sub(i+1, close-1)) .. "}")
-        i = close + 1
-      else
-        table.insert(result, latex_escape(text:sub(i)))
-        break
-      end
-    elseif text:sub(i, i) == "_" then
-      local close = text:find("_", i+1, true)
-      if close then
-        table.insert(result, "\\textit{" .. latex_escape(text:sub(i+1, close-1)) .. "}")
-        i = close + 1
-      else
-        table.insert(result, latex_escape(text:sub(i)))
-        break
-      end
+-- Walk a list of Pandoc inline AST nodes → LaTeX string.
+local function inlines_to_latex(inlines)
+  local buf = {}
+  for _, el in ipairs(inlines) do
+    if el.t == "Str" then
+      buf[#buf+1] = latex_escape(el.text)
+    elseif el.t == "Space" or el.t == "SoftBreak" then
+      buf[#buf+1] = " "
+    elseif el.t == "LineBreak" then
+      buf[#buf+1] = "\\\\ "
+    elseif el.t == "Strong" then
+      buf[#buf+1] = "\\textbf{" .. inlines_to_latex(el.content) .. "}"
+    elseif el.t == "Emph" then
+      buf[#buf+1] = "\\textit{" .. inlines_to_latex(el.content) .. "}"
+    elseif el.t == "Code" then
+      buf[#buf+1] = "\\texttt{" .. latex_escape(el.text) .. "}"
     else
-      local next_special = text:find("[%*_]", i)
-      if next_special then
-        table.insert(result, latex_escape(text:sub(i, next_special-1)))
-        i = next_special
-      else
-        table.insert(result, latex_escape(text:sub(i)))
-        break
-      end
+      buf[#buf+1] = latex_escape(pandoc.utils.stringify(el))
     end
   end
+  return table.concat(buf)
+end
 
-  return table.concat(result)
+-- Walk a list of Pandoc block AST nodes → LaTeX string.
+-- Blocks are separated by \par (safe for both inline and block-level content).
+local function blocks_to_latex(blocks)
+  local parts = {}
+  for _, block in ipairs(blocks) do
+    if block.t == "Para" or block.t == "Plain" then
+      parts[#parts+1] = inlines_to_latex(block.content)
+    elseif block.t == "BulletList" then
+      local items = {}
+      for _, item_blocks in ipairs(block.content) do
+        items[#items+1] = "\\item " .. blocks_to_latex(item_blocks)
+      end
+      parts[#parts+1] = "\\begin{itemize}\\tightlist\n"
+        .. table.concat(items, "\n") .. "\n\\end{itemize}"
+    end
+    -- Other block types (headers, code blocks, etc.) are intentionally ignored.
+  end
+  return table.concat(parts, "\\par\n")
+end
+
+-- Convert a Markdown string to LaTeX using the Pandoc AST pipeline.
+local function text_to_latex(text)
+  if not text or text == "" then return "" end
+  local doc = pandoc.read(text, "markdown")
+  return blocks_to_latex(doc.blocks)
 end
 
 local function render_feats_latex(feats)
@@ -1101,9 +1127,10 @@ local function render_feats_latex(feats)
 
   local out = {}
   for _, feat in ipairs(feats) do
-    local name = latex_escape(feat.name or "")
-    local text = markdown_inline_to_latex(strip_yaml_quotes(feat.text or ""))
+    local name     = latex_escape(feat.name or "")
+    local text     = text_to_latex(strip_yaml_quotes(feat.text or ""))
     local question = latex_escape(feat.question or "")
+
     local entry = ""
     if name ~= "" and text ~= "" then
       entry = "\\textbf{" .. name .. ":} " .. text
@@ -1112,15 +1139,23 @@ local function render_feats_latex(feats)
     elseif text ~= "" then
       entry = text
     end
+
+    -- The question is always a separate paragraph so it is safe after any block.
     if question ~= "" then
-      entry = entry .. "\\\\\\textit{" .. question .. "}"
+      entry = entry .. "\\par\n\\textit{" .. question .. "}"
     end
+
     if entry ~= "" then
-      table.insert(out, entry .. "\\\\")
+      out[#out+1] = entry
     end
   end
 
-  return table.concat(out, "\n")
+  -- \par between entries is safe regardless of whether entries contain block
+  -- environments (itemize etc.) — unlike \\, which is invalid at paragraph start.
+  -- Wrap in a group that tightens \parskip so the spacing inside the statblock
+  -- box stays compact regardless of the document-level parskip setting.
+  local body = table.concat(out, "\\par\n")
+  return "{\\setlength{\\parskip}{4pt}\\setlength{\\parindent}{0pt}" .. body .. "\\par\\vspace{-\\parskip}}"
 end
 
 local function render_adversary_statblock(parsed)
