@@ -1086,6 +1086,14 @@ local function inlines_to_latex(inlines)
       buf[#buf+1] = "\\textit{" .. inlines_to_latex(el.content) .. "}"
     elseif el.t == "Code" then
       buf[#buf+1] = "\\texttt{" .. latex_escape(el.text) .. "}"
+    elseif el.t == "RawInline" then
+      if el.format == "latex" or el.format == "tex" then
+        buf[#buf+1] = el.text
+      end
+    elseif el.t == "Math" then
+      -- DisplayMath ($$...$$) e InlineMath ($...$): passa il contenuto verbatim
+      -- così costrutti come $$\vspace{2em}$$ vengono emessi come \vspace{2em}
+      buf[#buf+1] = el.text
     else
       buf[#buf+1] = latex_escape(pandoc.utils.stringify(el))
     end
@@ -1100,6 +1108,10 @@ local function blocks_to_latex(blocks)
   for _, block in ipairs(blocks) do
     if block.t == "Para" or block.t == "Plain" then
       parts[#parts+1] = inlines_to_latex(block.content)
+    elseif block.t == "RawBlock" then
+      if block.format == "latex" or block.format == "tex" then
+        parts[#parts+1] = block.text or ""
+      end
     elseif block.t == "Header" then
       local rendered = Header(block)
       local header_blocks = rendered
@@ -1109,6 +1121,23 @@ local function blocks_to_latex(blocks)
         header_blocks = { rendered }
       end
       parts[#parts+1] = pandoc.write(pandoc.Pandoc(header_blocks), "latex"):gsub("%s+$", "")
+    elseif block.t == "Div" then
+      if has_class(block, "center") then
+        local body = blocks_to_latex(block.content or {})
+        parts[#parts+1] = "\\begin{center}\n" .. body .. "\n\\end{center}"
+      elseif has_class(block, "right") then
+        local body = blocks_to_latex(block.content or {})
+        parts[#parts+1] = "\\begin{flushright}\n" .. body .. "\n\\end{flushright}"
+      elseif has_class(block, "pagebreak") then
+        parts[#parts+1] = "\\dghpagebreak"
+      elseif has_class(block, "columnbreak") then
+        parts[#parts+1] = "\\columnbreak"
+      elseif has_class(block, "fullpage") then
+        local body = blocks_to_latex(normalize_break_blocks(normalize_section_color_blocks(block.content or {})))
+        parts[#parts+1] = "\\beginFullpage\n" .. body .. "\n\\finishFullpage"
+      else
+        parts[#parts+1] = blocks_to_latex(block.content or {})
+      end
     elseif block.t == "BulletList" then
       local items = {}
       for _, item_blocks in ipairs(block.content) do
@@ -1116,6 +1145,8 @@ local function blocks_to_latex(blocks)
       end
       parts[#parts+1] = "\\begin{itemize}\\tightlist\n"
         .. table.concat(items, "\n") .. "\n\\end{itemize}"
+    elseif block.t == "HorizontalRule" then
+      parts[#parts+1] = "\\dghsectionseparator"
     end
     -- Other block types (headers, code blocks, etc.) are intentionally ignored.
   end

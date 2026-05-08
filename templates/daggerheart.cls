@@ -557,7 +557,7 @@ Path = ./fonts/,
 	sharp corners,
 }
 
-\newcommand{\myseparator}{\par\noindent\rule{\linewidth}{1pt}\par}
+\newcommand{\dghsectionseparator}{\par\noindent\rule{\linewidth}{1pt}\par}
 
 % Macro per Tier+Type localizzata (definizioni separate per lingua)
 \newcommand{\dghenvironmenttiertypeenglish}[2]{\dghlabeltier\ #1 #2}
