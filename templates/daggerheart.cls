@@ -639,7 +639,7 @@ Path = ./fonts/,
 	\gdef\dghlabelimpulses{Impeti}%
 	\gdef\dghlabelpotentialadversaries{Potenziali Avversari}%
 	\gdef\dghlabeldesignedby{Progettato da}%
-	\gdef\dghlabelcomplexity{Livello di Complessit\`a}%
+	\gdef\dghlabelcomplexity{Livello di Complessità}%
 }
 
 \dghsetlabelsenglish

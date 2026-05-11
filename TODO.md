@@ -17,12 +17,6 @@ I due comandi usano approcci diversi per gestire lo stesso colore. Unificare: us
 sempre `\colorlet` (per alias) o sempre `\definecolor` (per valori fissi), con una
 coppia di colori "correnti" che viene ridefinita in entrambi i comandi.
 
-#### 11. `Livello di Complessit\`a` — accento con macro invece di UTF-8
-Nel bundle `\dghsetlabelsitalian`, la stringa contiene `\`a` invece di `à` diretto.
-Il file usa UTF-8 (fontspec + LuaLaTeX/XeLaTeX), quindi i caratteri accentati vanno
-scritti letteralmente. La macro potrebbe spaccare in contesti in cui il token `\`` è
-ridefinito.
-
 #### 12. `\dghenvironmenttiertype` definita due volte
 Prima viene dichiarata come `\newcommand` con valore inglese di default, poi il blocco
 babel `\captionsenglish` la ridefinisce con `\let`. La definizione iniziale è ridondante
