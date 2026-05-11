@@ -4,6 +4,8 @@
 > `daggerheart.latex`. L'utente finale non scrive LaTeX direttamente: tutta la superficie
 > di authoring è Markdown → Pandoc AST → filtro Lua → LaTeX → PDF.
 > Ogni proposta deve rispettare questo vincolo.
+> I file attualmente in tests/baseline sono considerati fonti di verità e non vanno MAI
+> modificati durante il refactor.
 
 ---
 
@@ -260,7 +262,7 @@
 - [ ] **[B1]** Unificare pipeline titoli H1: macro `\dghsection[color=,bg=]{titolo}` nella
   classe; `Header()` nel filtro Lua genera un unico `RawBlock` dichiarativo; eliminare
   `normalize_section_color_blocks` e le coppie `RawBlock` color-before/after
-- [ ] **[C2]** Estrarre helper multicols `\dgh@exitmulticols` / `\dgh@entermulticols` e
+- [x] **[C2]** Estrarre helper multicols `\dgh@exitmulticols` / `\dgh@entermulticols` e
   sostituire le 4 occorrenze duplicate
 - [ ] **[D5]** Propagare opzioni di classe ad `article` con `\DeclareOption*` +
   `\ProcessOptions\relax`

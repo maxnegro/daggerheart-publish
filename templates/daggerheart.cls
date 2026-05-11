@@ -438,6 +438,13 @@ Path = ./fonts/,
 \newcommand{\enabledghonepagebreak}{\global\dghonepagebreaktrue}
 \newcommand{\disabledghonepagebreak}{\global\dghonepagebreakfalse}
 
+% Internal helpers for multicols transitions.
+\newcommand{\dgh@exitmulticols}{\end{multicols}}
+\newcommand{\dgh@entermulticols}{%
+\begin{multicols}{2}%
+\raggedcolumns%
+}
+
 \let\oldsection\section
 \renewcommand{\section}[1]{%
 	\ifindaggerfullpage
@@ -446,14 +453,13 @@ Path = ./fonts/,
 		\oldsection{#1}%
 		\vspace{1em}%
 	\else
-		\end{multicols}%
+		\dgh@exitmulticols%
 		\ifdghonepagebreak\newpage\fi
 		\vspace{1em}%
 		\ifdgresetsectioncoloronnextsection\resetsectioncolor\else\dgapplycurrentsectioncolor\fi
 		\oldsection{#1}%
 		\vspace{1em}%
-		\begin{multicols}{2}%
-		\raggedcolumns
+		\dgh@entermulticols%
 	\fi
 }
 
@@ -786,13 +792,12 @@ Path = ./fonts/,
 
 % Canonical fullpage API.
 \newcommand{\dghfullpagestart}{%
-	\end{multicols}%
+	\dgh@exitmulticols%
 	\global\indaggerfullpagetrue%
 }
 \newcommand{\dghfullpageend}{%
 	\global\indaggerfullpagefalse%
-	\begin{multicols}{2}%
-	\raggedcolumns%
+	\dgh@entermulticols%
 }
 \newenvironment{dghfullpage}{\dghfullpagestart}{\dghfullpageend}
 
@@ -815,10 +820,9 @@ Path = ./fonts/,
 	\ifindaggerfullpage
 		\newpage%
 	\else
-		\end{multicols}%
+		\dgh@exitmulticols%
 		\newpage%
-		\begin{multicols}{2}%
-		\raggedcolumns%
+		\dgh@entermulticols%
 	\fi
 }
 
@@ -864,11 +868,10 @@ Path = ./fonts/,
 	\ifindaggerfullpage
 		\dghsectionbgrender{#1}{#2}%
 	\else
-		\end{multicols}%
+		\dgh@exitmulticols%
 		\ifdghonepagebreak\newpage\fi
 		\dghsectionbgrender{#1}{#2}%
-		\begin{multicols}{2}%
-		\raggedcolumns%
+		\dgh@entermulticols%
 	\fi
 }
 
