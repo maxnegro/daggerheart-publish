@@ -46,8 +46,19 @@ Dopo una modifica, verificare che tutto compili ancora:
 
 Output:
 - `✓ PASS` — Compilazione riuscita e PDF valido
-- `✗ FAIL` — Compilazione fallita o PDF invalido
+- `✗ FAIL` — Compilazione fallita o PDF invalido / Differenza rispetto a baseline
 - `⚠ WARNING` — Compilazione OK ma con problemi
+
+**NUOVO**: Se un test fallisce per "Baseline mismatch", la suite genera automaticamente un **file diff visivo** per permetterti di revisionare le differenze:
+
+```bash
+# La suite crea file diff-*.pdf in tests/results/
+# Visualizzali con:
+./tests/view-diff.sh test-colored-table
+
+# Oppure aprili manualmente:
+# xdg-open tests/results/diff-Fixture_test-colored-table_.pdf
+```
 
 ### 3. Validare struttura LaTeX intermedia
 
@@ -89,10 +100,13 @@ Verifica:
    ./tests/test-suite.sh
    ```
 
-4. **CONFRONTO VISIVO** (opzionale, manuale)
-   - Apri `tests/baseline/*.pdf` e `tests/results/*.pdf` side-by-side
-   - Verifica che layout, spacing, colori siano invariati
-   - Usa `diff-pdf` se disponibile: `diff-pdf tests/baseline/example.pdf tests/results/example.pdf`
+4. **CONFRONTO VISIVO** (automatico con diff-pdf)
+   
+   Se la suite rileva un mismatch tra il tuo PDF e il baseline:
+   - La suite **genera automaticamente** un file `diff-*.pdf` in `tests/results/`
+   - Visualizzalo con: `./tests/view-diff.sh test-colored-table`
+   - Il file diff mostra visualmente cosa è cambiato tra baseline e output corrente
+   - **Approva il cambio** rigenere il baseline: `./tests/test-suite.sh --baseline`
 
 5. **ANALISI LaTeX** (se necessario)
    ```bash
@@ -135,7 +149,7 @@ exit $exit_code
 
 ## Estensioni Future
 
-- [ ] `diff-pdf` integration per confronto automatico visivo
+- [x] `diff-pdf` integration per confronto automatico visivo ✅ (implementato)
 - [ ] Dashboard HTML per visualizzare risultati
 - [ ] Test di performance (tempo compilazione per libro)
 - [ ] Snapshot testing per struttura LaTeX intermedia

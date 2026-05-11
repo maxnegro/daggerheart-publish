@@ -250,7 +250,7 @@
 
 - [x] **[A2]** Rimuovere `}{}` spurio in `framecoverpage` (`daggerheart.cls`)
 - [x] **[A1]** Isolare effetti globali di `\ColoredTable` con `\begingroup...\endgroup`
-- [ ] **[D3]** Correggere conflitto `\onehalfspacing` / `\baselinestretch`:
+- [x] **[D3]** Correggere conflitto `\onehalfspacing` / `\baselinestretch`:
   usare solo `\setstretch{1.2}`
 - [ ] **[D4]** Aggiungere dichiarazione motore con `\RequirePackage{iftex}` +
   `\RequireXeTeXorLuaTeX`

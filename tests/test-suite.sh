@@ -4,6 +4,7 @@
 # 
 # --baseline: Generate baseline PDFs (do this before making changes)
 # --verbose: Show detailed compilation output
+# Default (without --baseline): compile and compare output with baseline PDFs
 
 set -euo pipefail
 
@@ -116,6 +117,46 @@ validate_pdf_exists() {
   fi
 }
 
+sanitize_label() {
+  local input="$1"
+  echo "$input" | tr '[:space:]/' '__' | tr -cd '[:alnum:]_-'
+}
+
+compare_against_baseline() {
+  local generated_pdf="$1"
+  local baseline_pdf="$2"
+  local label="$3"
+
+  if [[ ! -f "$baseline_pdf" ]]; then
+    log_test_warning "$label" "Baseline missing: $baseline_pdf"
+    return 0
+  fi
+
+  if command -v diff-pdf >/dev/null 2>&1; then
+    local safe_label
+    safe_label="$(sanitize_label "$label")"
+    local diff_output="$RESULTS_DIR/diff-${safe_label}.pdf"
+
+    # Use simple diff check without --brief (which doesn't exist in diff-pdf)
+    if diff-pdf "$baseline_pdf" "$generated_pdf" >/dev/null 2>&1; then
+      return 0
+    fi
+
+    # Generate visual diff artifact for manual review
+    if diff-pdf --output-diff="$diff_output" "$baseline_pdf" "$generated_pdf" >/dev/null 2>&1; then
+      log_line "    Visual diff saved: $diff_output"
+    fi
+    return 1
+  fi
+
+  # Fallback when diff-pdf is unavailable.
+  if cmp -s "$baseline_pdf" "$generated_pdf"; then
+    return 0
+  fi
+
+  return 1
+}
+
 # ============================================================================
 # Test: Books compilation
 # ============================================================================
@@ -132,12 +173,17 @@ for book_dir in "$BOOKS_DIR"/*; do
     
     if compile_book "$book_dir" "$output_pdf"; then
       if validate_pdf_exists "$output_pdf"; then
-        log_test_pass "Book: $book_name"
-        
         # If in baseline mode, copy to baseline
         if [[ $BASELINE_MODE -eq 1 ]]; then
+          log_test_pass "Book: $book_name"
           cp "$output_pdf" "$BASELINE_DIR/${book_name}.pdf"
           log_line "    Baseline saved: $BASELINE_DIR/${book_name}.pdf"
+        else
+          if compare_against_baseline "$output_pdf" "$BASELINE_DIR/${book_name}.pdf" "Book: $book_name"; then
+            log_test_pass "Book: $book_name"
+          else
+            log_test_fail "Book: $book_name" "Baseline mismatch (see diff-$(sanitize_label "Book: $book_name").pdf in tests/results/)"
+          fi
         fi
       else
         log_test_fail "Book: $book_name" "PDF generated but is invalid or empty"
@@ -192,11 +238,16 @@ EOF
     
     if compile_book "$fixture_dir" "$output_pdf"; then
       if validate_pdf_exists "$output_pdf"; then
-        log_test_pass "Fixture: $fixture_name"
-        
         if [[ $BASELINE_MODE -eq 1 ]]; then
+          log_test_pass "Fixture: $fixture_name"
           cp "$output_pdf" "$BASELINE_DIR/fixture-${fixture_name}.pdf"
           log_line "    Baseline saved: $BASELINE_DIR/fixture-${fixture_name}.pdf"
+        else
+          if compare_against_baseline "$output_pdf" "$BASELINE_DIR/fixture-${fixture_name}.pdf" "Fixture: $fixture_name"; then
+            log_test_pass "Fixture: $fixture_name"
+          else
+            log_test_fail "Fixture: $fixture_name" "Baseline mismatch (see diff-$(sanitize_label "Fixture: $fixture_name").pdf in tests/results/)"
+          fi
         fi
       else
         log_test_fail "Fixture: $fixture_name" "PDF generated but is invalid or empty"
@@ -231,6 +282,13 @@ log_line ""
 if [[ $BASELINE_MODE -eq 1 ]]; then
   log_line "Baseline PDFs generated in: $BASELINE_DIR"
   log_line "Next time, run without --baseline to test against baseline."
+else
+  diff_files=$(find "$RESULTS_DIR" -name "diff-*.pdf" -type f | wc -l)
+  if [[ $diff_files -gt 0 ]]; then
+    log_line ""
+    log_line "Visual diffs available: $RESULTS_DIR/diff-*.pdf"
+    log_line "To review differences, open any diff-*.pdf file in your PDF viewer."
+  fi
 fi
 
 log_line ""

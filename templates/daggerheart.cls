@@ -139,13 +139,12 @@
 	}}
 }
 
-\onehalfspacing
+\setstretch{1.2}
 \setlength{\columnsep}{1.5em}
 
 % --- Fonts ---
 \renewcommand{\normalsize}{\fontsize{8.5}{10}\selectfont}
 \normalsize
-\renewcommand{\baselinestretch}{1.2}
 \setmainfont{Montserrat-Regular.ttf}[
 Path = ./fonts/,
 ItalicFont = Merriweather-Italic.ttf,
