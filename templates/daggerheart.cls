@@ -518,7 +518,6 @@ Path = ./fonts/,
 \renewcommand{\tableofcontents}{%
 	\@starttoc{toc}%
 }
-\makeatother
 
 % --- Main Box ---
 \newtcolorbox{adversarybox}[1]{
@@ -606,19 +605,17 @@ Path = ./fonts/,
 
 \dghsetlabelsenglish
 
-\makeatletter
 \AtBeginDocument{%
-\@ifpackageloaded{babel}{%
-\addto\captionsenglish{\dghsetlabelsenglish}%
-\addto\captionsitalian{\dghsetlabelsitalian}%
-\ifcsname languagename\endcsname
-\ifdefstring{\languagename}{italian}{\dghsetlabelsitalian}{\dghsetlabelsenglish}%
-\else
-\dghsetlabelsenglish
-\fi
-}{}%
+  \@ifpackageloaded{babel}{%
+    \addto\captionsenglish{\dghsetlabelsenglish}%
+    \addto\captionsitalian{\dghsetlabelsitalian}%
+    \ifcsname languagename\endcsname
+      \ifdefstring{\languagename}{italian}{\dghsetlabelsitalian}{\dghsetlabelsenglish}%
+    \else
+      \dghsetlabelsenglish
+    \fi
+  }{}%
 }
-\makeatother
 
 
 \newcommand{\dghexperienceseparator}{\noindent\rule{\linewidth}{0.25pt}}
