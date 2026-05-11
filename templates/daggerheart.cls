@@ -365,7 +365,7 @@ Path = ./fonts/,
 	\color{maintext}
 	\pagestyle{fancy}
 	\restoregeometry
-}{}
+}
 
 % --- Titles ---
 \setcounter{secnumdepth}{0}
