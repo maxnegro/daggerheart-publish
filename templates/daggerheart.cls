@@ -519,38 +519,42 @@ Path = ./fonts/,
 	\@starttoc{toc}%
 }
 
-% --- Main Box ---
-\newtcolorbox{adversarybox}[1]{
-	enhanced,
-	colback=adversarybgcolor,
-	colframe=adversarybordercolor,
-	arc=5pt,
-	boxrule=1pt,
-	outer arc=5pt,
-	before skip=2em,
-	after skip=2em,
-	top=8pt,
-	left=8pt,
-	right=8pt,
-	bottom=8pt,
-	before upper={\parskip=4pt},
+% --- Shared entity box styles ---
+\tcbset{
+	dgh@mainboxstyle/.style 2 args={
+		enhanced,
+		colback=#1,
+		colframe=#2,
+		arc=5pt,
+		boxrule=1pt,
+		outer arc=5pt,
+		before skip=2em,
+		after skip=2em,
+		top=8pt,
+		left=8pt,
+		right=8pt,
+		bottom=8pt,
+		before upper={\parskip=4pt},
+	},
+	dgh@innerboxstyle/.style args={#1}{
+		colback=white,
+		enhanced,
+		frame hidden,
+		borderline north={1pt}{0pt}{#1},
+		borderline south={1pt}{0pt}{#1},
+		left=0.5em,
+		right=0.5em,
+		top=0.5em,
+		bottom=0.5em,
+		before skip=1em,
+		after skip=1em,
+		sharp corners,
+	},
 }
 
-% --- Inner box ---
-\newtcolorbox{adversaryinnerbox}{
-	colback=white,
-	enhanced,
-	frame hidden,
-	borderline north={1pt}{0pt}{adversarybordercolor},
-	borderline south={1pt}{0pt}{adversarybordercolor},
-	left=0.5em,
-	right=0.5em,
-	top=0.5em,
-	bottom=0.5em,
-	before skip=1em,
-	after skip=1em,
-	sharp corners,
-}
+% --- Adversary boxes ---
+\newtcolorbox{adversarybox}[1]{dgh@mainboxstyle={adversarybgcolor}{adversarybordercolor}}
+\newtcolorbox{adversaryinnerbox}{dgh@innerboxstyle={adversarybordercolor}}
 
 \newcommand{\dghsectionseparator}{\par\noindent\rule{\linewidth}{1pt}\par}
 
@@ -708,38 +712,9 @@ Path = ./fonts/,
 	\end{environmentbox}%
 }
 
-% --- Main Box ---
-\newtcolorbox{environmentbox}[1]{
-	enhanced,
-	colback=environmentbgcolor,
-	colframe=environmentbordercolor,
-	arc=5pt,
-	boxrule=1pt,
-	outer arc=5pt,
-	before skip=2em,
-	after skip=2em,
-	top=8pt,
-	left=8pt,
-	right=8pt,
-	bottom=8pt,
-	before upper={\parskip=4pt},
-}
-
-% --- Inner box ---
-\newtcolorbox{environmentinnerbox}{
-	colback=white,
-	enhanced,
-	frame hidden,
-	borderline north={1pt}{0pt}{environmentbordercolor},
-	borderline south={1pt}{0pt}{environmentbordercolor},
-	left=0.5em,
-	right=0.5em,
-	top=0.5em,
-	bottom=0.5em,
-	before skip=1em,
-	after skip=1em,
-	sharp corners,
-}
+% --- Environment boxes ---
+\newtcolorbox{environmentbox}[1]{dgh@mainboxstyle={environmentbgcolor}{environmentbordercolor}}
+\newtcolorbox{environmentinnerbox}{dgh@innerboxstyle={environmentbordercolor}}
 
 \newcommand{\environmentstats}[2]{
 	\ifstrempty{#1}{}{\textbf{\dghlabeldifficulty:} #1 \ifstrempty{#2}{}{\\}}

@@ -4,31 +4,8 @@
 
 ## Analisi `daggerheart.cls` — Doppioni, inefficienze e miglioramenti
 
-### 🔴 Problemi strutturali (alta priorità)
-
-#### 1. `\makeatletter`/`\makeatother` spezzato
-Il file chiama `\makeatother` a metà (dopo la ridefinizione di `\tableofcontents`), poi
-`\makeatletter` di nuovo più avanti per il blocco `\AtBeginDocument` babel. I file `.cls`
-sono già in categoria-11 per `@`, quindi entrambe le chiamate sono ridondanti; rimuoverle
-del tutto — o racchiuderle in un unico blocco attorno ai soli comandi interni che lo
-richiedono — elimina il rischio di errori causati dall'alternanza.
-
----
-
 ### 🟠 Duplicazione di codice (media priorità)
 
-#### 4. `adversarybox`/`adversaryinnerbox` ↔ `environmentbox`/`environmentinnerbox`
-Le quattro `\newtcolorbox` sono identiche tranne per due coppie di colori
-(`adversarybordercolor`/`adversarybgcolor` vs `environmentbordercolor`/`environmentbgcolor`).
-Proposta: una singola coppia di box parametrizzata per colore:
-```latex
-\NewDocumentCommand{\dghdefineboxpair}{m m m}{
-  % #1 = prefisso, #2 = colore bordo, #3 = colore sfondo
-  ...
-}
-\dghdefineboxpair{adversary}{adversarybordercolor}{adversarybgcolor}
-\dghdefineboxpair{environment}{environmentbordercolor}{environmentbgcolor}
-```
 
 #### 5. `\adversary` e `\colossusadversary` quasi identici
 I due comandi differiscono solo per il box esterno (`adversarybox` vs `environmentbox`).
