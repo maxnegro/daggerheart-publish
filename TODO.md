@@ -6,11 +6,6 @@
 
 ### 🟡 Inefficienze e fragilità (bassa priorità)
 
-#### 13. `\ifdghonepagebreak` senza API pubblica di disattivazione
-Il flag esiste e il suo valore di default è `true`, ma non c'è nessun comando utente per
-impostarlo a `false` nella sorgente del documento. Aggiungere `\dghonepagebreakfalse` /
-`\dghonepagebreaktrue` come comandi pubblici documentati, o rimuovere il flag se non usato.
-
 #### 14. Spaziatura di `\section` e `\subsection` ricalcolata in più punti
 `\titlespacing*` viene chiamata una volta in modo definitivo, ma `\applysectioncolor`
 chiama `\titleformat` senza preservare la spaziatura. Se `\titlespacing*` viene emessa

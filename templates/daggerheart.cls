@@ -437,6 +437,10 @@ Path = ./fonts/,
 \newif\ifdghonepagebreak
 \dghonepagebreaktrue
 
+% Public API for section page-break behavior in two-column mode.
+\newcommand{\enabledghonepagebreak}{\global\dghonepagebreaktrue}
+\newcommand{\disabledghonepagebreak}{\global\dghonepagebreakfalse}
+
 \let\oldsection\section
 \renewcommand{\section}[1]{%
 	\ifindaggerfullpage

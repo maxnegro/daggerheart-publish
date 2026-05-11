@@ -262,7 +262,7 @@ function Pandoc(doc)
   doc.blocks = normalize_break_blocks(doc.blocks)
 
   if not h1_newpage then
-    table.insert(doc.blocks, 1, pandoc.RawBlock("latex", "\\dghonepagebreakfalse"))
+    table.insert(doc.blocks, 1, pandoc.RawBlock("latex", "\\disabledghonepagebreak"))
   end
   return doc
 end
