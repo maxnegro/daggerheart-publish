@@ -640,77 +640,45 @@ Path = ./fonts/,
 }
 
 
-\newcommand{\adversary}[6]{%
-	\begin{adversarybox}{}%
+% --- Internal entity renderer ---
+% #1=outer box env, #2=inner box env, #3=name, #4=tiertype,
+% #5=description, #6=motivesandtactics, #7=stats, #8=features
+\newcommand{\dgh@entity}[8]{%
+	\begin{#1}{}%
 		{\color{maintext}%
-			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#1}
+			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#3}
 			\par\smallskip
 			\normalfont\fontsize{8pt}{8pt}\selectfont
-			
-			\ifstrempty{#2}{}{
-				\textbf{\emph{#2}}
-				\\%\par\smallskip
-			}
-			\ifstrempty{#3}{}{
-				\emph{#3}
-				\par%\smallskip
-			}
 			\ifstrempty{#4}{}{
-				\textbf{\dghlabelmotivesandtactics:} #4
-				\par%\smallskip
+				\textbf{\emph{#4}}
+				\\
 			}
 			\ifstrempty{#5}{}{
-				\begin{adversaryinnerbox}
-					#5
-				\end{adversaryinnerbox}
+				\emph{#5}
+				\par
 			}
-			\par\smallskip
-			
-			\ifstrempty{#6}{}{			
-				\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
-				\normalfont\fontsize{8pt}{8pt}\selectfont
-				
-				#6
-			}
-		}%
-	\end{adversarybox}%
-}
-
-\newcommand{\colossusadversary}[6]{%
-	\begin{environmentbox}{}%
-		{\color{maintext}%
-			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#1}
-			\par\smallskip
-			\normalfont\fontsize{8pt}{8pt}\selectfont
-
-			\ifstrempty{#2}{}{
-				\textbf{\emph{#2}}
-				\\%\par%\smallskip
-			}
-			\ifstrempty{#3}{}{
-				\emph{#3}
-				\par%\smallskip
-			}
-			\ifstrempty{#4}{}{
-				\textbf{\dghlabelmotivesandtactics:} #4
-				\par%\smallskip
-			}
-			\ifstrempty{#5}{}{
-				\begin{environmentinnerbox}
-					#5
-				\end{environmentinnerbox}
-			}
-			\par\smallskip
-
 			\ifstrempty{#6}{}{
+				\textbf{\dghlabelmotivesandtactics:} #6
+				\par
+			}
+			\ifstrempty{#7}{}{
+				\begin{#2}
+					#7
+				\end{#2}
+			}
+			\par\smallskip
+			\ifstrempty{#8}{}{
 				\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
 				\normalfont\fontsize{8pt}{8pt}\selectfont
 
-				#6
+				#8
 			}
 		}%
-	\end{environmentbox}%
+	\end{#1}%
 }
+
+\newcommand{\adversary}[6]{\dgh@entity{adversarybox}{adversaryinnerbox}{#1}{#2}{#3}{#4}{#5}{#6}}
+\newcommand{\colossusadversary}[6]{\dgh@entity{environmentbox}{environmentinnerbox}{#1}{#2}{#3}{#4}{#5}{#6}}
 
 % --- Environment boxes ---
 \newtcolorbox{environmentbox}[1]{dgh@mainboxstyle={environmentbgcolor}{environmentbordercolor}}

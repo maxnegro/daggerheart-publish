@@ -7,11 +7,6 @@
 ### 🟠 Duplicazione di codice (media priorità)
 
 
-#### 5. `\adversary` e `\colossusadversary` quasi identici
-I due comandi differiscono solo per il box esterno (`adversarybox` vs `environmentbox`).
-Andrebbero unificati in un comando interno `\dgh@entitybox{boxtype}{...}` con le due
-varianti pubbliche come thin wrapper.
-
 #### 6. `\adversarystats` e `\environmentstats` — struttura simile non unificata
 `\adversarystats` accetta 9 argomenti; `\environmentstats` solo 2. Hanno semantica diversa
 ma entrambi emettono coppie `\textbf{label:} valore`. La lista potrebbe essere gestita con
