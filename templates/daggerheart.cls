@@ -170,8 +170,10 @@ Path = ./fonts/,
 \definecolor{tableheaderbg}{HTML}{3a6b7b}
 \definecolor{tablerow}{HTML}{ebf0f1}
 \definecolor{white}{HTML}{ffffff}
-\definecolor{squareboxbg}{HTML}{f1ebf4}
-\definecolor{squareboxborder}{HTML}{4d2d63}
+\definecolor{squareboxbg-default}{HTML}{f1ebf4}
+\definecolor{squareboxborder-default}{HTML}{4d2d63}
+\colorlet{squareboxbg}{squareboxbg-default}
+\colorlet{squareboxborder}{squareboxborder-default}
 \definecolor{roundedboxbg}{HTML}{dde2ed}
 \definecolor{quoteborder}{HTML}{deb334}
 \definecolor{adversarybordercolor}{HTML}{bcab84}
@@ -198,8 +200,8 @@ Path = ./fonts/,
 	\colorlet{squareboxbg}{#1}
 }
 \newcommand{\resetboxcolor}{
-	\definecolor{squareboxbg}{HTML}{f1ebf4}
-	\definecolor{squareboxborder}{HTML}{4d2d63}
+	\colorlet{squareboxbg}{squareboxbg-default}
+	\colorlet{squareboxborder}{squareboxborder-default}
 }
 
 % --- Custom square box ---
@@ -599,8 +601,6 @@ Path = ./fonts/,
 % Macro per Tier+Type localizzata (definizioni separate per lingua)
 \newcommand{\dghenvironmenttiertypeenglish}[2]{\dghlabeltier\ #1 #2}
 \newcommand{\dghenvironmenttiertypeitalian}[2]{#2 di \dghlabeltier\ #1}
-% Macro attiva (default inglese)
-\newcommand{\dghenvironmenttiertype}[2]{\dghenvironmenttiertypeenglish{#1}{#2}}
 
 % Localized labels (default English). If babel is loaded, labels switch with language.
 \newcommand{\dghsetlabelsenglish}{%

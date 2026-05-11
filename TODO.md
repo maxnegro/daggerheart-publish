@@ -6,16 +6,6 @@
 
 ### 🟡 Inefficienze e fragilità (bassa priorità)
 
-#### 10. `\colorlet` in `\setboxcolor` vs `\definecolor` in `\resetboxcolor`
-I due comandi usano approcci diversi per gestire lo stesso colore. Unificare: usare
-sempre `\colorlet` (per alias) o sempre `\definecolor` (per valori fissi), con una
-coppia di colori "correnti" che viene ridefinita in entrambi i comandi.
-
-#### 12. `\dghenvironmenttiertype` definita due volte
-Prima viene dichiarata come `\newcommand` con valore inglese di default, poi il blocco
-babel `\captionsenglish` la ridefinisce con `\let`. La definizione iniziale è ridondante
-se babel è sempre caricato; altrimenti va documentato esplicitamente il caso senza babel.
-
 #### 13. `\ifdghonepagebreak` senza API pubblica di disattivazione
 Il flag esiste e il suo valore di default è `true`, ma non c'è nessun comando utente per
 impostarlo a `false` nella sorgente del documento. Aggiungere `\dghonepagebreakfalse` /
