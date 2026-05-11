@@ -279,7 +279,7 @@ Path = ./fonts/,
 	\end{tikzpicture}
 	}
     
-	\ifnum\dghcoverimagecreditenabled>0\relax
+	\ifdghcoverimagecreditenabled
 		\begin{tikzpicture}[remember picture,overlay]
 			\node[
 				anchor=north east,
@@ -292,11 +292,11 @@ Path = ./fonts/,
 				text opacity=1,
 				rounded corners=2pt
 			] at (current page.north east) {%
-				\ifnum\dghcoverimagetitleenabled>0\relax
+				\ifdghcoverimagetitleenabled
 					{\normalfont\fontsize{8pt}{7pt}\selectfont\bfseries\color{lightgray} \dghcoverimagetitle}%
 				\fi
-				\ifnum\dghcoverimageauthorenabled>0\relax
-					\ifnum\dghcoverimagetitleenabled>0\relax\\[-3pt]\fi
+				\ifdghcoverimageauthorenabled
+					\ifdghcoverimagetitleenabled\\[-3pt]\fi
 					{\normalfont\fontsize{6pt}{5pt}\selectfont\itshape\color{lightgray} \dghcoverimageauthor}%
 				\fi
 			};
@@ -479,9 +479,12 @@ Path = ./fonts/,
 \newcommand{\dghcovercomplexity}{0}
 \newcommand{\dghcoverimagetitle}{}
 \newcommand{\dghcoverimageauthor}{}
-\newcommand{\dghcoverimagecreditenabled}{0}
-\newcommand{\dghcoverimagetitleenabled}{0}
-\newcommand{\dghcoverimageauthorenabled}{0}
+\newif\ifdghcoverimagecreditenabled
+\newif\ifdghcoverimagetitleenabled
+\newif\ifdghcoverimageauthorenabled
+\dghcoverimagecreditenabledfalse
+\dghcoverimagetitleenabledfalse
+\dghcoverimageauthorenabledfalse
 
 \newcommand{\settitlepageimagemode}[1]{\gdef\dghtitleimagemode{#1}}
 \newcommand{\settitlepageimagepath}[1]{\gdef\dghtitleimagepath{#1}}

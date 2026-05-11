@@ -6,12 +6,6 @@
 
 ### 🟡 Inefficienze e fragilità (bassa priorità)
 
-#### 9. Toggle numerici `0`/`1` con `\ifnum` — stile fragile
-I flag per la cover (`\dghcoverimagecreditenabled`, `\dghcoverimagetitleenabled`,
-`\dghcoverimageauthorenabled`) sono definiti come `\newcommand{...}{0}` e testati con
-`\ifnum...\relax`. È preferibile usare `\newif\ifdgh...` che è idiomatico LaTeX, più
-leggibile e meno soggetto a errori di parsing.
-
 #### 10. `\colorlet` in `\setboxcolor` vs `\definecolor` in `\resetboxcolor`
 I due comandi usano approcci diversi per gestire lo stesso colore. Unificare: usare
 sempre `\colorlet` (per alias) o sempre `\definecolor` (per valori fissi), con una

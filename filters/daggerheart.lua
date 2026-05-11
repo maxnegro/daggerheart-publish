@@ -205,9 +205,9 @@ function Meta(meta)
   local cover_image_author = latex_escape(trim_inline(get_meta_string(meta, {
     "cover-image-author"
   }, "")))
-  local title_enabled = cover_image_title ~= "" and "1" or "0"
-  local author_enabled = cover_image_author ~= "" and "1" or "0"
-  local credit_enabled = (title_enabled == "1" or author_enabled == "1") and "1" or "0"
+  local title_enabled = cover_image_title ~= ""
+  local author_enabled = cover_image_author ~= ""
+  local credit_enabled = (title_enabled or author_enabled)
 
   append_header_include(meta, "\\gdef\\dghcoverdesigner{" .. latex_escape(cover_defaults.designer or "") .. "}")
   append_header_include(meta, "\\gdef\\dghcovercomplexity{" .. (cover_defaults.complexity or "0") .. "}")
@@ -215,9 +215,9 @@ function Meta(meta)
   append_header_include(meta, "\\long\\gdef\\dghcoversubtitle{" .. (cover_defaults.subtitle or "") .. "}")
   append_header_include(meta, "\\gdef\\dghcoverimagetitle{" .. cover_image_title .. "}")
   append_header_include(meta, "\\gdef\\dghcoverimageauthor{" .. cover_image_author .. "}")
-  append_header_include(meta, "\\gdef\\dghcoverimagetitleenabled{" .. title_enabled .. "}")
-  append_header_include(meta, "\\gdef\\dghcoverimageauthorenabled{" .. author_enabled .. "}")
-  append_header_include(meta, "\\gdef\\dghcoverimagecreditenabled{" .. credit_enabled .. "}")
+  append_header_include(meta, title_enabled and "\\dghcoverimagetitleenabledtrue" or "\\dghcoverimagetitleenabledfalse")
+  append_header_include(meta, author_enabled and "\\dghcoverimageauthorenabledtrue" or "\\dghcoverimageauthorenabledfalse")
+  append_header_include(meta, credit_enabled and "\\dghcoverimagecreditenabledtrue" or "\\dghcoverimagecreditenabledfalse")
 
   local title_image = get_meta_string(meta, {
     "title-image",
