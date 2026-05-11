@@ -5,4 +5,8 @@ books/*
 !books/example/
 !books/example-frame/
 
+# Generated test artifacts
+tests/results/
+tests/baseline/
+
 !.gitkeep
