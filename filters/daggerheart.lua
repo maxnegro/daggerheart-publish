@@ -673,7 +673,7 @@ local function build_adversary_stats_from_markdown(parsed)
     weapon_details = latex_escape(weapons_value)
   end
 
-  local stats = "\\adversarystats"
+  local stats = "\\dghadversarystats"
     .. latex_arg(size)
     .. latex_arg(segments)
     .. latex_arg(difficulty)
@@ -726,7 +726,7 @@ local function build_environment_stats_from_markdown(parsed)
     adversaries = latex_escape(adversaries_value)
   end
 
-  return "\\environmentstats" .. latex_arg(difficulty) .. latex_arg(adversaries)
+  return "\\dghenvironmentstats" .. latex_arg(difficulty) .. latex_arg(adversaries)
 end
 
 local function latex_image_length(value)
@@ -1261,9 +1261,9 @@ local function render_adversary_statblock(parsed)
     is_colossus = true
   end
 
-  local macro = "\\adversary"
+  local macro = "\\dghadversary"
   if is_colossus then
-    macro = "\\colossusadversary"
+    macro = "\\dghcolossusadversary"
   end
 
   return macro
@@ -1299,7 +1299,7 @@ local function render_environment_statblock(parsed)
 
   local features = render_feats_latex(parsed.feats)
 
-  return "\\environment"
+  return "\\dghenvironment"
     .. latex_arg(title)
     .. latex_arg(tier_text)
     .. latex_arg(summary)

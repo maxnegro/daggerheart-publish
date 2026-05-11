@@ -392,8 +392,8 @@ Path = ./fonts/,
 }
 
 \newcommand{\setsectioncolor}[2]{%
-	\global\def\dgsectioncolor{#1}%
-	\global\def\dgsubsectioncolor{#2}%
+	\gdef\dgsectioncolor{#1}%
+	\gdef\dgsubsectioncolor{#2}%
 	\applysectioncolor{\dgsectioncolor}{\dgsubsectioncolor}%
 	\global\dgresetsectioncoloronnextsectiontrue
 }
@@ -407,7 +407,7 @@ Path = ./fonts/,
 }
 
 
-\newcommand{\resetsectioncolor}{\global\def\dgsectioncolor{h1text}\global\def\dgsubsectioncolor{h2text}\applysectioncolor{\dgsectioncolor}{\dgsubsectioncolor} \setsubsubsectioncolor{h3text}\global\dgresetsectioncoloronnextsectionfalse}
+\newcommand{\resetsectioncolor}{\gdef\dgsectioncolor{h1text}\gdef\dgsubsectioncolor{h2text}\applysectioncolor{\dgsectioncolor}{\dgsubsectioncolor} \setsubsubsectioncolor{h3text}\global\dgresetsectioncoloronnextsectionfalse}
 \newcommand{\dgapplycurrentsectioncolor}{\applysectioncolor{\dgsectioncolor}{\dgsubsectioncolor}}
 \resetsectioncolor
 
@@ -465,6 +465,8 @@ Path = ./fonts/,
 }
 
 % --- Lists ---
+% SHIM: \tightlist is injected by Pandoc to reduce spacing in lists.
+% Do NOT remove — this is a required compatibility layer for Pandoc's Markdown → LaTeX conversion.
 \providecommand{\tightlist}{%
 	\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}%
 }
@@ -675,7 +677,7 @@ Path = ./fonts/,
 }
 
 
-\newcommand{\adversarystats}[9]{
+\newcommand{\dghadversarystats}[9]{
 	\dghstatif{\dghlabelsize}{#1}{\\}
 	\dghstatif{\dghlabelsegments}{#2}{\\}
 	\dghstatif{\dghlabeldifficulty}{#3}{ |}
@@ -725,19 +727,19 @@ Path = ./fonts/,
 	\end{#1}%
 }
 
-\newcommand{\adversary}[6]{\dgh@entity{adversarybox}{adversaryinnerbox}{#1}{#2}{#3}{#4}{#5}{#6}}
-\newcommand{\colossusadversary}[6]{\dgh@entity{environmentbox}{environmentinnerbox}{#1}{#2}{#3}{#4}{#5}{#6}}
+\newcommand{\dghadversary}[6]{\dgh@entity{adversarybox}{adversaryinnerbox}{#1}{#2}{#3}{#4}{#5}{#6}}
+\newcommand{\dghcolossusadversary}[6]{\dgh@entity{environmentbox}{environmentinnerbox}{#1}{#2}{#3}{#4}{#5}{#6}}
 
 % --- Environment boxes ---
 \newtcolorbox{environmentbox}[1]{dgh@mainboxstyle={environmentbgcolor}{environmentbordercolor}}
 \newtcolorbox{environmentinnerbox}{dgh@innerboxstyle={environmentbordercolor}}
 
-\newcommand{\environmentstats}[2]{
+\newcommand{\dghenvironmentstats}[2]{
 	\dghstatif{\dghlabeldifficulty}{#1}{\ifstrempty{#2}{}{\\}}
 	\dghstatif{\dghlabelpotentialadversaries}{#2}{}
 }
 
-\newcommand{\environment}[6]{%
+\newcommand{\dghenvironment}[6]{%
 	\begin{environmentbox}{}%
 		{\color{maintext}%
 			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#1}
@@ -773,6 +775,12 @@ Path = ./fonts/,
 	\end{environmentbox}%
 }
 
+% Deprecated aliases: use dgh-prefixed versions instead (for gradual migration)
+\let\adversarystats\dghadversarystats
+\let\adversary\dghadversary
+\let\colossusadversary\dghcolossusadversary
+\let\environmentstats\dghenvironmentstats
+\let\environment\dghenvironment
 
 \newif\ifindaggerfullpage
 \indaggerfullpagefalse
