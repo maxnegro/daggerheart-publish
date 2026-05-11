@@ -737,23 +737,30 @@ Path = ./fonts/,
 \newif\ifindaggerfullpage
 \indaggerfullpagefalse
 
-\newcommand{\fullpage}[1]{
-	\end{multicols}
-	\indaggerfullpagetrue
-	#1
-	\indaggerfullpagefalse
-	\begin{multicols}{2}
-	\raggedcolumns
-}
-
-\newcommand{\beginFullpage}{%
+% Canonical fullpage API.
+\newcommand{\dghfullpagestart}{%
 	\end{multicols}%
-	\indaggerfullpagetrue%
+	\global\indaggerfullpagetrue%
 }
-\newcommand{\finishFullpage}{%
-	\indaggerfullpagefalse%
+\newcommand{\dghfullpageend}{%
+	\global\indaggerfullpagefalse%
 	\begin{multicols}{2}%
 	\raggedcolumns%
+}
+\newenvironment{dghfullpage}{\dghfullpagestart}{\dghfullpageend}
+
+% Deprecated wrapper kept for backward compatibility.
+% Prefer: \begin{dghfullpage} ... \end{dghfullpage}
+\newif\ifdghfullpagedeprecationwarned
+\dghfullpagedeprecationwarnedfalse
+\newcommand{\fullpage}[1]{%
+	\ifdghfullpagedeprecationwarned\else
+		\PackageWarningNoLine{daggerheart}{\string\fullpage is deprecated; use dghfullpage environment instead}%
+		\global\dghfullpagedeprecationwarnedtrue
+	\fi
+	\begin{dghfullpage}%
+	#1%
+	\end{dghfullpage}%
 }
 
 % Force a real page break even when the document body is in multicols.

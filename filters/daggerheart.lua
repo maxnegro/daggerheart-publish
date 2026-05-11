@@ -1134,7 +1134,7 @@ local function blocks_to_latex(blocks)
         parts[#parts+1] = "\\columnbreak"
       elseif has_class(block, "fullpage") then
         local body = blocks_to_latex(normalize_break_blocks(normalize_section_color_blocks(block.content or {})))
-        parts[#parts+1] = "\\beginFullpage\n" .. body .. "\n\\finishFullpage"
+        parts[#parts+1] = "\\dghfullpagestart\n" .. body .. "\n\\dghfullpageend"
       else
         parts[#parts+1] = blocks_to_latex(block.content or {})
       end
@@ -1476,7 +1476,7 @@ function Div(div)
     local height = "\\paperheight"
 
     local out = {}
-    table.insert(out, "\\beginFullpage")
+    table.insert(out, "\\dghfullpagestart")
     table.insert(out, "\\newpage")
     table.insert(out, "\\thispagestyle{empty}")
 
@@ -1502,7 +1502,7 @@ function Div(div)
     table.insert(out, "  };")
     table.insert(out, "\\end{tikzpicture}")
     table.insert(out, "\\null")
-    table.insert(out, "\\finishFullpage")
+    table.insert(out, "\\dghfullpageend")
 
     return pandoc.RawBlock("latex", table.concat(out, "\n"))
   end
@@ -1526,7 +1526,7 @@ function Div(div)
 
   if has_class(div, "fullpage") then
     local body = blocks_to_latex(normalize_break_blocks(normalize_section_color_blocks(div.content)))
-    local latex = "\\beginFullpage\n" .. body .. "\n\\finishFullpage"
+    local latex = "\\dghfullpagestart\n" .. body .. "\n\\dghfullpageend"
     return pandoc.RawBlock("latex", latex)
   end
 
