@@ -249,7 +249,7 @@
 ### 🔴 Bug bloccanti — prima di qualsiasi refactoring
 
 - [x] **[A2]** Rimuovere `}{}` spurio in `framecoverpage` (`daggerheart.cls`)
-- [ ] **[A1]** Isolare effetti globali di `\ColoredTable` con `\begingroup...\endgroup`
+- [x] **[A1]** Isolare effetti globali di `\ColoredTable` con `\begingroup...\endgroup`
 - [ ] **[D3]** Correggere conflitto `\onehalfspacing` / `\baselinestretch`:
   usare solo `\setstretch{1.2}`
 - [ ] **[D4]** Aggiungere dichiarazione motore con `\RequirePackage{iftex}` +
@@ -345,7 +345,7 @@
   - ✓ `tests/fixtures/` — 6 test case minimalisti per bug critici
   - ✓ `books/test-full-suite/` — libro completo (4 capitoli) per copertina standard
   - ✓ `books/test-frame-cover/` — libro separato per frame cover come copertina
-- [ ] PDF di riferimento generati da tutti gli esempi in `books/` (con `./tests/test-suite.sh --baseline`)
+- [x] PDF di riferimento generati da tutti gli esempi in `books/` (con `./tests/test-suite.sh --baseline`)
 - [ ] Bug bloccanti (🔴) risolti — prerequisito per ogni altra modifica
 - [ ] Pipeline titoli unificata (B1) implementata — blocco più a rischio, priorità assoluta
 - [ ] Pipeline cover unificata (B2) — coordinare Lua + template + CLS insieme

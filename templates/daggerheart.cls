@@ -874,11 +874,13 @@ Path = ./fonts/,
 }
 
 \newcommand{\ColoredTable}[4]{%
+	\begingroup
 	\renewcommand{\arraystretch}{1.3}
 	\rowcolors{2}{#2!20}{white}
 	\begin{tabularx}{#1}{#3}
 		\rowcolor{#2}
 		#4
 	\end{tabularx}
+	\endgroup
 }
 
