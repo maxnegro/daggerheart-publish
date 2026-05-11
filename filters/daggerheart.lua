@@ -334,21 +334,21 @@ function Header(el)
       local title_latex = pandoc.write(inlines_doc, "latex"):gsub("%s*\n%s*", " "):gsub("^%s+", ""):gsub("%s+$", "")
       local out = {}
       if bg_height and bg_height ~= "" then
-        table.insert(out, "\\setlength{\\dghsectionbgheight}{" .. bg_height .. "}")
+        table.insert(out, "\\setdghsectionbgheight{" .. bg_height .. "}")
       else
-        table.insert(out, "\\setlength{\\dghsectionbgheight}{150pt}")
+        table.insert(out, "\\setdghsectionbgheight{150pt}")
       end
       if bg_raise and bg_raise ~= "" then
-        table.insert(out, "\\setlength{\\dghsectionbgraise}{" .. bg_raise .. "}")
+        table.insert(out, "\\setdghsectionbgraise{" .. bg_raise .. "}")
       else
-        table.insert(out, "\\setlength{\\dghsectionbgraise}{-18pt}")
+        table.insert(out, "\\setdghsectionbgraise{-18pt}")
       end
       -- Use explicit bg-fade-offset when provided, otherwise default to bg-height-80pt.
       local bg_fade = el.attributes["bg-fade-offset"]
       if bg_fade and bg_fade ~= "" then
-        table.insert(out, "\\setlength{\\dghsectionbgfadeoffset}{" .. bg_fade .. "}")
+        table.insert(out, "\\setdghsectionbgfadeoffset{" .. bg_fade .. "}")
       else
-        table.insert(out, "\\setlength{\\dghsectionbgfadeoffset}{\\dimexpr\\dghsectionbgheight-80pt\\relax}")
+        table.insert(out, "\\resetdghsectionbgfadeoffset")
       end
       table.insert(out, "\\sectionwithbg{" .. bg .. "}{" .. title_latex .. "}")
       local section_bg_block = pandoc.RawBlock("latex", table.concat(out, "\n"))

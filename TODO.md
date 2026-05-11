@@ -4,24 +4,7 @@
 
 ## Analisi `daggerheart.cls` — Doppioni, inefficienze e miglioramenti
 
-### 🟠 Duplicazione di codice (media priorità)
-
-
-#### 7. Due API sovrapposte per il fullpage
-Esistono sia `\fullpage{...}` (ambiente inline con argomento) sia la coppia
-`\beginFullpage`/`\finishFullpage` per delimitare blocchi. Fanno la stessa cosa con
-interfacce diverse; sarebbe più uniforme avere solo l'ambiente `\newenvironment{dghfullpage}`.
-
----
-
 ### 🟡 Inefficienze e fragilità (bassa priorità)
-
-#### 8. `\dghsectionbgfadeoffset` non si ricalcola automaticamente
-Il commento dice "recomputed whenever height or raise changes" ma nessun meccanismo lo
-garantisce: se l'utente cambia `\dghsectionbgheight` con `\setlength`, `\dghsectionbgfadeoffset`
-rimane al valore iniziale. Soluzione: calcolare il valore inline in `\dghsectionbgpicture`
-con `\dimexpr` o fornire un comando `\setdghsectionbgheight{...}` che aggiorni entrambe le
-lunghezze.
 
 #### 9. Toggle numerici `0`/`1` con `\ifnum` — stile fragile
 I flag per la cover (`\dghcoverimagecreditenabled`, `\dghcoverimagetitleenabled`,

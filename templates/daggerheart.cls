@@ -50,12 +50,47 @@
 \newlength{\dghsectionbgraise}
 \newlength{\dghsectionbgbleed}
 \newlength{\dghsectionbgfadeoffset}
-\setlength{\dghsectionbgheight}{150pt}
-\setlength{\dghsectionbgraise}{-18pt}
+\newif\ifdghsectionbgfadeauto
+\dghsectionbgfadeautotrue
 \setlength{\dghsectionbgbleed}{1bp}
-% Default fade start (distance from page top): height - 80pt
-% Override manually if needed; recomputed whenever height or raise changes.
-\setlength{\dghsectionbgfadeoffset}{\dimexpr\dghsectionbgheight-80pt\relax}
+
+% Internal helper: keep stored fade offset synced with current auto formula.
+\newcommand{\dghsectionbgupdateautofade}{%
+	\ifdghsectionbgfadeauto
+		\setlength{\dghsectionbgfadeoffset}{\dimexpr\dghsectionbgheight-80pt\relax}%
+	\fi
+}
+
+% Public setters for section background parameters.
+\newcommand{\setdghsectionbgheight}[1]{%
+	\setlength{\dghsectionbgheight}{#1}%
+	\dghsectionbgupdateautofade
+}
+\newcommand{\setdghsectionbgraise}[1]{%
+	\setlength{\dghsectionbgraise}{#1}%
+	\dghsectionbgupdateautofade
+}
+\newcommand{\setdghsectionbgfadeoffset}[1]{%
+	\global\dghsectionbgfadeautofalse
+	\setlength{\dghsectionbgfadeoffset}{#1}%
+}
+\newcommand{\resetdghsectionbgfadeoffset}{%
+	\global\dghsectionbgfadeautotrue
+	\dghsectionbgupdateautofade
+}
+
+% Effective fade offset used while rendering section backgrounds.
+\newcommand{\dghsectionbgfadeeffective}{%
+	\ifdghsectionbgfadeauto
+		\dimexpr\dghsectionbgheight-80pt\relax
+	\else
+		\dghsectionbgfadeoffset
+	\fi
+}
+
+\setdghsectionbgheight{150pt}
+\setdghsectionbgraise{-18pt}
+\resetdghsectionbgfadeoffset
 \AtBeginDocument{%
 	\setlength{\dghpagetotext}{1in}%
 	\addtolength{\dghpagetotext}{\voffset}%
@@ -792,7 +827,7 @@ Path = ./fonts/,
 		% white fade: starts at (height+raise) from page top, ends at image bottom
 		\fill[white, path fading=dgh fade to white]
 			% ($(current page.north west) + (-\dghsectionbgbleed, -126pt+\dghsectionbgbleed)$)
-			($(current page.north west) + (-\dghsectionbgbleed, -\dghsectionbgfadeoffset)$)
+			($(current page.north west) + (-\dghsectionbgbleed, -\dghsectionbgfadeeffective)$)
 			rectangle
 			($(current page.north east) + (\dghsectionbgbleed, -\dghsectionbgheight)$);
 		% anti-seam mask: hides 1px raster antialiasing at the south clip boundary
