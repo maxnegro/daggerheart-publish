@@ -382,11 +382,13 @@ Path = ./fonts/,
 	{\thesection}
 	{1em}
 	{}
+	\titlespacing*{\section}{0pt}{0pt}{0.8em}
 	\titleformat{\subsection}
 	{\eveleth\fontsize{20pt}{20pt}\selectfont\color{#2}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesubsection}
 	{1em}
 	{}
+	\titlespacing*{\subsection}{0pt}{1.0em}{0.5em}
 }
 
 \newcommand{\setsectioncolor}[2]{%
@@ -409,10 +411,6 @@ Path = ./fonts/,
 \newcommand{\dgapplycurrentsectioncolor}{\applysectioncolor{\dgsectioncolor}{\dgsubsectioncolor}}
 \resetsectioncolor
 
-% Keep heading spacing deterministic: default article section skips include
-% stretch/shrink components that can change layout based on remaining page content.
-\titlespacing*{\section}{0pt}{0pt}{0.8em}
-\titlespacing*{\subsection}{0pt}{1.0em}{0.5em}
 \titlespacing*{\subsubsection}{0pt}{0.8em}{0.4em}
 
 \titleformat{\paragraph}[hang]
