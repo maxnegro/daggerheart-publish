@@ -33,7 +33,7 @@
 \RequirePackage{etoolbox}
 \RequirePackage{tikzpagenodes}
 \RequirePackage{eso-pic}
-\usetikzlibrary{calc,fadings}
+	\usetikzlibrary{calc,fadings,shadings}
 \tikzfading[name=dgh fade to white,
 	top color=transparent!100,
 	bottom color=transparent!0]
@@ -214,9 +214,6 @@ Path = ./fonts/,
 \renewenvironment{quote}
 {\begin{quotebox}}
 {\end{quotebox}}
-
-\usepackage{tikz}
-\usetikzlibrary{shadings}
 
 \definecolor{sfondoCover}{HTML}{295369}
 \definecolor{h1textlight}{HTML}{F5E6D3}
@@ -522,8 +519,6 @@ Path = ./fonts/,
 	\@starttoc{toc}%
 }
 \makeatother
-
-\tcbuselibrary{skins}
 
 % --- Main Box ---
 \newtcolorbox{adversarybox}[1]{
