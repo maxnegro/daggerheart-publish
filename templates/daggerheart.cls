@@ -626,17 +626,25 @@ Path = ./fonts/,
 
 \newcommand{\dghformatadjacentsegments}[1]{\textbf{\dghlabeladjacentsegments:}\ \mdseries\upshape #1}
 
+% Generic stat renderer helpers.
+\newcommand{\dghstat}[2]{\textbf{#1:} #2}
+\newcommand{\dghstatif}[3]{%
+	\ifstrempty{#2}{}{% 
+		\dghstat{#1}{#2}#3%
+	}%
+}
+
 
 \newcommand{\adversarystats}[9]{
-	\ifstrempty{#1}{}{\textbf{\dghlabelsize:} #1\\}
-	\ifstrempty{#2}{}{\textbf{\dghlabelsegments:} #2\\}
-	\ifstrempty{#3}{}{\textbf{\dghlabeldifficulty:} #3 |}
-	\ifstrempty{#4}{}{\textbf{\dghlabelthresholds:} #4 |}
-	\ifstrempty{#5}{}{\textbf{\dghlabelhp:} #5 |}
-	\ifstrempty{#6}{}{\textbf{\dghlabelstress:} #6}
+	\dghstatif{\dghlabelsize}{#1}{\\}
+	\dghstatif{\dghlabelsegments}{#2}{\\}
+	\dghstatif{\dghlabeldifficulty}{#3}{ |}
+	\dghstatif{\dghlabelthresholds}{#4}{ |}
+	\dghstatif{\dghlabelhp}{#5}{ |}
+	\dghstatif{\dghlabelstress}{#6}{}
 	\ifstrempty{#7}{}{\\}
-	\ifstrempty{#7}{}{\textbf{\dghlabelatk:} #7 	|}
-	\ifstrempty{#8}{}{\textbf{#8:} #9}
+	\dghstatif{\dghlabelatk}{#7}{ |}
+	\dghstatif{#8}{#9}{}
 }
 
 
@@ -685,8 +693,8 @@ Path = ./fonts/,
 \newtcolorbox{environmentinnerbox}{dgh@innerboxstyle={environmentbordercolor}}
 
 \newcommand{\environmentstats}[2]{
-	\ifstrempty{#1}{}{\textbf{\dghlabeldifficulty:} #1 \ifstrempty{#2}{}{\\}}
-	\ifstrempty{#2}{}{\textbf{\dghlabelpotentialadversaries:} #2}
+	\dghstatif{\dghlabeldifficulty}{#1}{\ifstrempty{#2}{}{\\}}
+	\dghstatif{\dghlabelpotentialadversaries}{#2}{}
 }
 
 \newcommand{\environment}[6]{%

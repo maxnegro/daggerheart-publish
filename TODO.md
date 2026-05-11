@@ -7,11 +7,6 @@
 ### 🟠 Duplicazione di codice (media priorità)
 
 
-#### 6. `\adversarystats` e `\environmentstats` — struttura simile non unificata
-`\adversarystats` accetta 9 argomenti; `\environmentstats` solo 2. Hanno semantica diversa
-ma entrambi emettono coppie `\textbf{label:} valore`. La lista potrebbe essere gestita con
-un comando `\dghstat{label}{value}` generico da comporre a piacere, riducendo la rigidità.
-
 #### 7. Due API sovrapposte per il fullpage
 Esistono sia `\fullpage{...}` (ambiente inline con argomento) sia la coppia
 `\beginFullpage`/`\finishFullpage` per delimitare blocchi. Fanno la stessa cosa con
