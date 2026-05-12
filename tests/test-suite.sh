@@ -36,6 +36,9 @@ BASELINE_DIR="$ROOT_DIR/tests/baseline"
 FIXTURES_DIR="$ROOT_DIR/tests/fixtures"
 BOOKS_DIR="$ROOT_DIR/books"
 
+## Clean previous results
+rm -rf "$RESULTS_DIR"
+## Create results and baseline directories if they don't exist
 mkdir -p "$RESULTS_DIR"
 mkdir -p "$BASELINE_DIR"
 

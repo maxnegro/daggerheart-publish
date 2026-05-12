@@ -262,6 +262,30 @@
 - [ ] **[B1]** Unificare pipeline titoli H1: macro `\dghsection[color=,bg=]{titolo}` nella
   classe; `Header()` nel filtro Lua genera un unico `RawBlock` dichiarativo; eliminare
   `normalize_section_color_blocks` e le coppie `RawBlock` color-before/after
+  - [x] **[B1.0]** Vincoli di sicurezza (decisi):
+    baseline corrente = fonte di verità (immutabile durante B1), strategia `opzione 1 + 3`,
+    modifiche solo di mantenibilità/leggibilità, nessuna regressione visiva/funzionale,
+    nessuna modifica alla sintassi Markdown/frontmatter accettata dal filtro Pandoc.
+  - [x] **[B1.1]** Congelare il comportamento attuale (golden behavior):
+    mappare i 3 casi H1 (`normale`, `con colori custom`, `con bg`) con estratti `.tex`
+    da `KEEP_TEX=1` su fixture dedicate.
+  - [ ] **[B1.2]** Introdurre macro ponte in CLS senza cambiare output:
+    creare `\dghsection[...]` che internamente richiama i path esistenti
+    (`\section` / `\sectionwithbg`) mantenendo la stessa semantica visuale.
+  - [ ] **[B1.3]** Portare `Header()` a singolo punto di emissione:
+    per H1 emettere solo `\dghsection[...] {titolo}` (unico `RawBlock`),
+    senza rimuovere ancora `normalize_section_color_blocks`.
+  - [ ] **[B1.4]** Adattare `blocks_to_latex()` interna:
+    garantire che il rendering ricorsivo usi lo stesso percorso H1 del flusso principale.
+  - [ ] **[B1.5]** Eliminazione controllata dei workaround:
+    rimuovere `normalize_section_color_blocks` e ogni accoppiamento before/after
+    solo dopo equivalenza visiva verificata.
+  - [ ] **[B1.6]** Gate di accettazione B1:
+    `./tests/test-suite.sh` verde + `diff-pdf` senza differenze sui libri baseline
+    (nessuna rigenerazione baseline in questa fase).
+  - [ ] **[B1.7]** Gate sintassi filtro (non regressione):
+    confermare su fixture/book esistenti che restano accettati gli stessi pattern
+    Markdown/frontmatter/Div attrs del filtro corrente (nessun breaking change di parsing).
 - [x] **[C2]** Estrarre helper multicols `\dgh@exitmulticols` / `\dgh@entermulticols` e
   sostituire le 4 occorrenze duplicate
 - [ ] **[D5]** Propagare opzioni di classe ad `article` con `\DeclareOption*` +
