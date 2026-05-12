@@ -875,6 +875,75 @@ Path = ./fonts/,
 	\fi
 }
 
+% \dghsection[opts]{title}: unified H1 macro for pandoc → LaTeX pipeline.
+% Options:
+%   label     = {} — hypertarget/label id (non-bg only)
+%   color     = {} — h1 color name (e.g. dg-red, dg-purple)
+%   color2    = {} — h2 color name
+%   bg        = {} — background image path → triggers sectionwithbg path
+%   bg-height = {} — image height (default 150pt)
+%   bg-raise  = {} — title raise offset (default -18pt)
+%   bg-fade   = {} — explicit fade offset (empty = auto)
+\pgfkeys{
+	/dghsection/.is family, /dghsection,
+	label/.initial     = {},
+	color/.initial     = {},
+	color2/.initial    = {},
+	bg/.initial        = {},
+	bg-height/.initial = {},
+	bg-raise/.initial  = {},
+	bg-fade/.initial   = {},
+}
+\newcommand{\dghsection}[2][]{%
+	\pgfkeys{/dghsection,
+		label={}, color={}, color2={}, bg={},
+		bg-height={}, bg-raise={}, bg-fade={},
+		#1}%
+	\pgfkeysgetvalue{/dghsection/label}{\dghsect@label}%
+	\pgfkeysgetvalue{/dghsection/color}{\dghsect@color}%
+	\pgfkeysgetvalue{/dghsection/color2}{\dghsect@colortwo}%
+	\pgfkeysgetvalue{/dghsection/bg}{\dghsect@bg}%
+	\pgfkeysgetvalue{/dghsection/bg-height}{\dghsect@bgh}%
+	\pgfkeysgetvalue{/dghsection/bg-raise}{\dghsect@bgr}%
+	\pgfkeysgetvalue{/dghsection/bg-fade}{\dghsect@bgf}%
+	% Apply section color if requested
+	\ifx\dghsect@color\@empty\else
+		\setsectioncolor{\dghsect@color}{\dghsect@colortwo}%
+		\global\dgresetsectioncoloronnextsectionfalse
+	\fi
+	% Render section
+	\ifx\dghsect@bg\@empty
+		% Plain section, optionally with hypertarget anchor
+		\ifx\dghsect@label\@empty
+			\section{#2}%
+		\else
+			\hypertarget{\dghsect@label}{\section{#2}\label{\dghsect@label}}%
+		\fi
+	\else
+		% Section with background image
+		\ifx\dghsect@bgh\@empty
+			\setdghsectionbgheight{150pt}%
+		\else
+			\setdghsectionbgheight{\dghsect@bgh}%
+		\fi
+		\ifx\dghsect@bgr\@empty
+			\setdghsectionbgraise{-18pt}%
+		\else
+			\setdghsectionbgraise{\dghsect@bgr}%
+		\fi
+		\ifx\dghsect@bgf\@empty
+			\resetdghsectionbgfadeoffset
+		\else
+			\setdghsectionbgfadeoffset{\dghsect@bgf}%
+		\fi
+		\sectionwithbg{\dghsect@bg}{#2}%
+	\fi
+	% Reset color flag after section
+	\ifx\dghsect@color\@empty\else
+		\global\dgresetsectioncoloronnextsectiontrue
+	\fi
+}
+
 \newcommand{\ColoredTable}[4]{%
 	\begingroup
 	\renewcommand{\arraystretch}{1.3}

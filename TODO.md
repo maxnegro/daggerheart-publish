@@ -269,7 +269,7 @@
   - [x] **[B1.1]** Congelare il comportamento attuale (golden behavior):
     mappare i 3 casi H1 (`normale`, `con colori custom`, `con bg`) con estratti `.tex`
     da `KEEP_TEX=1` su fixture dedicate.
-  - [ ] **[B1.2]** Introdurre macro ponte in CLS senza cambiare output:
+  - [x] **[B1.2]** Introdurre macro ponte in CLS senza cambiare output:
     creare `\dghsection[...]` che internamente richiama i path esistenti
     (`\section` / `\sectionwithbg`) mantenendo la stessa semantica visuale.
   - [ ] **[B1.3]** Portare `Header()` a singolo punto di emissione:
