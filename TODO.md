@@ -272,9 +272,34 @@
   - [x] **[B1.2]** Introdurre macro ponte in CLS senza cambiare output:
     creare `\dghsection[...]` che internamente richiama i path esistenti
     (`\section` / `\sectionwithbg`) mantenendo la stessa semantica visuale.
-  - [ ] **[B1.3]** Portare `Header()` a singolo punto di emissione:
-    per H1 emettere solo `\dghsection[...] {titolo}` (unico `RawBlock`),
-    senza rimuovere ancora `normalize_section_color_blocks`.
+  - [ ] **[B1.3]** Portare `Header()` a singolo punto di emissione (task ombrello).
+    - [ ] **[B1.3.a]** Rifattorizzazione minima emissione H1:
+      sostituire solo il ramo H1 in `Header()` con emissione unica
+      `\dghsection[...] {titolo}` (unico `RawBlock`), mantenendo invariata
+      tutta la logica non-H1.
+    - [ ] **[B1.3.b]** Compatibilità semantica parametri H1:
+      verificare che i campi `label`, `color/color2`, `bg`, `newpage`
+      vengano passati 1:1 alla macro senza normalizzazioni testuali del titolo.
+    - [ ] **[B1.3.c]** Fence di sicurezza temporanea:
+      lasciare attivo `normalize_section_color_blocks` (anche se ridondante)
+      per questa fase, così da isolare i regressi al solo cambio di emissione H1.
+    - [ ] **[B1.3.d]** Golden sintattico mirato:
+      aggiornare/estendere `tests/golden/check-b1-h1-golden.sh` per assertare
+      esclusivamente il pattern `\dghsection[...] {titolo}` nei casi H1,
+      senza ancora cambiare altri checker.
+    - [ ] **[B1.3.e]** Diagnosi tipografica dedicata H1 (apostrofi/virgolette):
+      creare confronto controllato tra `HEAD` e branch corrente compilando lo
+      stesso `.tex` con sola differenza nella `daggerheart.cls`; raccogliere
+      evidenza visiva (`diff-pdf`) e testuale (`pdftotext`) senza introdurre hack
+      di sostituzione caratteri.
+    - [ ] **[B1.3.f]** Fix tipografico non invasivo:
+      intervenire solo su timing/espansione macro (`\setsectioncolor`,
+      `\dghsection`, `\titleformat`) fino a riallineare la resa tipografica,
+      mantenendo il testo del titolo identico in input/output.
+    - [ ] **[B1.3.g]** Gate di uscita B1.3:
+      (1) compile verde su fixture H1,
+      (2) nessun regression error LaTeX,
+      (3) nessuna differenza visiva inattesa sui casi H1 baseline critici.
   - [ ] **[B1.4]** Adattare `blocks_to_latex()` interna:
     garantire che il rendering ricorsivo usi lo stesso percorso H1 del flusso principale.
   - [ ] **[B1.5]** Eliminazione controllata dei workaround:

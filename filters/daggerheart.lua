@@ -803,6 +803,12 @@ local function cell_to_latex(cell)
   return latex
 end
 
+local function cell_text_length(cell)
+  local text = pandoc.utils.stringify(cell_blocks(cell) or {})
+  text = text:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+  return #text
+end
+
 local function row_cells(row)
   if not row then
     return {}
@@ -850,14 +856,45 @@ local function collect_table_rows(tbl)
   return rows
 end
 
-local function default_colspec(col_count)
+local function default_colspec(col_count, rows)
   if col_count < 1 then
     col_count = 1
   end
 
+  local weights = {}
+  for col = 1, col_count do
+    weights[col] = 1
+  end
+
+  if rows then
+    for _, row in ipairs(rows) do
+      local cells = row_cells(row)
+      for col = 1, col_count do
+        local cell = cells[col]
+        local length = cell_text_length(cell)
+        local weight = math.max(1, math.ceil(math.sqrt(length)))
+        if weight > weights[col] then
+          weights[col] = weight
+        end
+      end
+    end
+  end
+
+  local total = 0
+  for _, weight in ipairs(weights) do
+    total = total + weight
+  end
+  if total <= 0 then
+    total = col_count
+  end
+
   local parts = {}
-  for _ = 1, col_count do
-    table.insert(parts, ">{\\raggedright\\arraybackslash}X")
+  for col = 1, col_count do
+    local weight = weights[col] / total * col_count
+    table.insert(parts, string.format(
+      ">{\\raggedright\\arraybackslash\\hsize=%.3f\\hsize\\linewidth=\\hsize}X",
+      weight
+    ))
   end
 
   return table.concat(parts, "")
@@ -904,7 +941,7 @@ function Table(tbl)
   local latex = "\\ColoredTable"
     .. latex_arg("\\linewidth")
     .. latex_arg("\\dgsectioncolor")
-    .. latex_arg(default_colspec(col_count))
+    .. latex_arg(default_colspec(col_count, rows))
     .. latex_arg(table.concat(latex_rows, "\n"))
 
   return pandoc.RawBlock("latex", latex)
