@@ -135,6 +135,25 @@ local function complexity_to_string(value)
   return tostring(complexity_num)
 end
 
+local function meta_author_to_latex(value)
+  if value == nil then
+    return ""
+  end
+
+  if pandoc.utils.type(value) == "List" then
+    local authors = {}
+    for _, item in ipairs(value) do
+      local rendered = meta_to_latex(item)
+      if rendered ~= "" then
+        table.insert(authors, rendered)
+      end
+    end
+    return table.concat(authors, ", ")
+  end
+
+  return meta_to_latex(value)
+end
+
 local function trim_inline(text)
   if not text then
     return ""
@@ -157,7 +176,10 @@ local function ensure_cover_defaults_from_meta(meta)
     cover_defaults.subtitle = subtitle
   end
 
-  local designer = pandoc.utils.stringify(meta.designer or "")
+  local designer = trim_inline(meta_to_latex(meta.designer))
+  if designer == "" then
+    designer = meta_author_to_latex(meta.author)
+  end
   if designer ~= "" then
     cover_defaults.designer = designer
   end
@@ -1451,6 +1473,7 @@ function Div(div)
 
     local designer_value = first_non_empty(
       div.attributes["designer"],
+      div.attributes["author"],
       cover_defaults.designer
     )
     local designer = designer_value ~= "" and latex_escape(designer_value) or "\\dghcoverdesigner"
