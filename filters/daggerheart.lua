@@ -3,6 +3,8 @@ local List = require("pandoc.List")
 local h1_newpage = true
 local normalize_section_color_blocks
 local normalize_break_blocks
+local custom_cover_toc_rendered = false
+local render_toc = false
 local cover_defaults = {
   title = "",
   subtitle = "",
@@ -59,6 +61,100 @@ local function get_meta_string(meta, keys, default)
     end
   end
   return default
+end
+
+local function get_meta_bool(meta, keys, default)
+  if not meta then
+    return default
+  end
+
+  for _, key in ipairs(keys) do
+    local value = meta[key]
+    if value ~= nil then
+      if type(value) == "boolean" then
+        return value
+      end
+
+      local string_value = (meta_to_string(value) or ""):match("^%s*(.-)%s*$"):lower()
+      if string_value == "true" or string_value == "yes" or string_value == "1" then
+        return true
+      end
+      if string_value == "false" or string_value == "no" or string_value == "0" then
+        return false
+      end
+    end
+  end
+  return default
+end
+
+local function read_book_frontmatter_toc()
+  if not (PANDOC_STATE and PANDOC_STATE.input_files and #PANDOC_STATE.input_files > 0) then
+    return nil
+  end
+
+  local handle = io.open(PANDOC_STATE.input_files[1], "r")
+  if not handle then
+    return nil
+  end
+
+  local in_frontmatter = false
+  for line in handle:lines() do
+    if not in_frontmatter then
+      if line:match("^%-%-%-%s*$") then
+        in_frontmatter = true
+      else
+        break
+      end
+    else
+      if line:match("^%-%-%-%s*$") then
+        break
+      end
+
+      local value = line:match("^%s*toc:%s*(%S+)")
+      if value then
+        handle:close()
+        value = value:gsub('^["\']', ""):gsub('["\']$', ""):lower()
+        if value == "true" then
+          return true
+        end
+        if value == "false" then
+          return false
+        end
+        return nil
+      end
+    end
+  end
+
+  handle:close()
+  return nil
+end
+
+local function detect_render_toc(meta)
+  if PANDOC_WRITER_OPTIONS then
+    local writer_toc = PANDOC_WRITER_OPTIONS.table_of_contents
+    if writer_toc == nil then
+      writer_toc = PANDOC_WRITER_OPTIONS.toc
+    end
+    if type(writer_toc) == "boolean" then
+      return writer_toc
+    end
+  end
+
+  local meta_toc = get_meta_bool(meta, { "render-toc", "toc" }, nil)
+  if meta_toc ~= nil then
+    return meta_toc
+  end
+
+  if os.getenv("ENABLE_TOC") == "0" then
+    return false
+  end
+
+  local frontmatter_toc = read_book_frontmatter_toc()
+  if frontmatter_toc ~= nil then
+    return frontmatter_toc
+  end
+
+  return false
 end
 
 local function ensure_header_includes_list(meta)
@@ -200,6 +296,9 @@ local function ensure_cover_defaults_from_meta(meta)
 end
 
 function Meta(meta)
+  custom_cover_toc_rendered = false
+  render_toc = detect_render_toc(meta)
+
   if meta["h1-newpage"] ~= nil then
     h1_newpage = meta["h1-newpage"]
   end
@@ -1495,6 +1594,20 @@ function Div(div)
     local image = (image_path ~= "") and ("\\detokenize{" .. image_path .. "}") or "\\dghtitleimagepath"
 
     local body = blocks_to_latex(div.content)
+    local render_toc_after_cover = false
+    local toc_title = "\\contentsname"
+    local toc_is_enabled = render_toc or detect_render_toc(PANDOC_STATE and PANDOC_STATE.meta or {})
+
+    if not custom_cover_toc_rendered and toc_is_enabled then
+      custom_cover_toc_rendered = true
+      render_toc_after_cover = true
+
+      local toc_title_value = get_meta_string(PANDOC_STATE.meta or {}, { "toc-title" }, "")
+      if toc_title_value ~= "" then
+        toc_title = latex_escape(toc_title_value)
+      end
+    end
+
     local out = {}
     table.insert(out, "\\end{multicols}")
     table.insert(out,
@@ -1507,8 +1620,16 @@ function Div(div)
     )
     table.insert(out, body)
     table.insert(out, "\\end{framecoverpage}")
+    if render_toc_after_cover then
+      table.insert(out,
+        "{\\montserratThin\\fontsize{24pt}{28pt}\\selectfont\\MakeTextUppercase{" .. toc_title .. "}}"
+      )
+    end
     table.insert(out, "\\begin{multicols}{2}")
     table.insert(out, "\\raggedcolumns")
+    if render_toc_after_cover then
+      table.insert(out, "{\\setlength{\\parskip}{0pt}\\tableofcontents}")
+    end
     return pandoc.RawBlock("latex", table.concat(out, "\n"))
   end
 

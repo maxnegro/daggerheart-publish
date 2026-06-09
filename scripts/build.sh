@@ -136,6 +136,9 @@ PANDOC_ARGS=(
 TOC_FRONTMATTER="$(awk '/^---/{if(p==0){p=1;next}else{exit}} p && /^[[:space:]]*toc:[[:space:]]*/{print $2}' "$BOOK_MD")"
 if [[ "${ENABLE_TOC:-1}" == "1" && "$TOC_FRONTMATTER" != "false" ]]; then
   PANDOC_ARGS+=(--toc)
+  PANDOC_ARGS+=(-M render-toc=true)
+else
+  PANDOC_ARGS+=(-M render-toc=false)
 fi
 
 PANDOC_INPUTS=("$BOOK_MD")

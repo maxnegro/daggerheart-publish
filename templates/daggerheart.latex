@@ -31,11 +31,14 @@ $endif$
 \begin{multicols}{2}
 \raggedcolumns
 $if(toc)$
+$if(custom-cover-page)$
+$else$
 \end{multicols}
 {\montserratThin\fontsize{24pt}{28pt}\selectfont\MakeTextUppercase{$if(toc-title)$$toc-title$$else$\contentsname$endif$}}
 \begin{multicols}{2}
 \raggedcolumns
 {\setlength{\parskip}{0pt}\tableofcontents}
+$endif$
 $endif$
 
 $body$
