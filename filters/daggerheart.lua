@@ -1314,7 +1314,8 @@ end
 -- Convert a Markdown string to LaTeX using the Pandoc AST pipeline.
 local function text_to_latex(text)
   if not text or text == "" then return "" end
-  local doc = pandoc.read(text, "markdown")
+  -- Allow bullet lists immediately after text lines in YAML block scalars.
+  local doc = pandoc.read(text, "markdown+lists_without_preceding_blankline")
   return blocks_to_latex(doc.blocks)
 end
 
