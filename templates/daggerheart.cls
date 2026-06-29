@@ -475,8 +475,8 @@ Path = ./fonts/,
 \providecommand{\tightlist}{%
 	\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}%
 }
-\setlength{\leftmargini}{1em}
-\setlength{\leftmarginii}{1em}
+\setlist[itemize]{left=0pt, label=\textbullet}
+\setlist[enumerate]{left=0pt, label=\arabic*.}
 
 % --- Frontpage ---
 \newcommand{\dghtitleimagemode}{none}
