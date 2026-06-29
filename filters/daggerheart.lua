@@ -876,6 +876,8 @@ local function image_latex(el)
 
   if width then
     table.insert(options, "width=" .. width)
+  else
+    table.insert(options, "width=\\linewidth")
   end
 
   if height then
