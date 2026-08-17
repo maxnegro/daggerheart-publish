@@ -1,0 +1,307 @@
+#!/usr/bin/env bash
+# Test suite for daggerheart-publish
+# Usage: ./tests/test-suite.sh [--baseline] [--verbose]
+# 
+# --baseline: Generate baseline PDFs (do this before making changes)
+# --verbose: Show detailed compilation output
+# Default (without --baseline): compile and compare output with baseline PDFs
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+BASELINE_MODE=0
+VERBOSE=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --baseline)
+      BASELINE_MODE=1
+      shift
+      ;;
+    --verbose)
+      VERBOSE=1
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+RESULTS_DIR="$ROOT_DIR/tests/results"
+BASELINE_DIR="$ROOT_DIR/tests/baseline"
+FIXTURES_DIR="$ROOT_DIR/tests/fixtures"
+BOOKS_DIR="$ROOT_DIR/books"
+
+## Clean previous results
+rm -rf "$RESULTS_DIR"
+## Create results and baseline directories if they don't exist
+mkdir -p "$RESULTS_DIR"
+mkdir -p "$BASELINE_DIR"
+
+# Color output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Counters
+TOTAL=0
+PASSED=0
+FAILED=0
+WARNINGS=0
+
+# Log file
+LOGFILE="$RESULTS_DIR/test-results.log"
+> "$LOGFILE"
+
+log_line() {
+  echo -e "$1" | tee -a "$LOGFILE"
+}
+
+log_test_start() {
+  local name="$1"
+  TOTAL=$((TOTAL + 1))
+  log_line "[$(printf '%2d' $TOTAL)] Testing: $name"
+}
+
+log_test_pass() {
+  local name="$1"
+  PASSED=$((PASSED + 1))
+  log_line "  ${GREEN}✓ PASS${NC}: $name"
+}
+
+log_test_fail() {
+  local name="$1"
+  local reason="$2"
+  FAILED=$((FAILED + 1))
+  log_line "  ${RED}✗ FAIL${NC}: $name"
+  log_line "    Reason: $reason"
+}
+
+log_test_warning() {
+  local name="$1"
+  local msg="$2"
+  WARNINGS=$((WARNINGS + 1))
+  log_line "  ${YELLOW}⚠ WARNING${NC}: $name"
+  log_line "    Message: $msg"
+}
+
+compile_book() {
+  local book_path="$1"
+  local output_pdf="$2"
+  local temp_log="$RESULTS_DIR/compile-$$.log"
+
+  if [[ $VERBOSE -eq 1 ]]; then
+    if "$ROOT_DIR/scripts/build.sh" "$book_path" "$output_pdf" 2>&1 | tee -a "$temp_log"; then
+      return 0
+    else
+      return 1
+    fi
+  else
+    if "$ROOT_DIR/scripts/build.sh" "$book_path" "$output_pdf" >"$temp_log" 2>&1; then
+      return 0
+    else
+      cat "$temp_log" >> "$LOGFILE"
+      return 1
+    fi
+  fi
+}
+
+validate_pdf_exists() {
+  local pdf="$1"
+  if [[ -f "$pdf" && -s "$pdf" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+sanitize_label() {
+  local input="$1"
+  echo "$input" | tr '[:space:]/' '__' | tr -cd '[:alnum:]_-'
+}
+
+compare_against_baseline() {
+  local generated_pdf="$1"
+  local baseline_pdf="$2"
+  local label="$3"
+
+  if [[ ! -f "$baseline_pdf" ]]; then
+    log_test_warning "$label" "Baseline missing: $baseline_pdf"
+    return 0
+  fi
+
+  if command -v diff-pdf >/dev/null 2>&1; then
+    local safe_label
+    safe_label="$(sanitize_label "$label")"
+    local diff_output="$RESULTS_DIR/diff-${safe_label}.pdf"
+
+    # Use simple diff check without --brief (which doesn't exist in diff-pdf)
+    if diff-pdf "$baseline_pdf" "$generated_pdf" >/dev/null 2>&1; then
+      return 0
+    fi
+
+    # Generate visual diff artifact for manual review
+    if diff-pdf --output-diff="$diff_output" "$baseline_pdf" "$generated_pdf" >/dev/null 2>&1; then
+      log_line "    Visual diff saved: $diff_output"
+    fi
+    return 1
+  fi
+
+  # Fallback when diff-pdf is unavailable.
+  if cmp -s "$baseline_pdf" "$generated_pdf"; then
+    return 0
+  fi
+
+  return 1
+}
+
+# ============================================================================
+# Test: Books compilation
+# ============================================================================
+
+log_line ""
+log_line "====== BOOK COMPILATION TESTS ======"
+
+for book_dir in "$BOOKS_DIR"/*; do
+  if [[ -d "$book_dir" && -f "$book_dir/book.md" ]]; then
+    book_name="$(basename "$book_dir")"
+    output_pdf="$RESULTS_DIR/${book_name}.pdf"
+    
+    log_test_start "Book: $book_name"
+    
+    if compile_book "$book_dir" "$output_pdf"; then
+      if validate_pdf_exists "$output_pdf"; then
+        # If in baseline mode, copy to baseline
+        if [[ $BASELINE_MODE -eq 1 ]]; then
+          log_test_pass "Book: $book_name"
+          cp "$output_pdf" "$BASELINE_DIR/${book_name}.pdf"
+          log_line "    Baseline saved: $BASELINE_DIR/${book_name}.pdf"
+        else
+          if compare_against_baseline "$output_pdf" "$BASELINE_DIR/${book_name}.pdf" "Book: $book_name"; then
+            log_test_pass "Book: $book_name"
+          else
+            log_test_fail "Book: $book_name" "Baseline mismatch (see diff-$(sanitize_label "Book: $book_name").pdf in tests/results/)"
+          fi
+        fi
+      else
+        log_test_fail "Book: $book_name" "PDF generated but is invalid or empty"
+      fi
+    else
+      log_test_fail "Book: $book_name" "Compilation failed"
+    fi
+  fi
+done
+
+# ============================================================================
+# Test: Fixture compilation (critical cases)
+# ============================================================================
+
+log_line ""
+log_line "====== FIXTURE COMPILATION TESTS ======"
+
+for fixture_file in "$FIXTURES_DIR"/*.md; do
+  if [[ -f "$fixture_file" ]]; then
+    fixture_name="$(basename "$fixture_file" .md)"
+    fixture_dir="$RESULTS_DIR/fixture-$fixture_name"
+    output_pdf="$fixture_dir/$fixture_name.pdf"
+    
+    mkdir -p "$fixture_dir"
+
+    # Fixture-specific assets
+    if [[ "$fixture_name" == "test-framecoverpage" ]]; then
+      mkdir -p "$fixture_dir/assets"
+      cp "$ROOT_DIR/books/test-frame-cover/assets/cover-library.png" "$fixture_dir/assets/cover-library.png"
+    fi
+    
+    # Create minimal book.md wrapper
+    cat > "$fixture_dir/book.md" <<'EOF'
+---
+title: Test Fixture
+subtitle: Fixture Validation
+author: Test Suite
+designer: Test System
+documentclass: daggerheart
+lang: italian
+toc: false
+---
+EOF
+    
+    cp "$fixture_file" "$fixture_dir/chapter.md"
+    
+    # Create chapters directory
+    mkdir -p "$fixture_dir/chapters"
+    mv "$fixture_dir/chapter.md" "$fixture_dir/chapters/01-test.md"
+    
+    log_test_start "Fixture: $fixture_name"
+    
+    if compile_book "$fixture_dir" "$output_pdf"; then
+      if validate_pdf_exists "$output_pdf"; then
+        if [[ $BASELINE_MODE -eq 1 ]]; then
+          log_test_pass "Fixture: $fixture_name"
+          cp "$output_pdf" "$BASELINE_DIR/fixture-${fixture_name}.pdf"
+          log_line "    Baseline saved: $BASELINE_DIR/fixture-${fixture_name}.pdf"
+        else
+          if compare_against_baseline "$output_pdf" "$BASELINE_DIR/fixture-${fixture_name}.pdf" "Fixture: $fixture_name"; then
+            log_test_pass "Fixture: $fixture_name"
+          else
+            log_test_fail "Fixture: $fixture_name" "Baseline mismatch (see diff-$(sanitize_label "Fixture: $fixture_name").pdf in tests/results/)"
+          fi
+        fi
+      else
+        log_test_fail "Fixture: $fixture_name" "PDF generated but is invalid or empty"
+      fi
+    else
+      log_test_fail "Fixture: $fixture_name" "Compilation failed"
+    fi
+  fi
+done
+
+# ============================================================================
+# Test: LaTeX intermediate validation (when KEEP_TEX=1)
+# ============================================================================
+
+log_line ""
+log_line "====== LATEX VALIDATION TESTS ======"
+log_line "To enable LaTeX validation, compile with KEEP_TEX=1"
+log_line "Example: KEEP_TEX=1 make build"
+
+# ============================================================================
+# Summary
+# ============================================================================
+
+log_line ""
+log_line "====== TEST SUMMARY ======"
+log_line "Total tests:  $TOTAL"
+log_line "Passed:       ${GREEN}$PASSED${NC}"
+log_line "Failed:       $(if [[ $FAILED -eq 0 ]]; then echo "${GREEN}$FAILED${NC}"; else echo "${RED}$FAILED${NC}"; fi)"
+log_line "Warnings:     $(if [[ $WARNINGS -eq 0 ]]; then echo "$WARNINGS"; else echo "${YELLOW}$WARNINGS${NC}"; fi)"
+log_line ""
+
+if [[ $BASELINE_MODE -eq 1 ]]; then
+  log_line "Baseline PDFs generated in: $BASELINE_DIR"
+  log_line "Next time, run without --baseline to test against baseline."
+else
+  diff_files=$(find "$RESULTS_DIR" -name "diff-*.pdf" -type f | wc -l)
+  if [[ $diff_files -gt 0 ]]; then
+    log_line ""
+    log_line "Visual diffs available: $RESULTS_DIR/diff-*.pdf"
+    log_line "To review differences, open any diff-*.pdf file in your PDF viewer."
+  fi
+fi
+
+log_line ""
+log_line "Full log saved to: $LOGFILE"
+
+# Exit code
+if [[ $FAILED -eq 0 ]]; then
+  echo -e "${GREEN}All tests passed!${NC}"
+  exit 0
+else
+  echo -e "${RED}$FAILED test(s) failed!${NC}"
+  exit 1
+fi

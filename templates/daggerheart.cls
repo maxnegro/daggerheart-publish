@@ -33,7 +33,7 @@
 \RequirePackage{etoolbox}
 \RequirePackage{tikzpagenodes}
 \RequirePackage{eso-pic}
-\usetikzlibrary{calc,fadings}
+	\usetikzlibrary{calc,fadings,shadings}
 \tikzfading[name=dgh fade to white,
 	top color=transparent!100,
 	bottom color=transparent!0]
@@ -50,12 +50,47 @@
 \newlength{\dghsectionbgraise}
 \newlength{\dghsectionbgbleed}
 \newlength{\dghsectionbgfadeoffset}
-\setlength{\dghsectionbgheight}{150pt}
-\setlength{\dghsectionbgraise}{-18pt}
+\newif\ifdghsectionbgfadeauto
+\dghsectionbgfadeautotrue
 \setlength{\dghsectionbgbleed}{1bp}
-% Default fade start (distance from page top): height - 80pt
-% Override manually if needed; recomputed whenever height or raise changes.
-\setlength{\dghsectionbgfadeoffset}{\dimexpr\dghsectionbgheight-80pt\relax}
+
+% Internal helper: keep stored fade offset synced with current auto formula.
+\newcommand{\dghsectionbgupdateautofade}{%
+	\ifdghsectionbgfadeauto
+		\setlength{\dghsectionbgfadeoffset}{\dimexpr\dghsectionbgheight-80pt\relax}%
+	\fi
+}
+
+% Public setters for section background parameters.
+\newcommand{\setdghsectionbgheight}[1]{%
+	\setlength{\dghsectionbgheight}{#1}%
+	\dghsectionbgupdateautofade
+}
+\newcommand{\setdghsectionbgraise}[1]{%
+	\setlength{\dghsectionbgraise}{#1}%
+	\dghsectionbgupdateautofade
+}
+\newcommand{\setdghsectionbgfadeoffset}[1]{%
+	\global\dghsectionbgfadeautofalse
+	\setlength{\dghsectionbgfadeoffset}{#1}%
+}
+\newcommand{\resetdghsectionbgfadeoffset}{%
+	\global\dghsectionbgfadeautotrue
+	\dghsectionbgupdateautofade
+}
+
+% Effective fade offset used while rendering section backgrounds.
+\newcommand{\dghsectionbgfadeeffective}{%
+	\ifdghsectionbgfadeauto
+		\dimexpr\dghsectionbgheight-80pt\relax
+	\else
+		\dghsectionbgfadeoffset
+	\fi
+}
+
+\setdghsectionbgheight{150pt}
+\setdghsectionbgraise{-18pt}
+\resetdghsectionbgfadeoffset
 \AtBeginDocument{%
 	\setlength{\dghpagetotext}{1in}%
 	\addtolength{\dghpagetotext}{\voffset}%
@@ -104,13 +139,12 @@
 	}}
 }
 
-\onehalfspacing
+\setstretch{1.2}
 \setlength{\columnsep}{1.5em}
 
 % --- Fonts ---
 \renewcommand{\normalsize}{\fontsize{8.5}{10}\selectfont}
 \normalsize
-\renewcommand{\baselinestretch}{1.2}
 \setmainfont{Montserrat-Regular.ttf}[
 Path = ./fonts/,
 ItalicFont = Merriweather-Italic.ttf,
@@ -135,8 +169,10 @@ Path = ./fonts/,
 \definecolor{tableheaderbg}{HTML}{3a6b7b}
 \definecolor{tablerow}{HTML}{ebf0f1}
 \definecolor{white}{HTML}{ffffff}
-\definecolor{squareboxbg}{HTML}{f1ebf4}
-\definecolor{squareboxborder}{HTML}{4d2d63}
+\definecolor{squareboxbg-default}{HTML}{f1ebf4}
+\definecolor{squareboxborder-default}{HTML}{4d2d63}
+\colorlet{squareboxbg}{squareboxbg-default}
+\colorlet{squareboxborder}{squareboxborder-default}
 \definecolor{roundedboxbg}{HTML}{dde2ed}
 \definecolor{quoteborder}{HTML}{deb334}
 \definecolor{adversarybordercolor}{HTML}{bcab84}
@@ -163,8 +199,8 @@ Path = ./fonts/,
 	\colorlet{squareboxbg}{#1}
 }
 \newcommand{\resetboxcolor}{
-	\definecolor{squareboxbg}{HTML}{f1ebf4}
-	\definecolor{squareboxborder}{HTML}{4d2d63}
+	\colorlet{squareboxbg}{squareboxbg-default}
+	\colorlet{squareboxborder}{squareboxborder-default}
 }
 
 % --- Custom square box ---
@@ -215,9 +251,6 @@ Path = ./fonts/,
 {\begin{quotebox}}
 {\end{quotebox}}
 
-\usepackage{tikz}
-\usetikzlibrary{shadings}
-
 \definecolor{sfondoCover}{HTML}{295369}
 \definecolor{h1textlight}{HTML}{F5E6D3}
 
@@ -247,7 +280,7 @@ Path = ./fonts/,
 	\end{tikzpicture}
 	}
     
-	\ifnum\dghcoverimagecreditenabled>0\relax
+	\ifdghcoverimagecreditenabled
 		\begin{tikzpicture}[remember picture,overlay]
 			\node[
 				anchor=north east,
@@ -260,11 +293,11 @@ Path = ./fonts/,
 				text opacity=1,
 				rounded corners=2pt
 			] at (current page.north east) {%
-				\ifnum\dghcoverimagetitleenabled>0\relax
+				\ifdghcoverimagetitleenabled
 					{\normalfont\fontsize{8pt}{7pt}\selectfont\bfseries\color{lightgray} \dghcoverimagetitle}%
 				\fi
-				\ifnum\dghcoverimageauthorenabled>0\relax
-					\ifnum\dghcoverimagetitleenabled>0\relax\\[-3pt]\fi
+				\ifdghcoverimageauthorenabled
+					\ifdghcoverimagetitleenabled\\[-3pt]\fi
 					{\normalfont\fontsize{6pt}{5pt}\selectfont\itshape\color{lightgray} \dghcoverimageauthor}%
 				\fi
 			};
@@ -331,7 +364,7 @@ Path = ./fonts/,
 	\color{maintext}
 	\pagestyle{fancy}
 	\restoregeometry
-}{}
+}
 
 % --- Titles ---
 \setcounter{secnumdepth}{0}
@@ -348,16 +381,18 @@ Path = ./fonts/,
 	{\thesection}
 	{1em}
 	{}
+	\titlespacing*{\section}{0pt}{0pt}{0.8em}
 	\titleformat{\subsection}
 	{\eveleth\fontsize{20pt}{20pt}\selectfont\color{#2}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesubsection}
 	{1em}
 	{}
+	\titlespacing*{\subsection}{0pt}{1.0em}{0.5em}
 }
 
 \newcommand{\setsectioncolor}[2]{%
-	\global\def\dgsectioncolor{#1}%
-	\global\def\dgsubsectioncolor{#2}%
+	\gdef\dgsectioncolor{#1}%
+	\gdef\dgsubsectioncolor{#2}%
 	\applysectioncolor{\dgsectioncolor}{\dgsubsectioncolor}%
 	\global\dgresetsectioncoloronnextsectiontrue
 }
@@ -371,14 +406,10 @@ Path = ./fonts/,
 }
 
 
-\newcommand{\resetsectioncolor}{\global\def\dgsectioncolor{h1text}\global\def\dgsubsectioncolor{h2text}\applysectioncolor{\dgsectioncolor}{\dgsubsectioncolor} \setsubsubsectioncolor{h3text}\global\dgresetsectioncoloronnextsectionfalse}
+\newcommand{\resetsectioncolor}{\gdef\dgsectioncolor{h1text}\gdef\dgsubsectioncolor{h2text}\applysectioncolor{\dgsectioncolor}{\dgsubsectioncolor} \setsubsubsectioncolor{h3text}\global\dgresetsectioncoloronnextsectionfalse}
 \newcommand{\dgapplycurrentsectioncolor}{\applysectioncolor{\dgsectioncolor}{\dgsubsectioncolor}}
 \resetsectioncolor
 
-% Keep heading spacing deterministic: default article section skips include
-% stretch/shrink components that can change layout based on remaining page content.
-\titlespacing*{\section}{0pt}{0pt}{0.8em}
-\titlespacing*{\subsection}{0pt}{1.0em}{0.5em}
 \titlespacing*{\subsubsection}{0pt}{0.8em}{0.4em}
 
 \titleformat{\paragraph}[hang]
@@ -403,6 +434,17 @@ Path = ./fonts/,
 \newif\ifdghonepagebreak
 \dghonepagebreaktrue
 
+% Public API for section page-break behavior in two-column mode.
+\newcommand{\enabledghonepagebreak}{\global\dghonepagebreaktrue}
+\newcommand{\disabledghonepagebreak}{\global\dghonepagebreakfalse}
+
+% Internal helpers for multicols transitions.
+\newcommand{\dgh@exitmulticols}{\end{multicols}}
+\newcommand{\dgh@entermulticols}{%
+\begin{multicols}{2}%
+\raggedcolumns%
+}
+
 \let\oldsection\section
 \renewcommand{\section}[1]{%
 	\ifindaggerfullpage
@@ -411,14 +453,13 @@ Path = ./fonts/,
 		\oldsection{#1}%
 		\vspace{1em}%
 	\else
-		\end{multicols}%
+		\dgh@exitmulticols%
 		\ifdghonepagebreak\newpage\fi
 		\vspace{1em}%
 		\ifdgresetsectioncoloronnextsection\resetsectioncolor\else\dgapplycurrentsectioncolor\fi
 		\oldsection{#1}%
 		\vspace{1em}%
-		\begin{multicols}{2}%
-		\raggedcolumns
+		\dgh@entermulticols%
 	\fi
 }
 
@@ -429,11 +470,13 @@ Path = ./fonts/,
 }
 
 % --- Lists ---
+% SHIM: \tightlist is injected by Pandoc to reduce spacing in lists.
+% Do NOT remove — this is a required compatibility layer for Pandoc's Markdown → LaTeX conversion.
 \providecommand{\tightlist}{%
 	\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}%
 }
-\setlength{\leftmargini}{1em}
-\setlength{\leftmarginii}{1em}
+\setlist[itemize]{left=0pt, label=\textbullet}
+\setlist[enumerate]{left=0pt, label=\arabic*.}
 
 % --- Frontpage ---
 \newcommand{\dghtitleimagemode}{none}
@@ -447,9 +490,12 @@ Path = ./fonts/,
 \newcommand{\dghcovercomplexity}{0}
 \newcommand{\dghcoverimagetitle}{}
 \newcommand{\dghcoverimageauthor}{}
-\newcommand{\dghcoverimagecreditenabled}{0}
-\newcommand{\dghcoverimagetitleenabled}{0}
-\newcommand{\dghcoverimageauthorenabled}{0}
+\newif\ifdghcoverimagecreditenabled
+\newif\ifdghcoverimagetitleenabled
+\newif\ifdghcoverimageauthorenabled
+\dghcoverimagecreditenabledfalse
+\dghcoverimagetitleenabledfalse
+\dghcoverimageauthorenabledfalse
 
 \newcommand{\settitlepageimagemode}[1]{\gdef\dghtitleimagemode{#1}}
 \newcommand{\settitlepageimagepath}[1]{\gdef\dghtitleimagepath{#1}}
@@ -521,50 +567,49 @@ Path = ./fonts/,
 \renewcommand{\tableofcontents}{%
 	\@starttoc{toc}%
 }
-\makeatother
 
-\tcbuselibrary{skins}
-
-% --- Main Box ---
-\newtcolorbox{adversarybox}[1]{
-	enhanced,
-	colback=adversarybgcolor,
-	colframe=adversarybordercolor,
-	arc=5pt,
-	boxrule=1pt,
-	outer arc=5pt,
-	before skip=2em,
-	after skip=2em,
-	top=8pt,
-	left=8pt,
-	right=8pt,
-	bottom=8pt,
-	before upper={\parskip=4pt},
+% --- Shared entity box styles ---
+\tcbset{
+	dgh@mainboxstyle/.style 2 args={
+		enhanced,
+		colback=#1,
+		colframe=#2,
+		arc=5pt,
+		boxrule=1pt,
+		outer arc=5pt,
+		before skip=2em,
+		after skip=2em,
+		top=8pt,
+		left=8pt,
+		right=8pt,
+		bottom=8pt,
+		before upper={\parskip=4pt},
+	},
+	dgh@innerboxstyle/.style args={#1}{
+		colback=white,
+		enhanced,
+		frame hidden,
+		borderline north={1pt}{0pt}{#1},
+		borderline south={1pt}{0pt}{#1},
+		left=0.5em,
+		right=0.5em,
+		top=0.5em,
+		bottom=0.5em,
+		before skip=1em,
+		after skip=1em,
+		sharp corners,
+	},
 }
 
-% --- Inner box ---
-\newtcolorbox{adversaryinnerbox}{
-	colback=white,
-	enhanced,
-	frame hidden,
-	borderline north={1pt}{0pt}{adversarybordercolor},
-	borderline south={1pt}{0pt}{adversarybordercolor},
-	left=0.5em,
-	right=0.5em,
-	top=0.5em,
-	bottom=0.5em,
-	before skip=1em,
-	after skip=1em,
-	sharp corners,
-}
+% --- Adversary boxes ---
+\newtcolorbox{adversarybox}[1]{dgh@mainboxstyle={adversarybgcolor}{adversarybordercolor}}
+\newtcolorbox{adversaryinnerbox}{dgh@innerboxstyle={adversarybordercolor}}
 
 \newcommand{\dghsectionseparator}{\par\noindent\rule{\linewidth}{1pt}\par}
 
 % Macro per Tier+Type localizzata (definizioni separate per lingua)
 \newcommand{\dghenvironmenttiertypeenglish}[2]{\dghlabeltier\ #1 #2}
 \newcommand{\dghenvironmenttiertypeitalian}[2]{#2 di \dghlabeltier\ #1}
-% Macro attiva (default inglese)
-\newcommand{\dghenvironmenttiertype}[2]{\dghenvironmenttiertypeenglish{#1}{#2}}
 
 % Localized labels (default English). If babel is loaded, labels switch with language.
 \newcommand{\dghsetlabelsenglish}{%
@@ -606,155 +651,100 @@ Path = ./fonts/,
 	\gdef\dghlabelimpulses{Impeti}%
 	\gdef\dghlabelpotentialadversaries{Potenziali Avversari}%
 	\gdef\dghlabeldesignedby{Progettato da}%
-	\gdef\dghlabelcomplexity{Livello di Complessit\`a}%
+	\gdef\dghlabelcomplexity{Livello di Complessità}%
 }
 
 \dghsetlabelsenglish
 
-\makeatletter
 \AtBeginDocument{%
-\@ifpackageloaded{babel}{%
-\addto\captionsenglish{\dghsetlabelsenglish}%
-\addto\captionsitalian{\dghsetlabelsitalian}%
-\ifcsname languagename\endcsname
-\ifdefstring{\languagename}{italian}{\dghsetlabelsitalian}{\dghsetlabelsenglish}%
-\else
-\dghsetlabelsenglish
-\fi
-}{}%
+  \@ifpackageloaded{babel}{%
+    \addto\captionsenglish{\dghsetlabelsenglish}%
+    \addto\captionsitalian{\dghsetlabelsitalian}%
+    \ifcsname languagename\endcsname
+      \ifdefstring{\languagename}{italian}{\dghsetlabelsitalian}{\dghsetlabelsenglish}%
+    \else
+      \dghsetlabelsenglish
+    \fi
+  }{}%
 }
-\makeatother
 
 
 \newcommand{\dghexperienceseparator}{\noindent\rule{\linewidth}{0.25pt}}
 
 \newcommand{\dghformatadjacentsegments}[1]{\textbf{\dghlabeladjacentsegments:}\ \mdseries\upshape #1}
 
+% Generic stat renderer helpers.
+\newcommand{\dghstat}[2]{\textbf{#1:} #2}
+\newcommand{\dghstatif}[3]{%
+	\ifstrempty{#2}{}{% 
+		\dghstat{#1}{#2}#3%
+	}%
+}
 
-\newcommand{\adversarystats}[9]{
-	\ifstrempty{#1}{}{\textbf{\dghlabelsize:} #1\\}
-	\ifstrempty{#2}{}{\textbf{\dghlabelsegments:} #2\\}
-	\ifstrempty{#3}{}{\textbf{\dghlabeldifficulty:} #3 |}
-	\ifstrempty{#4}{}{\textbf{\dghlabelthresholds:} #4 |}
-	\ifstrempty{#5}{}{\textbf{\dghlabelhp:} #5 |}
-	\ifstrempty{#6}{}{\textbf{\dghlabelstress:} #6}
+
+\newcommand{\dghadversarystats}[9]{
+	\dghstatif{\dghlabelsize}{#1}{\\}
+	\dghstatif{\dghlabelsegments}{#2}{\\}
+	\dghstatif{\dghlabeldifficulty}{#3}{ |}
+	\dghstatif{\dghlabelthresholds}{#4}{ |}
+	\dghstatif{\dghlabelhp}{#5}{ |}
+	\dghstatif{\dghlabelstress}{#6}{}
 	\ifstrempty{#7}{}{\\}
-	\ifstrempty{#7}{}{\textbf{\dghlabelatk:} #7 	|}
-	\ifstrempty{#8}{}{\textbf{#8:} #9}
+	\dghstatif{\dghlabelatk}{#7}{ |}
+	\dghstatif{#8}{#9}{}
 }
 
 
-\newcommand{\adversary}[6]{%
-	\begin{adversarybox}{}%
+% --- Internal entity renderer ---
+% #1=outer box env, #2=inner box env, #3=name, #4=tiertype,
+% #5=description, #6=motivesandtactics, #7=stats, #8=features
+\newcommand{\dgh@entity}[8]{%
+	\begin{#1}{}%
 		{\color{maintext}%
-			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#1}
+			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#3}
 			\par\smallskip
 			\normalfont\fontsize{8pt}{8pt}\selectfont
-			
-			\ifstrempty{#2}{}{
-				\textbf{\emph{#2}}
-				\\%\par\smallskip
-			}
-			\ifstrempty{#3}{}{
-				\emph{#3}
-				\par%\smallskip
-			}
 			\ifstrempty{#4}{}{
-				\textbf{\dghlabelmotivesandtactics:} #4
-				\par%\smallskip
+				\textbf{\emph{#4}}
+				\\
 			}
 			\ifstrempty{#5}{}{
-				\begin{adversaryinnerbox}
-					#5
-				\end{adversaryinnerbox}
+				\emph{#5}
+				\par
 			}
-			\par\smallskip
-			
-			\ifstrempty{#6}{}{			
-				\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
-				\normalfont\fontsize{8pt}{8pt}\selectfont
-				
-				#6
-			}
-		}%
-	\end{adversarybox}%
-}
-
-\newcommand{\colossusadversary}[6]{%
-	\begin{environmentbox}{}%
-		{\color{maintext}%
-			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#1}
-			\par\smallskip
-			\normalfont\fontsize{8pt}{8pt}\selectfont
-
-			\ifstrempty{#2}{}{
-				\textbf{\emph{#2}}
-				\\%\par%\smallskip
-			}
-			\ifstrempty{#3}{}{
-				\emph{#3}
-				\par%\smallskip
-			}
-			\ifstrempty{#4}{}{
-				\textbf{\dghlabelmotivesandtactics:} #4
-				\par%\smallskip
-			}
-			\ifstrempty{#5}{}{
-				\begin{environmentinnerbox}
-					#5
-				\end{environmentinnerbox}
-			}
-			\par\smallskip
-
 			\ifstrempty{#6}{}{
+				\textbf{\dghlabelmotivesandtactics:} #6
+				\par
+			}
+			\ifstrempty{#7}{}{
+				\begin{#2}
+					#7
+				\end{#2}
+			}
+			\par\smallskip
+			\ifstrempty{#8}{}{
 				\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
 				\normalfont\fontsize{8pt}{8pt}\selectfont
 
-				#6
+				#8
 			}
 		}%
-	\end{environmentbox}%
+	\end{#1}%
 }
 
-% --- Main Box ---
-\newtcolorbox{environmentbox}[1]{
-	enhanced,
-	colback=environmentbgcolor,
-	colframe=environmentbordercolor,
-	arc=5pt,
-	boxrule=1pt,
-	outer arc=5pt,
-	before skip=2em,
-	after skip=2em,
-	top=8pt,
-	left=8pt,
-	right=8pt,
-	bottom=8pt,
-	before upper={\parskip=4pt},
+\newcommand{\dghadversary}[6]{\dgh@entity{adversarybox}{adversaryinnerbox}{#1}{#2}{#3}{#4}{#5}{#6}}
+\newcommand{\dghcolossusadversary}[6]{\dgh@entity{environmentbox}{environmentinnerbox}{#1}{#2}{#3}{#4}{#5}{#6}}
+
+% --- Environment boxes ---
+\newtcolorbox{environmentbox}[1]{dgh@mainboxstyle={environmentbgcolor}{environmentbordercolor}}
+\newtcolorbox{environmentinnerbox}{dgh@innerboxstyle={environmentbordercolor}}
+
+\newcommand{\dghenvironmentstats}[2]{
+	\dghstatif{\dghlabeldifficulty}{#1}{\ifstrempty{#2}{}{\\}}
+	\dghstatif{\dghlabelpotentialadversaries}{#2}{}
 }
 
-% --- Inner box ---
-\newtcolorbox{environmentinnerbox}{
-	colback=white,
-	enhanced,
-	frame hidden,
-	borderline north={1pt}{0pt}{environmentbordercolor},
-	borderline south={1pt}{0pt}{environmentbordercolor},
-	left=0.5em,
-	right=0.5em,
-	top=0.5em,
-	bottom=0.5em,
-	before skip=1em,
-	after skip=1em,
-	sharp corners,
-}
-
-\newcommand{\environmentstats}[2]{
-	\ifstrempty{#1}{}{\textbf{\dghlabeldifficulty:} #1 \ifstrempty{#2}{}{\\}}
-	\ifstrempty{#2}{}{\textbf{\dghlabelpotentialadversaries:} #2}
-}
-
-\newcommand{\environment}[6]{%
+\newcommand{\dghenvironment}[6]{%
 	\begin{environmentbox}{}%
 		{\color{maintext}%
 			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#1}
@@ -790,27 +780,39 @@ Path = ./fonts/,
 	\end{environmentbox}%
 }
 
+% Deprecated aliases: use dgh-prefixed versions instead (for gradual migration)
+\let\adversarystats\dghadversarystats
+\let\adversary\dghadversary
+\let\colossusadversary\dghcolossusadversary
+\let\environmentstats\dghenvironmentstats
+\let\environment\dghenvironment
 
 \newif\ifindaggerfullpage
 \indaggerfullpagefalse
 
-\newcommand{\fullpage}[1]{
-	\end{multicols}
-	\indaggerfullpagetrue
-	#1
-	\indaggerfullpagefalse
-	\begin{multicols}{2}
-	\raggedcolumns
+% Canonical fullpage API.
+\newcommand{\dghfullpagestart}{%
+	\dgh@exitmulticols%
+	\global\indaggerfullpagetrue%
 }
+\newcommand{\dghfullpageend}{%
+	\global\indaggerfullpagefalse%
+	\dgh@entermulticols%
+}
+\newenvironment{dghfullpage}{\dghfullpagestart}{\dghfullpageend}
 
-\newcommand{\beginFullpage}{%
-	\end{multicols}%
-	\indaggerfullpagetrue%
-}
-\newcommand{\finishFullpage}{%
-	\indaggerfullpagefalse%
-	\begin{multicols}{2}%
-	\raggedcolumns%
+% Deprecated wrapper kept for backward compatibility.
+% Prefer: \begin{dghfullpage} ... \end{dghfullpage}
+\newif\ifdghfullpagedeprecationwarned
+\dghfullpagedeprecationwarnedfalse
+\newcommand{\fullpage}[1]{%
+	\ifdghfullpagedeprecationwarned\else
+		\PackageWarningNoLine{daggerheart}{\string\fullpage is deprecated; use dghfullpage environment instead}%
+		\global\dghfullpagedeprecationwarnedtrue
+	\fi
+	\begin{dghfullpage}%
+	#1%
+	\end{dghfullpage}%
 }
 
 % Force a real page break even when the document body is in multicols.
@@ -818,10 +820,9 @@ Path = ./fonts/,
 	\ifindaggerfullpage
 		\newpage%
 	\else
-		\end{multicols}%
+		\dgh@exitmulticols%
 		\newpage%
-		\begin{multicols}{2}%
-		\raggedcolumns%
+		\dgh@entermulticols%
 	\fi
 }
 
@@ -842,7 +843,7 @@ Path = ./fonts/,
 		% white fade: starts at (height+raise) from page top, ends at image bottom
 		\fill[white, path fading=dgh fade to white]
 			% ($(current page.north west) + (-\dghsectionbgbleed, -126pt+\dghsectionbgbleed)$)
-			($(current page.north west) + (-\dghsectionbgbleed, -\dghsectionbgfadeoffset)$)
+			($(current page.north west) + (-\dghsectionbgbleed, -\dghsectionbgfadeeffective)$)
 			rectangle
 			($(current page.north east) + (\dghsectionbgbleed, -\dghsectionbgheight)$);
 		% anti-seam mask: hides 1px raster antialiasing at the south clip boundary
@@ -867,20 +868,90 @@ Path = ./fonts/,
 	\ifindaggerfullpage
 		\dghsectionbgrender{#1}{#2}%
 	\else
-		\end{multicols}%
+		\dgh@exitmulticols%
 		\ifdghonepagebreak\newpage\fi
 		\dghsectionbgrender{#1}{#2}%
-		\begin{multicols}{2}%
-		\raggedcolumns%
+		\dgh@entermulticols%
+	\fi
+}
+
+% \dghsection[opts]{title}: unified H1 macro for pandoc → LaTeX pipeline.
+% Options:
+%   label     = {} — hypertarget/label id (non-bg only)
+%   color     = {} — h1 color name (e.g. dg-red, dg-purple)
+%   color2    = {} — h2 color name
+%   bg        = {} — background image path → triggers sectionwithbg path
+%   bg-height = {} — image height (default 150pt)
+%   bg-raise  = {} — title raise offset (default -18pt)
+%   bg-fade   = {} — explicit fade offset (empty = auto)
+\pgfkeys{
+	/dghsection/.is family, /dghsection,
+	label/.initial     = {},
+	color/.initial     = {},
+	color2/.initial    = {},
+	bg/.initial        = {},
+	bg-height/.initial = {},
+	bg-raise/.initial  = {},
+	bg-fade/.initial   = {},
+}
+\newcommand{\dghsection}[2][]{%
+	\pgfkeys{/dghsection,
+		label={}, color={}, color2={}, bg={},
+		bg-height={}, bg-raise={}, bg-fade={},
+		#1}%
+	\pgfkeysgetvalue{/dghsection/label}{\dghsect@label}%
+	\pgfkeysgetvalue{/dghsection/color}{\dghsect@color}%
+	\pgfkeysgetvalue{/dghsection/color2}{\dghsect@colortwo}%
+	\pgfkeysgetvalue{/dghsection/bg}{\dghsect@bg}%
+	\pgfkeysgetvalue{/dghsection/bg-height}{\dghsect@bgh}%
+	\pgfkeysgetvalue{/dghsection/bg-raise}{\dghsect@bgr}%
+	\pgfkeysgetvalue{/dghsection/bg-fade}{\dghsect@bgf}%
+	% Apply section color if requested
+	\ifx\dghsect@color\@empty\else
+		\setsectioncolor{\dghsect@color}{\dghsect@colortwo}%
+		\global\dgresetsectioncoloronnextsectionfalse
+	\fi
+	% Render section
+	\ifx\dghsect@bg\@empty
+		% Plain section, optionally with hypertarget anchor
+		\ifx\dghsect@label\@empty
+			\section{#2}%
+		\else
+			\hypertarget{\dghsect@label}{\section{#2}\label{\dghsect@label}}%
+		\fi
+	\else
+		% Section with background image
+		\ifx\dghsect@bgh\@empty
+			\setdghsectionbgheight{150pt}%
+		\else
+			\setdghsectionbgheight{\dghsect@bgh}%
+		\fi
+		\ifx\dghsect@bgr\@empty
+			\setdghsectionbgraise{-18pt}%
+		\else
+			\setdghsectionbgraise{\dghsect@bgr}%
+		\fi
+		\ifx\dghsect@bgf\@empty
+			\resetdghsectionbgfadeoffset
+		\else
+			\setdghsectionbgfadeoffset{\dghsect@bgf}%
+		\fi
+		\sectionwithbg{\dghsect@bg}{#2}%
+	\fi
+	% Reset color flag after section
+	\ifx\dghsect@color\@empty\else
+		\global\dgresetsectioncoloronnextsectiontrue
 	\fi
 }
 
 \newcommand{\ColoredTable}[4]{%
+	\begingroup
 	\renewcommand{\arraystretch}{1.3}
 	\rowcolors{2}{#2!20}{white}
 	\begin{tabularx}{#1}{#3}
 		\rowcolor{#2}
 		#4
 	\end{tabularx}
+	\endgroup
 }
 

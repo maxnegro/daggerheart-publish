@@ -191,6 +191,10 @@ try {
 
     if ($EnableToc -eq "1" -and $TocFrontmatter -ne "false") {
         $PandocArgs += "--toc"
+        $PandocArgs += "-M", "render-toc=true"
+    }
+    else {
+        $PandocArgs += "-M", "render-toc=false"
     }
 
     $PandocInputs = @($BookMd) + $ChapterFiles

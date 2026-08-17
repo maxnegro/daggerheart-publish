@@ -3,6 +3,8 @@ local List = require("pandoc.List")
 local h1_newpage = true
 local normalize_section_color_blocks
 local normalize_break_blocks
+local custom_cover_toc_rendered = false
+local render_toc = false
 local cover_defaults = {
   title = "",
   subtitle = "",
@@ -59,6 +61,100 @@ local function get_meta_string(meta, keys, default)
     end
   end
   return default
+end
+
+local function get_meta_bool(meta, keys, default)
+  if not meta then
+    return default
+  end
+
+  for _, key in ipairs(keys) do
+    local value = meta[key]
+    if value ~= nil then
+      if type(value) == "boolean" then
+        return value
+      end
+
+      local string_value = (meta_to_string(value) or ""):match("^%s*(.-)%s*$"):lower()
+      if string_value == "true" or string_value == "yes" or string_value == "1" then
+        return true
+      end
+      if string_value == "false" or string_value == "no" or string_value == "0" then
+        return false
+      end
+    end
+  end
+  return default
+end
+
+local function read_book_frontmatter_toc()
+  if not (PANDOC_STATE and PANDOC_STATE.input_files and #PANDOC_STATE.input_files > 0) then
+    return nil
+  end
+
+  local handle = io.open(PANDOC_STATE.input_files[1], "r")
+  if not handle then
+    return nil
+  end
+
+  local in_frontmatter = false
+  for line in handle:lines() do
+    if not in_frontmatter then
+      if line:match("^%-%-%-%s*$") then
+        in_frontmatter = true
+      else
+        break
+      end
+    else
+      if line:match("^%-%-%-%s*$") then
+        break
+      end
+
+      local value = line:match("^%s*toc:%s*(%S+)")
+      if value then
+        handle:close()
+        value = value:gsub('^["\']', ""):gsub('["\']$', ""):lower()
+        if value == "true" then
+          return true
+        end
+        if value == "false" then
+          return false
+        end
+        return nil
+      end
+    end
+  end
+
+  handle:close()
+  return nil
+end
+
+local function detect_render_toc(meta)
+  if PANDOC_WRITER_OPTIONS then
+    local writer_toc = PANDOC_WRITER_OPTIONS.table_of_contents
+    if writer_toc == nil then
+      writer_toc = PANDOC_WRITER_OPTIONS.toc
+    end
+    if type(writer_toc) == "boolean" then
+      return writer_toc
+    end
+  end
+
+  local meta_toc = get_meta_bool(meta, { "render-toc", "toc" }, nil)
+  if meta_toc ~= nil then
+    return meta_toc
+  end
+
+  if os.getenv("ENABLE_TOC") == "0" then
+    return false
+  end
+
+  local frontmatter_toc = read_book_frontmatter_toc()
+  if frontmatter_toc ~= nil then
+    return frontmatter_toc
+  end
+
+  return false
 end
 
 local function ensure_header_includes_list(meta)
@@ -135,6 +231,25 @@ local function complexity_to_string(value)
   return tostring(complexity_num)
 end
 
+local function meta_author_to_latex(value)
+  if value == nil then
+    return ""
+  end
+
+  if pandoc.utils.type(value) == "List" then
+    local authors = {}
+    for _, item in ipairs(value) do
+      local rendered = meta_to_latex(item)
+      if rendered ~= "" then
+        table.insert(authors, rendered)
+      end
+    end
+    return table.concat(authors, ", ")
+  end
+
+  return meta_to_latex(value)
+end
+
 local function trim_inline(text)
   if not text then
     return ""
@@ -157,7 +272,10 @@ local function ensure_cover_defaults_from_meta(meta)
     cover_defaults.subtitle = subtitle
   end
 
-  local designer = pandoc.utils.stringify(meta.designer or "")
+  local designer = trim_inline(meta_to_latex(meta.designer))
+  if designer == "" then
+    designer = meta_author_to_latex(meta.author)
+  end
   if designer ~= "" then
     cover_defaults.designer = designer
   end
@@ -178,6 +296,9 @@ local function ensure_cover_defaults_from_meta(meta)
 end
 
 function Meta(meta)
+  custom_cover_toc_rendered = false
+  render_toc = detect_render_toc(meta)
+
   if meta["h1-newpage"] ~= nil then
     h1_newpage = meta["h1-newpage"]
   end
@@ -205,9 +326,9 @@ function Meta(meta)
   local cover_image_author = latex_escape(trim_inline(get_meta_string(meta, {
     "cover-image-author"
   }, "")))
-  local title_enabled = cover_image_title ~= "" and "1" or "0"
-  local author_enabled = cover_image_author ~= "" and "1" or "0"
-  local credit_enabled = (title_enabled == "1" or author_enabled == "1") and "1" or "0"
+  local title_enabled = cover_image_title ~= ""
+  local author_enabled = cover_image_author ~= ""
+  local credit_enabled = (title_enabled or author_enabled)
 
   append_header_include(meta, "\\gdef\\dghcoverdesigner{" .. latex_escape(cover_defaults.designer or "") .. "}")
   append_header_include(meta, "\\gdef\\dghcovercomplexity{" .. (cover_defaults.complexity or "0") .. "}")
@@ -215,9 +336,9 @@ function Meta(meta)
   append_header_include(meta, "\\long\\gdef\\dghcoversubtitle{" .. (cover_defaults.subtitle or "") .. "}")
   append_header_include(meta, "\\gdef\\dghcoverimagetitle{" .. cover_image_title .. "}")
   append_header_include(meta, "\\gdef\\dghcoverimageauthor{" .. cover_image_author .. "}")
-  append_header_include(meta, "\\gdef\\dghcoverimagetitleenabled{" .. title_enabled .. "}")
-  append_header_include(meta, "\\gdef\\dghcoverimageauthorenabled{" .. author_enabled .. "}")
-  append_header_include(meta, "\\gdef\\dghcoverimagecreditenabled{" .. credit_enabled .. "}")
+  append_header_include(meta, title_enabled and "\\dghcoverimagetitleenabledtrue" or "\\dghcoverimagetitleenabledfalse")
+  append_header_include(meta, author_enabled and "\\dghcoverimageauthorenabledtrue" or "\\dghcoverimageauthorenabledfalse")
+  append_header_include(meta, credit_enabled and "\\dghcoverimagecreditenabledtrue" or "\\dghcoverimagecreditenabledfalse")
 
   local title_image = get_meta_string(meta, {
     "title-image",
@@ -262,7 +383,7 @@ function Pandoc(doc)
   doc.blocks = normalize_break_blocks(doc.blocks)
 
   if not h1_newpage then
-    table.insert(doc.blocks, 1, pandoc.RawBlock("latex", "\\dghonepagebreakfalse"))
+    table.insert(doc.blocks, 1, pandoc.RawBlock("latex", "\\disabledghonepagebreak"))
   end
   return doc
 end
@@ -334,21 +455,21 @@ function Header(el)
       local title_latex = pandoc.write(inlines_doc, "latex"):gsub("%s*\n%s*", " "):gsub("^%s+", ""):gsub("%s+$", "")
       local out = {}
       if bg_height and bg_height ~= "" then
-        table.insert(out, "\\setlength{\\dghsectionbgheight}{" .. bg_height .. "}")
+        table.insert(out, "\\setdghsectionbgheight{" .. bg_height .. "}")
       else
-        table.insert(out, "\\setlength{\\dghsectionbgheight}{150pt}")
+        table.insert(out, "\\setdghsectionbgheight{150pt}")
       end
       if bg_raise and bg_raise ~= "" then
-        table.insert(out, "\\setlength{\\dghsectionbgraise}{" .. bg_raise .. "}")
+        table.insert(out, "\\setdghsectionbgraise{" .. bg_raise .. "}")
       else
-        table.insert(out, "\\setlength{\\dghsectionbgraise}{-18pt}")
+        table.insert(out, "\\setdghsectionbgraise{-18pt}")
       end
       -- Use explicit bg-fade-offset when provided, otherwise default to bg-height-80pt.
       local bg_fade = el.attributes["bg-fade-offset"]
       if bg_fade and bg_fade ~= "" then
-        table.insert(out, "\\setlength{\\dghsectionbgfadeoffset}{" .. bg_fade .. "}")
+        table.insert(out, "\\setdghsectionbgfadeoffset{" .. bg_fade .. "}")
       else
-        table.insert(out, "\\setlength{\\dghsectionbgfadeoffset}{\\dimexpr\\dghsectionbgheight-80pt\\relax}")
+        table.insert(out, "\\resetdghsectionbgfadeoffset")
       end
       table.insert(out, "\\sectionwithbg{" .. bg .. "}{" .. title_latex .. "}")
       local section_bg_block = pandoc.RawBlock("latex", table.concat(out, "\n"))
@@ -673,7 +794,7 @@ local function build_adversary_stats_from_markdown(parsed)
     weapon_details = latex_escape(weapons_value)
   end
 
-  local stats = "\\adversarystats"
+  local stats = "\\dghadversarystats"
     .. latex_arg(size)
     .. latex_arg(segments)
     .. latex_arg(difficulty)
@@ -726,7 +847,7 @@ local function build_environment_stats_from_markdown(parsed)
     adversaries = latex_escape(adversaries_value)
   end
 
-  return "\\environmentstats" .. latex_arg(difficulty) .. latex_arg(adversaries)
+  return "\\dghenvironmentstats" .. latex_arg(difficulty) .. latex_arg(adversaries)
 end
 
 local function latex_image_length(value)
@@ -755,6 +876,8 @@ local function image_latex(el)
 
   if width then
     table.insert(options, "width=" .. width)
+  else
+    table.insert(options, "width=\\linewidth")
   end
 
   if height then
@@ -801,6 +924,12 @@ local function cell_to_latex(cell)
     return "~"
   end
   return latex
+end
+
+local function cell_text_length(cell)
+  local text = pandoc.utils.stringify(cell_blocks(cell) or {})
+  text = text:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+  return #text
 end
 
 local function row_cells(row)
@@ -850,14 +979,45 @@ local function collect_table_rows(tbl)
   return rows
 end
 
-local function default_colspec(col_count)
+local function default_colspec(col_count, rows)
   if col_count < 1 then
     col_count = 1
   end
 
+  local weights = {}
+  for col = 1, col_count do
+    weights[col] = 1
+  end
+
+  if rows then
+    for _, row in ipairs(rows) do
+      local cells = row_cells(row)
+      for col = 1, col_count do
+        local cell = cells[col]
+        local length = cell_text_length(cell)
+        local weight = math.max(1, math.ceil(math.sqrt(length)))
+        if weight > weights[col] then
+          weights[col] = weight
+        end
+      end
+    end
+  end
+
+  local total = 0
+  for _, weight in ipairs(weights) do
+    total = total + weight
+  end
+  if total <= 0 then
+    total = col_count
+  end
+
   local parts = {}
-  for _ = 1, col_count do
-    table.insert(parts, ">{\\raggedright\\arraybackslash}X")
+  for col = 1, col_count do
+    local weight = weights[col] / total * col_count
+    table.insert(parts, string.format(
+      ">{\\raggedright\\arraybackslash\\hsize=%.3f\\hsize\\linewidth=\\hsize}X",
+      weight
+    ))
   end
 
   return table.concat(parts, "")
@@ -904,7 +1064,7 @@ function Table(tbl)
   local latex = "\\ColoredTable"
     .. latex_arg("\\linewidth")
     .. latex_arg("\\dgsectioncolor")
-    .. latex_arg(default_colspec(col_count))
+    .. latex_arg(default_colspec(col_count, rows))
     .. latex_arg(table.concat(latex_rows, "\n"))
 
   return pandoc.RawBlock("latex", latex)
@@ -1134,7 +1294,7 @@ local function blocks_to_latex(blocks)
         parts[#parts+1] = "\\columnbreak"
       elseif has_class(block, "fullpage") then
         local body = blocks_to_latex(normalize_break_blocks(normalize_section_color_blocks(block.content or {})))
-        parts[#parts+1] = "\\beginFullpage\n" .. body .. "\n\\finishFullpage"
+        parts[#parts+1] = "\\dghfullpagestart\n" .. body .. "\n\\dghfullpageend"
       else
         parts[#parts+1] = blocks_to_latex(block.content or {})
       end
@@ -1156,7 +1316,8 @@ end
 -- Convert a Markdown string to LaTeX using the Pandoc AST pipeline.
 local function text_to_latex(text)
   if not text or text == "" then return "" end
-  local doc = pandoc.read(text, "markdown")
+  -- Allow bullet lists immediately after text lines in YAML block scalars.
+  local doc = pandoc.read(text, "markdown+lists_without_preceding_blankline")
   return blocks_to_latex(doc.blocks)
 end
 
@@ -1261,9 +1422,9 @@ local function render_adversary_statblock(parsed)
     is_colossus = true
   end
 
-  local macro = "\\adversary"
+  local macro = "\\dghadversary"
   if is_colossus then
-    macro = "\\colossusadversary"
+    macro = "\\dghcolossusadversary"
   end
 
   return macro
@@ -1299,7 +1460,7 @@ local function render_environment_statblock(parsed)
 
   local features = render_feats_latex(parsed.feats)
 
-  return "\\environment"
+  return "\\dghenvironment"
     .. latex_arg(title)
     .. latex_arg(tier_text)
     .. latex_arg(summary)
@@ -1414,6 +1575,7 @@ function Div(div)
 
     local designer_value = first_non_empty(
       div.attributes["designer"],
+      div.attributes["author"],
       cover_defaults.designer
     )
     local designer = designer_value ~= "" and latex_escape(designer_value) or "\\dghcoverdesigner"
@@ -1435,6 +1597,20 @@ function Div(div)
     local image = (image_path ~= "") and ("\\detokenize{" .. image_path .. "}") or "\\dghtitleimagepath"
 
     local body = blocks_to_latex(div.content)
+    local render_toc_after_cover = false
+    local toc_title = "\\contentsname"
+    local toc_is_enabled = render_toc or detect_render_toc(PANDOC_STATE and PANDOC_STATE.meta or {})
+
+    if not custom_cover_toc_rendered and toc_is_enabled then
+      custom_cover_toc_rendered = true
+      render_toc_after_cover = true
+
+      local toc_title_value = get_meta_string(PANDOC_STATE.meta or {}, { "toc-title" }, "")
+      if toc_title_value ~= "" then
+        toc_title = latex_escape(toc_title_value)
+      end
+    end
+
     local out = {}
     table.insert(out, "\\end{multicols}")
     table.insert(out,
@@ -1447,8 +1623,16 @@ function Div(div)
     )
     table.insert(out, body)
     table.insert(out, "\\end{framecoverpage}")
+    if render_toc_after_cover then
+      table.insert(out,
+        "{\\montserratThin\\fontsize{24pt}{28pt}\\selectfont\\MakeTextUppercase{" .. toc_title .. "}}"
+      )
+    end
     table.insert(out, "\\begin{multicols}{2}")
     table.insert(out, "\\raggedcolumns")
+    if render_toc_after_cover then
+      table.insert(out, "{\\setlength{\\parskip}{0pt}\\tableofcontents}")
+    end
     return pandoc.RawBlock("latex", table.concat(out, "\n"))
   end
 
@@ -1476,7 +1660,7 @@ function Div(div)
     local height = "\\paperheight"
 
     local out = {}
-    table.insert(out, "\\beginFullpage")
+    table.insert(out, "\\dghfullpagestart")
     table.insert(out, "\\newpage")
     table.insert(out, "\\thispagestyle{empty}")
 
@@ -1502,7 +1686,7 @@ function Div(div)
     table.insert(out, "  };")
     table.insert(out, "\\end{tikzpicture}")
     table.insert(out, "\\null")
-    table.insert(out, "\\finishFullpage")
+    table.insert(out, "\\dghfullpageend")
 
     return pandoc.RawBlock("latex", table.concat(out, "\n"))
   end
@@ -1526,7 +1710,7 @@ function Div(div)
 
   if has_class(div, "fullpage") then
     local body = blocks_to_latex(normalize_break_blocks(normalize_section_color_blocks(div.content)))
-    local latex = "\\beginFullpage\n" .. body .. "\n\\finishFullpage"
+    local latex = "\\dghfullpagestart\n" .. body .. "\n\\dghfullpageend"
     return pandoc.RawBlock("latex", latex)
   end
 

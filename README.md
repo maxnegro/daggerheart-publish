@@ -393,7 +393,7 @@ Regole per i Colossi:
   - `hp`: punti ferita del segmento (può essere "N (ciascuno)" se multipli)
   - `feats`: caratteristiche specifiche del segmento
 
-Nel filtro Lua, il blocco principale viene renderizzato con `\colossusadversary`, mentre i segmenti mantengono il formato standard `\adversary`.
+Nel filtro Lua, il blocco principale viene renderizzato con `\dghcolossusadversary`, mentre i segmenti mantengono il formato standard `\dghadversary`.
 
 ### Environment
 
