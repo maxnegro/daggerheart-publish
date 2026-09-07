@@ -10,7 +10,8 @@ local cover_defaults = {
   subtitle = "",
   designer = "",
   complexity = "0",
-  image = ""
+  image = "",
+  title_fontsize = "32pt"
 }
 
 local function meta_to_string(value)
@@ -293,6 +294,14 @@ local function ensure_cover_defaults_from_meta(meta)
   if image ~= "" then
     cover_defaults.image = image
   end
+
+  local title_fontsize = get_meta_string(meta, {
+    "cover-title-fontsize",
+    "title-fontsize"
+  }, "")
+  if title_fontsize ~= "" then
+    cover_defaults.title_fontsize = title_fontsize
+  end
 end
 
 function Meta(meta)
@@ -333,6 +342,7 @@ function Meta(meta)
   append_header_include(meta, "\\gdef\\dghcoverdesigner{" .. latex_escape(cover_defaults.designer or "") .. "}")
   append_header_include(meta, "\\gdef\\dghcovercomplexity{" .. (cover_defaults.complexity or "0") .. "}")
   append_header_include(meta, "\\gdef\\dghcovertitle{" .. latex_escape(cover_defaults.title or "") .. "}")
+  append_header_include(meta, "\\gdef\\dghtitlefontsize{" .. (cover_defaults.title_fontsize or "32pt") .. "}")
   append_header_include(meta, "\\long\\gdef\\dghcoversubtitle{" .. (cover_defaults.subtitle or "") .. "}")
   append_header_include(meta, "\\gdef\\dghcoverimagetitle{" .. cover_image_title .. "}")
   append_header_include(meta, "\\gdef\\dghcoverimageauthor{" .. cover_image_author .. "}")

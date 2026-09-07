@@ -306,7 +306,7 @@ Path = ./fonts/,
 
 	\vspace*{\dimexpr0.5\paperheight-\dghpagetotext-26pt\relax}
     
-    {\montserratLight\fontsize{32pt}{34pt}\selectfont\raggedright\color{h1textlight}\MakeUppercase #1}
+    \parbox{\linewidth}{\montserratLight\fontsize{\dghtitlefontsize}{\dghtitlefontsize}\selectfont\raggedright\color{h1textlight}\righthyphenmin=62\lefthyphenmin=62\hyphenpenalty=10000\exhyphenpenalty=10000\MakeUppercase #1}
     \vspace{1em}
     
 	{\normalfont\fontsize{10pt}{13pt}\selectfont\itshape\color{white}\setlength{\parindent}{0pt}\setlength{\parskip}{0.35em}\rightskip=0pt\relax #2\par}    
@@ -484,6 +484,7 @@ Path = ./fonts/,
 \newcommand{\dghtitleimageheight}{0.5\paperheight}
 \newcommand{\dghtitleimagefit}{fill}
 \newcommand{\dghtitleimageposition}{middle}
+\newcommand{\dghtitlefontsize}{32pt}
 \newcommand{\dghcovertitle}{}
 \newcommand{\dghcoversubtitle}{}
 \newcommand{\dghcoverdesigner}{}
