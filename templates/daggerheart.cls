@@ -324,7 +324,7 @@ Path = ./fonts/,
     
 	\begingroup
 	\color{white}
-	\setlength{\parindent}{1em}
+	\setlength{\parindent}{0pt}
 	\setlength{\parskip}{0.25em}
 	\renewcommand{\section}[1]{%
 		\needspace{6\baselineskip}%

@@ -1631,7 +1631,9 @@ function Div(div)
       .. latex_arg(complexity)
       .. latex_arg(image)
     )
+    table.insert(out, "{\\setlength{\\parindent}{0pt}")
     table.insert(out, body)
+    table.insert(out, "\\par}")
     table.insert(out, "\\end{framecoverpage}")
     if render_toc_after_cover then
       table.insert(out,
