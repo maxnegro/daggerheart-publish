@@ -11,7 +11,8 @@ local cover_defaults = {
   designer = "",
   complexity = "0",
   image = "",
-  title_fontsize = "32pt"
+  title_fontsize = "32pt",
+  image_cut = "0.5\\paperheight"
 }
 
 local function meta_to_string(value)
@@ -302,6 +303,27 @@ local function ensure_cover_defaults_from_meta(meta)
   if title_fontsize ~= "" then
     cover_defaults.title_fontsize = title_fontsize
   end
+
+  local image_cut_raw = get_meta_string(meta, {
+    "cover-image-cut",
+    "cover-cut"
+  }, "")
+  if image_cut_raw ~= "" and image_cut_raw ~= "0.5\\paperheight" then
+    local s = trim_inline(image_cut_raw)
+    if s == "" then
+      -- keep default
+    elseif s:match("^[%d%.]+$") then
+      cover_defaults.image_cut = s .. "\\paperheight"
+    elseif s:find("\\") or s:match("pt$") or s:match("cm$") or s:match("mm$") or s:match("in$") or s:match("em$") or s:match("ex$") or s:match("bp$") or s:match("pc$") or s:match("dd$") or s:match("cc$") or s:match("sp$") then
+      cover_defaults.image_cut = s
+    elseif s:match("^[%d%.]+") then
+      cover_defaults.image_cut = s .. "\\paperheight"
+    else
+      cover_defaults.image_cut = s
+    end
+  elseif image_cut_raw == "0.5\\paperheight" then
+    cover_defaults.image_cut = "0.5\\paperheight"
+  end
 end
 
 function Meta(meta)
@@ -344,6 +366,7 @@ function Meta(meta)
   append_header_include(meta, "\\gdef\\dghcovertitle{" .. latex_escape(cover_defaults.title or "") .. "}")
   append_header_include(meta, "\\gdef\\dghtitlefontsize{" .. (cover_defaults.title_fontsize or "32pt") .. "}")
   append_header_include(meta, "\\long\\gdef\\dghcoversubtitle{" .. (cover_defaults.subtitle or "") .. "}")
+  append_header_include(meta, "\\gdef\\dghcoverimagecut{" .. cover_defaults.image_cut .. "}")
   append_header_include(meta, "\\gdef\\dghcoverimagetitle{" .. cover_image_title .. "}")
   append_header_include(meta, "\\gdef\\dghcoverimageauthor{" .. cover_image_author .. "}")
   append_header_include(meta, title_enabled and "\\dghcoverimagetitleenabledtrue" or "\\dghcoverimagetitleenabledfalse")
