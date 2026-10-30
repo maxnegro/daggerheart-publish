@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.7] - 2026-10-30
+
+- feat(cover): implement configurable cover image cut height (365a3d3)
+- docs: document cover-image-cut option for custom cover page (e40ec9d)
+- fix(cover): remove paragraph indentation on cover page (9db671d)
+- feat: aggiunta configurazione dimensione font titolo copertina (9c094da)
+- Aggiornamento CHANGELOG (73c7ac6)
+
 ## [0.0.6] - 2026-08-17
 
 - Modifica l'allineamento degli elenchi puntati e numerati in daggerheart.cls (9225c4c)

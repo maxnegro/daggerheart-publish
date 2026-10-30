@@ -254,29 +254,33 @@ Path = ./fonts/,
 \definecolor{sfondoCover}{HTML}{295369}
 \definecolor{h1textlight}{HTML}{F5E6D3}
 
+\newlength{\dghcoverimagecutlen}
+\providecommand{\dghcoverimagecut}{0.5\paperheight}
+
 \newenvironment{framecoverpage}[5]{%
     % \newgeometry{margin=0pt, top=0pt, bottom=0pt, left=0pt, right=0pt}
     \pagecolor{sfondoCover}%
     \begin{titlepage}
+	\setlength{\dghcoverimagecutlen}{\dghcoverimagecut}%
 	\ifstrempty{#5}{}{%
 	\begin{tikzpicture}[remember picture,overlay]
-		% Immagine alta metà pagina, ritagliata a 0.5\paperheight
+		% Immagine alta metà pagina, ritagliata a \dghcoverimagecutlen
 		\begin{scope}
-			\clip (current page.north west) rectangle ([yshift=-0.5\paperheight] current page.north east);
+			\clip (current page.north west) rectangle ([yshift=-\dghcoverimagecutlen] current page.north east);
 			\node[anchor=north, inner sep=0pt] at (current page.north) {
 				\includegraphics[width=\paperwidth, keepaspectratio]{#5}
 			};
 		\end{scope}
 		% Fading sugli ultimi 28pt (opacità variabile)
 		\fill[sfondoCover, path fading=fadeToBg]
-			([yshift=-0.5\paperheight+32pt] current page.north west)
+			([yshift=-\dghcoverimagecutlen+32pt] current page.north west)
 			rectangle
-			([yshift=-0.5\paperheight] current page.north east);
+			([yshift=-\dghcoverimagecutlen] current page.north east);
 		% Maschera anti‑artefatto da 0.5pt (come nel tuo esempio)
 		\fill[sfondoCover]
-			([yshift=-0.5\paperheight-10pt] current page.north west)
+			([yshift=-\dghcoverimagecutlen-10pt] current page.north west)
 			rectangle
-			([yshift=-0.5\paperheight+0.5pt] current page.north east);
+			([yshift=-\dghcoverimagecutlen+0.5pt] current page.north east);
 	\end{tikzpicture}
 	}
     
@@ -304,9 +308,9 @@ Path = ./fonts/,
 		\end{tikzpicture}
 	\fi
 
-	\vspace*{\dimexpr0.5\paperheight-\dghpagetotext-26pt\relax}
+	\vspace*{\dimexpr\dghcoverimagecutlen-\dghpagetotext-26pt\relax}
     
-    {\montserratLight\fontsize{32pt}{34pt}\selectfont\raggedright\color{h1textlight}\MakeUppercase #1}
+    \parbox{\linewidth}{\montserratLight\fontsize{\dghtitlefontsize}{\dghtitlefontsize}\selectfont\raggedright\color{h1textlight}\righthyphenmin=62\lefthyphenmin=62\hyphenpenalty=10000\exhyphenpenalty=10000\MakeUppercase #1}
     \vspace{1em}
     
 	{\normalfont\fontsize{10pt}{13pt}\selectfont\itshape\color{white}\setlength{\parindent}{0pt}\setlength{\parskip}{0.35em}\rightskip=0pt\relax #2\par}    
@@ -324,7 +328,7 @@ Path = ./fonts/,
     
 	\begingroup
 	\color{white}
-	\setlength{\parindent}{1em}
+	\setlength{\parindent}{0pt}
 	\setlength{\parskip}{0.25em}
 	\renewcommand{\section}[1]{%
 		\needspace{6\baselineskip}%
@@ -484,6 +488,7 @@ Path = ./fonts/,
 \newcommand{\dghtitleimageheight}{0.5\paperheight}
 \newcommand{\dghtitleimagefit}{fill}
 \newcommand{\dghtitleimageposition}{middle}
+\newcommand{\dghtitlefontsize}{32pt}
 \newcommand{\dghcovertitle}{}
 \newcommand{\dghcoversubtitle}{}
 \newcommand{\dghcoverdesigner}{}
