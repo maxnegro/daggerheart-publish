@@ -248,6 +248,7 @@ complexity: 2
 cover-image: assets/copertina.jpg
 cover-image-title: Titolo immagine
 cover-image-author: Nome autore immagine
+cover-image-cut: 0.5\paperheight
 cover-page: custom
 ---
 ```
@@ -272,6 +273,7 @@ Note:
 
 - `cover-page: custom` attiva la cover personalizzata e disabilita `\maketitle` nel template.
 - `subtitle` nel frontmatter della cover personalizzata supporta markdown inline, hard line breaks Markdown (due spazi a fine riga) e paragrafi multipli.
+- `cover-image-cut` imposta l'altezza a partire dalla quale viene tagliata l'immagine e spostato il blocco di testo della cover personalizzata (default `0.5\paperheight`). Accetta valori LaTeX/TeX (es. `0.4\paperheight`, `200pt`) o un semplice numero frazionario (es. `0.6` corrisponde a `0.6\paperheight`).
 - Il contenuto di `::: framecoverpage` viene renderizzato nella cover in due colonne.
 - `cover-image-title` e `cover-image-author` popolano il box crediti in alto a destra.
 - Se `cover-image-title` e `cover-image-author` sono entrambi assenti o vuoti, il box crediti non viene generato.
