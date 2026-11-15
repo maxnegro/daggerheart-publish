@@ -1354,6 +1354,8 @@ local function text_to_latex(text)
   return blocks_to_latex(doc.blocks)
 end
 
+local FEAT_HANG = "0.5em"
+
 local function render_feats_latex(feats)
   if type(feats) ~= "table" or #feats == 0 then
     return ""
@@ -1367,16 +1369,17 @@ local function render_feats_latex(feats)
 
     local entry = ""
     if name ~= "" and text ~= "" then
-      entry = "\\textit{\\textbf{" .. name .. ":}} " .. text
+      entry = "\\hangindent=" .. FEAT_HANG .. "\\hangafter=1 \\textit{\\textbf{" .. name .. ":}} " .. text
     elseif name ~= "" then
-      entry = "\\textit{\\textbf{" .. name .. "}}"
+      entry = "\\hangindent=" .. FEAT_HANG .. "\\hangafter=1 \\textit{\\textbf{" .. name .. "}}"
     elseif text ~= "" then
-      entry = text
+      entry = "\\hangindent=" .. FEAT_HANG .. "\\hangafter=1 " .. text
     end
 
-    -- The question is always a separate paragraph so it is safe after any block.
     if question ~= "" then
-      entry = entry .. "\\par\n\\textit{" .. question .. "}"
+      entry = entry .. "\\par\\begingroup\\leftskip=" .. FEAT_HANG .. "\\rightskip=0pt \\textit{" .. question .. "}\\par\\endgroup"
+    else
+      entry = entry .. "\\par"
     end
 
     if entry ~= "" then
@@ -1384,12 +1387,10 @@ local function render_feats_latex(feats)
     end
   end
 
-  -- \par between entries is safe regardless of whether entries contain block
-  -- environments (itemize etc.) — unlike \\, which is invalid at paragraph start.
   -- Wrap in a group that tightens \parskip so the spacing inside the statblock
   -- box stays compact regardless of the document-level parskip setting.
-  local body = table.concat(out, "\\par\n")
-  return "{\\setlength{\\parskip}{3pt}\\setlength{\\parindent}{0pt}" .. body .. "\\par\\vspace{-\\parskip}}"
+  local body = table.concat(out, "\n")
+  return "{\\setlength{\\parskip}{3pt}\\setlength{\\parindent}{0pt}" .. body .. "\\vspace{-\\parskip}}"
 end
 
 local function render_adversary_statblock(parsed)
