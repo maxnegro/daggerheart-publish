@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.0.8] - 2026-11-15
+
+- fix(daggerheart): add hanging indentation for feat entries (387c4c5)
+- chore: update CHANGELOG for version 0.0.7 (804c152)
+
 ## [0.0.7] - 2026-10-30
 
 - feat(cover): implement configurable cover image cut height (365a3d3)
