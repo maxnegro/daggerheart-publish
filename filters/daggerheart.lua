@@ -842,7 +842,7 @@ local function build_adversary_stats_from_markdown(parsed)
   if experience and experience ~= "" then
     stats = stats
       .. string.rep("\\", 3)
-      .. "dghexperienceseparator"
+      .. "dghexperienceseparator[adversarybordercolor]"
       .. string.rep("\\", 3)
       .. "textbf{\\dghlabelexperience:} "
       .. latex_escape(experience)
@@ -1390,7 +1390,7 @@ local function render_feats_latex(feats)
   -- Wrap in a group that tightens \parskip so the spacing inside the statblock
   -- box stays compact regardless of the document-level parskip setting.
   local body = table.concat(out, "\n")
-  return "{\\setlength{\\parskip}{3pt}\\setlength{\\parindent}{0pt}" .. body .. "\\vspace{-\\parskip}}"
+  return "{\\setlength{\\parskip}{3pt}\\setlength{\\parindent}{0pt}\\raggedright\\hyphenpenalty=10000\\exhyphenpenalty=10000" .. body .. "\\vspace{-\\parskip}}"
 end
 
 local function render_adversary_statblock(parsed)
@@ -1443,7 +1443,7 @@ local function render_adversary_statblock(parsed)
   if experience ~= "" then
     stats = stats
       .. string.rep("\\", 3)
-      .. "dghexperienceseparator"
+      .. "dghexperienceseparator[adversarybordercolor]"
       .. string.rep("\\", 3)
       .. "textbf{\\dghlabelexperience:} "
       .. latex_escape(experience)

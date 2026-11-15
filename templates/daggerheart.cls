@@ -145,19 +145,19 @@
 % --- Fonts ---
 \renewcommand{\normalsize}{\fontsize{8.5}{10}\selectfont}
 \normalsize
-\setmainfont{Montserrat-Regular.ttf}[
+\setmainfont{IBMPlexSans-Regular.ttf}[
 Path = ./fonts/,
-ItalicFont = Merriweather-Italic.ttf,
-BoldFont = Montserrat-SemiBold.ttf,
-BoldItalicFont = Merriweather-BoldItalic.ttf
+ItalicFont = IBMPlexSans-Italic.ttf,
+BoldFont = IBMPlexSans-Bold.ttf,
+BoldItalicFont = IBMPlexSans-BoldItalic.ttf
 ]
-\newfontfamily\montserratThin{Montserrat-Thin.ttf}[
-Path = ./fonts/,
-]
-\newfontfamily\montserratLight{Montserrat-Light.ttf}[
+\newfontfamily\montserratThin{EvelethCleanThin.ttf}[
 Path = ./fonts/,
 ]
-\newfontfamily\eveleth{LeagueSpartan-Extrabold.ttf}[Path=./fonts/]
+\newfontfamily\montserratLight{EvelethCleanThin.ttf}[
+Path = ./fonts/,
+]
+\newfontfamily\eveleth{EvelethCleanRegular.ttf}[Path=./fonts/]
 
 % --- Colors ---
 \definecolor{maintext}{HTML}{000000}
@@ -381,13 +381,13 @@ Path = ./fonts/,
 
 \newcommand{\applysectioncolor}[2]{%
 	\titleformat{\section}
-	{\montserratLight\fontsize{24pt}{24pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
+	{\montserratLight\fontsize{28pt}{28pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesection}
 	{1em}
 	{}
 	\titlespacing*{\section}{0pt}{0pt}{0.8em}
 	\titleformat{\subsection}
-	{\eveleth\fontsize{20pt}{20pt}\selectfont\color{#2}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
+	{\eveleth\fontsize{17pt}{17pt}\selectfont\color{#2}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesubsection}
 	{1em}
 	{}
@@ -580,7 +580,7 @@ Path = ./fonts/,
 		colback=#1,
 		colframe=#2,
 		arc=5pt,
-		boxrule=1pt,
+		boxrule=0.5pt,
 		outer arc=5pt,
 		before skip=2em,
 		after skip=2em,
@@ -594,8 +594,9 @@ Path = ./fonts/,
 		colback=white,
 		enhanced,
 		frame hidden,
-		borderline north={1pt}{0pt}{#1},
-		borderline south={1pt}{0pt}{#1},
+		boxrule=0pt,
+		borderline north={0.3pt}{0pt}{#1},
+		borderline south={0.3pt}{0pt}{#1},
 		left=0.5em,
 		right=0.5em,
 		top=0.5em,
@@ -674,7 +675,7 @@ Path = ./fonts/,
 }
 
 
-\newcommand{\dghexperienceseparator}{\noindent\rule{\linewidth}{0.25pt}}
+\newcommand{\dghexperienceseparator}[1][black]{\noindent\textcolor{#1}{\rule{\linewidth}{0.3pt}}}
 
 \newcommand{\dghformatadjacentsegments}[1]{\textbf{\dghlabeladjacentsegments:}\ \mdseries\upshape #1}
 
@@ -706,9 +707,9 @@ Path = ./fonts/,
 \newcommand{\dgh@entity}[8]{%
 	\begin{#1}{}%
 		{\color{maintext}%
-			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#3}
+			\eveleth\fontsize{12pt}{12pt}\selectfont\MakeTextUppercase{#3}
 			\par\smallskip
-			\normalfont\fontsize{8pt}{8pt}\selectfont
+			\normalfont\fontsize{8pt}{8pt}\selectfont\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
 			\ifstrempty{#4}{}{
 				\textbf{\emph{#4}}
 				\\
@@ -728,8 +729,8 @@ Path = ./fonts/,
 			}
 			\par\smallskip
 			\ifstrempty{#8}{}{
-				\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
-				\normalfont\fontsize{8pt}{8pt}\selectfont
+				\normalfont\bfseries\fontsize{10pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
+				\normalfont\fontsize{8pt}{8pt}\selectfont\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
 
 				#8
 			}
@@ -752,9 +753,9 @@ Path = ./fonts/,
 \newcommand{\dghenvironment}[6]{%
 	\begin{environmentbox}{}%
 		{\color{maintext}%
-			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#1}
+			\eveleth\fontsize{12pt}{12pt}\selectfont\MakeTextUppercase{#1}
 			\par\smallskip
-			\normalfont\fontsize{8pt}{8pt}\selectfont
+			\normalfont\fontsize{8pt}{8pt}\selectfont\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
 			
 			\ifstrempty{#2}{}{
 				\textbf{\emph{#2}}
@@ -776,8 +777,8 @@ Path = ./fonts/,
 			\par%\smallskip
 			
 			\ifstrempty{#6}{}{
-			\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
-			\normalfont\fontsize{8pt}{8pt}\selectfont
+			\normalfont\bfseries\fontsize{10pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
+			\normalfont\fontsize{8pt}{8pt}\selectfont\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
 			
 			#6
 			}
