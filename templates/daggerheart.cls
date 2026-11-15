@@ -207,6 +207,7 @@ Path = ./fonts/,
 \newtcolorbox{squarebox}{
 	colback=squareboxbg,
 	enhanced,
+	boxrule=0pt,
 	frame hidden,
 	borderline north={.75pt}{0pt}{squareboxborder},
 	borderline south={.75pt}{0pt}{squareboxborder},
