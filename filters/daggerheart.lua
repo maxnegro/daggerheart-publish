@@ -1239,8 +1239,8 @@ local function parse_statblock_yaml(text)
           local feat_text_raw = raw:match("^%s*text%s*:%s*(.-)%s*$")
           if feat_question then
             current_feat.question = strip_yaml_quotes(feat_question)
-          elseif feat_text_raw == "|" then
-            -- YAML literal block scalar
+          elseif feat_text_raw and feat_text_raw:match("^[|>][-+]?%s*$") then
+            -- YAML block scalar indicator (|, |-, |+, >, >-, >+)
             current_feat._block_scalar = true
             current_feat._block_indent = nil
             current_feat.text = ""
@@ -1338,6 +1338,13 @@ local function blocks_to_latex(blocks)
       end
       parts[#parts+1] = "\\begin{itemize}\\tightlist\n"
         .. table.concat(items, "\n") .. "\n\\end{itemize}"
+    elseif block.t == "OrderedList" then
+      local items = {}
+      for _, item_blocks in ipairs(block.content) do
+        items[#items+1] = "\\item " .. blocks_to_latex(item_blocks)
+      end
+      parts[#parts+1] = "\\begin{enumerate}\\tightlist\n"
+        .. table.concat(items, "\n") .. "\n\\end{enumerate}"
     elseif block.t == "HorizontalRule" then
       parts[#parts+1] = "\\dghsectionseparator"
     end
@@ -1349,6 +1356,24 @@ end
 -- Convert a Markdown string to LaTeX using the Pandoc AST pipeline.
 local function text_to_latex(text)
   if not text or text == "" then return "" end
+  -- Dedent the text to handle indented lists from YAML block scalars.
+  local lines = {}
+  local min_indent = math.huge
+  for line in (text .. "\n"):gmatch("(.-)\n") do
+    local indent = line:match("^(%s*)")
+    if indent and line:match("%S") then
+      min_indent = math.min(min_indent, #indent)
+    end
+    table.insert(lines, line)
+  end
+  if min_indent < math.huge and min_indent > 0 then
+    for i, line in ipairs(lines) do
+      if #line >= min_indent then
+        lines[i] = line:sub(min_indent + 1)
+      end
+    end
+  end
+  text = table.concat(lines, "\n")
   -- Allow bullet lists immediately after text lines in YAML block scalars.
   local doc = pandoc.read(text, "markdown+lists_without_preceding_blankline")
   return blocks_to_latex(doc.blocks)
