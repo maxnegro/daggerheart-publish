@@ -664,3 +664,15 @@ Questo template utilizza i seguenti font:
 - **Montserrat** (Google Fonts, SIL Open Font License)
 - **Merriweather** (Google Fonts, SIL Open Font License)
 - **LeagueSpartan** (Google Fonts, SIL Open Font License)
+
+### Fallback font Eveleth
+
+La classe `daggerheart.cls` usa la famiglia **Eveleth** (EvelethCleanThin / EvelethCleanRegular) per H1, H2, titoli di entità e cover page. Questi font **non sono liberamente distribuibili** e **non sono inclusi nel repository**.
+
+Al build time la classe verifica la presenza dei file in `assets/fonts/` (copiati in `./fonts/` nella workdir di build):
+- Se presenti → usa Eveleth (rendering originale)
+- Se assenti → **fallback automatico a Montserrat**:
+  - `EvelethCleanThin.ttf` → `Montserrat-Thin.ttf`
+  - `EvelethCleanRegular.ttf` → `Montserrat-Light.ttf` (con `LetterSpace = -0.1` per avvicinare la resa)
+
+Montserrat è incluso in `assets/fonts/` (SIL OFL), quindi la build funziona out-of-the-box senza passi extra. Se possiedi licenza Eveleth, basta copiare i due `.ttf` in `assets/fonts/` per riavere il rendering esatto.

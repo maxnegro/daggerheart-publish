@@ -146,20 +146,23 @@
 \renewcommand{\normalsize}{\fontsize{8.5}{10}\selectfont}
 \normalsize
 \setmainfont{IBMPlexSans-Regular.ttf}[
-Path = ./assets/fonts/,
+Path = ./fonts/,
 ItalicFont = IBMPlexSans-Italic.ttf,
 BoldFont = IBMPlexSans-Bold.ttf,
 BoldItalicFont = IBMPlexSans-BoldItalic.ttf
 ]
-\newfontfamily\evelethThin{EvelethCleanThin.ttf}[
-Path = ./assets/fonts/,
-]
-\newfontfamily\eveleth{EvelethCleanRegular.ttf}[
-Path = ./assets/fonts/,
-LetterSpace = -0.1
-]
+
+% Eveleth fonts (not freely distributable) — fallback to Montserrat if absent
+\IfFileExists{./fonts/EvelethCleanThin.ttf}{%
+  \newfontfamily\evelethThin{EvelethCleanThin.ttf}[Path = ./fonts/]
+  \newfontfamily\eveleth{EvelethCleanRegular.ttf}[Path = ./fonts/, LetterSpace = -0.1]
+}{%
+  \newfontfamily\evelethThin{Montserrat-Thin.ttf}[Path = ./fonts/]
+  \newfontfamily\eveleth{Montserrat-Light.ttf}[Path = ./fonts/, LetterSpace = -0.1]
+}
+
 \newfontfamily\ibmplexsemicondensed{IBMPlexSans_SemiCondensed-Regular.ttf}[
-Path = ./assets/fonts/,
+Path = ./fonts/,
 BoldFont = IBMPlexSans_SemiCondensed-Bold.ttf,
 ItalicFont = IBMPlexSans_SemiCondensed-Italic.ttf,
 BoldItalicFont = IBMPlexSans_SemiCondensed-BoldItalic.ttf
