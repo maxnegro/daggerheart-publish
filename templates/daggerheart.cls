@@ -145,19 +145,28 @@
 % --- Fonts ---
 \renewcommand{\normalsize}{\fontsize{8.5}{10}\selectfont}
 \normalsize
-\setmainfont{Montserrat-Regular.ttf}[
+\setmainfont{IBMPlexSans-Regular.ttf}[
 Path = ./fonts/,
-ItalicFont = Merriweather-Italic.ttf,
-BoldFont = Montserrat-SemiBold.ttf,
-BoldItalicFont = Merriweather-BoldItalic.ttf
+ItalicFont = IBMPlexSans-Italic.ttf,
+BoldFont = IBMPlexSans-Bold.ttf,
+BoldItalicFont = IBMPlexSans-BoldItalic.ttf
 ]
-\newfontfamily\montserratThin{Montserrat-Thin.ttf}[
+
+% Eveleth fonts (not freely distributable) — fallback to Montserrat if absent
+\IfFileExists{./fonts/EvelethCleanThin.ttf}{%
+  \newfontfamily\evelethThin{EvelethCleanThin.ttf}[Path = ./fonts/]
+  \newfontfamily\eveleth{EvelethCleanRegular.ttf}[Path = ./fonts/, LetterSpace = -0.1]
+}{%
+  \newfontfamily\evelethThin{Montserrat-Light.ttf}[Path = ./fonts/, LetterSpace = -0.1]
+  \newfontfamily\eveleth{Montserrat-ExtraBold.ttf}[Path = ./fonts/, LetterSpace = -0.2]
+}
+
+\newfontfamily\ibmplexsemicondensed{IBMPlexSans_SemiCondensed-Regular.ttf}[
 Path = ./fonts/,
+BoldFont = IBMPlexSans_SemiCondensed-Bold.ttf,
+ItalicFont = IBMPlexSans_SemiCondensed-Italic.ttf,
+BoldItalicFont = IBMPlexSans_SemiCondensed-BoldItalic.ttf
 ]
-\newfontfamily\montserratLight{Montserrat-Light.ttf}[
-Path = ./fonts/,
-]
-\newfontfamily\eveleth{LeagueSpartan-Extrabold.ttf}[Path=./fonts/]
 
 % --- Colors ---
 \definecolor{maintext}{HTML}{000000}
@@ -207,6 +216,7 @@ Path = ./fonts/,
 \newtcolorbox{squarebox}{
 	colback=squareboxbg,
 	enhanced,
+	boxrule=0pt,
 	frame hidden,
 	borderline north={.75pt}{0pt}{squareboxborder},
 	borderline south={.75pt}{0pt}{squareboxborder},
@@ -310,7 +320,7 @@ Path = ./fonts/,
 
 	\vspace*{\dimexpr\dghcoverimagecutlen-\dghpagetotext-26pt\relax}
     
-    \parbox{\linewidth}{\montserratLight\fontsize{\dghtitlefontsize}{\dghtitlefontsize}\selectfont\raggedright\color{h1textlight}\righthyphenmin=62\lefthyphenmin=62\hyphenpenalty=10000\exhyphenpenalty=10000\MakeUppercase #1}
+    \parbox{\linewidth}{\evelethThin\fontsize{\dghtitlefontsize}{\dghtitlefontsize}\selectfont\raggedright\color{h1textlight}\righthyphenmin=62\lefthyphenmin=62\hyphenpenalty=10000\exhyphenpenalty=10000\MakeUppercase #1}
     \vspace{1em}
     
 	{\normalfont\fontsize{10pt}{13pt}\selectfont\itshape\color{white}\setlength{\parindent}{0pt}\setlength{\parskip}{0.35em}\rightskip=0pt\relax #2\par}    
@@ -333,7 +343,7 @@ Path = ./fonts/,
 	\renewcommand{\section}[1]{%
 		\needspace{6\baselineskip}%
 		\vspace{0.7em}%
-		{\noindent\montserratLight\fontsize{13pt}{14pt}\selectfont\color{white}\MakeTextUppercase{##1}\par}%
+		{\noindent\evelethThin\fontsize{13pt}{14pt}\selectfont\color{white}\MakeTextUppercase{##1}\par}%
 		\nopagebreak[4]%
 		\vspace{0.25em}%
 	}
@@ -381,13 +391,13 @@ Path = ./fonts/,
 
 \newcommand{\applysectioncolor}[2]{%
 	\titleformat{\section}
-	{\montserratLight\fontsize{24pt}{24pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
+	{\evelethThin\fontsize{28pt}{28pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesection}
 	{1em}
 	{}
 	\titlespacing*{\section}{0pt}{0pt}{0.8em}
 	\titleformat{\subsection}
-	{\eveleth\fontsize{20pt}{20pt}\selectfont\color{#2}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
+	{\eveleth\fontsize{17pt}{17pt}\selectfont\color{#2}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesubsection}
 	{1em}
 	{}
@@ -403,7 +413,7 @@ Path = ./fonts/,
 
 \newcommand{\setsubsubsectioncolor}[1]{%
 	\titleformat{\subsubsection}
-	{\bf\fontsize{15pt}{15pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
+	{\ibmplexsemicondensed\bfseries\fontsize{15pt}{15pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesubsubsection}
 	{1em}
 	{}
@@ -580,7 +590,7 @@ Path = ./fonts/,
 		colback=#1,
 		colframe=#2,
 		arc=5pt,
-		boxrule=1pt,
+		boxrule=0.5pt,
 		outer arc=5pt,
 		before skip=2em,
 		after skip=2em,
@@ -594,8 +604,9 @@ Path = ./fonts/,
 		colback=white,
 		enhanced,
 		frame hidden,
-		borderline north={1pt}{0pt}{#1},
-		borderline south={1pt}{0pt}{#1},
+		boxrule=0pt,
+		borderline north={0.3pt}{0pt}{#1},
+		borderline south={0.3pt}{0pt}{#1},
 		left=0.5em,
 		right=0.5em,
 		top=0.5em,
@@ -674,7 +685,7 @@ Path = ./fonts/,
 }
 
 
-\newcommand{\dghexperienceseparator}{\noindent\rule{\linewidth}{0.25pt}}
+\newcommand{\dghexperienceseparator}[1][black]{\noindent\textcolor{#1}{\rule{\linewidth}{0.3pt}}}
 
 \newcommand{\dghformatadjacentsegments}[1]{\textbf{\dghlabeladjacentsegments:}\ \mdseries\upshape #1}
 
@@ -706,9 +717,9 @@ Path = ./fonts/,
 \newcommand{\dgh@entity}[8]{%
 	\begin{#1}{}%
 		{\color{maintext}%
-			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#3}
+			\eveleth\fontsize{12pt}{12pt}\selectfont\MakeTextUppercase{#3}
 			\par\smallskip
-			\normalfont\fontsize{8pt}{8pt}\selectfont
+			\normalfont\fontsize{8pt}{8pt}\selectfont\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
 			\ifstrempty{#4}{}{
 				\textbf{\emph{#4}}
 				\\
@@ -728,8 +739,8 @@ Path = ./fonts/,
 			}
 			\par\smallskip
 			\ifstrempty{#8}{}{
-				\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
-				\normalfont\fontsize{8pt}{8pt}\selectfont
+				\ibmplexsemicondensed\bfseries\fontsize{10pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
+				\normalfont\fontsize{8pt}{8pt}\selectfont\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
 
 				#8
 			}
@@ -752,9 +763,9 @@ Path = ./fonts/,
 \newcommand{\dghenvironment}[6]{%
 	\begin{environmentbox}{}%
 		{\color{maintext}%
-			\eveleth\fontsize{14pt}{14pt}\selectfont\MakeTextUppercase{#1}
+			\eveleth\fontsize{12pt}{12pt}\selectfont\MakeTextUppercase{#1}
 			\par\smallskip
-			\normalfont\fontsize{8pt}{8pt}\selectfont
+			\normalfont\fontsize{8pt}{8pt}\selectfont\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
 			
 			\ifstrempty{#2}{}{
 				\textbf{\emph{#2}}
@@ -776,8 +787,8 @@ Path = ./fonts/,
 			\par%\smallskip
 			
 			\ifstrempty{#6}{}{
-			\eveleth\fontsize{12pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
-			\normalfont\fontsize{8pt}{8pt}\selectfont
+			\ibmplexsemicondensed\bfseries\fontsize{10pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
+			\normalfont\fontsize{8pt}{8pt}\selectfont\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
 			
 			#6
 			}
