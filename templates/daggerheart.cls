@@ -146,23 +146,20 @@
 \renewcommand{\normalsize}{\fontsize{8.5}{10}\selectfont}
 \normalsize
 \setmainfont{IBMPlexSans-Regular.ttf}[
-Path = ./fonts/,
+Path = ./assets/fonts/,
 ItalicFont = IBMPlexSans-Italic.ttf,
 BoldFont = IBMPlexSans-Bold.ttf,
 BoldItalicFont = IBMPlexSans-BoldItalic.ttf
 ]
-\newfontfamily\montserratThin{EvelethCleanThin.ttf}[
-Path = ./fonts/,
-]
-\newfontfamily\montserratLight{EvelethCleanThin.ttf}[
-Path = ./fonts/,
+\newfontfamily\evelethThin{EvelethCleanThin.ttf}[
+Path = ./assets/fonts/,
 ]
 \newfontfamily\eveleth{EvelethCleanRegular.ttf}[
-Path = ./fonts/,
+Path = ./assets/fonts/,
 LetterSpace = -0.1
 ]
 \newfontfamily\ibmplexsemicondensed{IBMPlexSans_SemiCondensed-Regular.ttf}[
-Path = ./fonts/,
+Path = ./assets/fonts/,
 BoldFont = IBMPlexSans_SemiCondensed-Bold.ttf,
 ItalicFont = IBMPlexSans_SemiCondensed-Italic.ttf,
 BoldItalicFont = IBMPlexSans_SemiCondensed-BoldItalic.ttf
@@ -320,7 +317,7 @@ BoldItalicFont = IBMPlexSans_SemiCondensed-BoldItalic.ttf
 
 	\vspace*{\dimexpr\dghcoverimagecutlen-\dghpagetotext-26pt\relax}
     
-    \parbox{\linewidth}{\montserratLight\fontsize{\dghtitlefontsize}{\dghtitlefontsize}\selectfont\raggedright\color{h1textlight}\righthyphenmin=62\lefthyphenmin=62\hyphenpenalty=10000\exhyphenpenalty=10000\MakeUppercase #1}
+    \parbox{\linewidth}{\evelethThin\fontsize{\dghtitlefontsize}{\dghtitlefontsize}\selectfont\raggedright\color{h1textlight}\righthyphenmin=62\lefthyphenmin=62\hyphenpenalty=10000\exhyphenpenalty=10000\MakeUppercase #1}
     \vspace{1em}
     
 	{\normalfont\fontsize{10pt}{13pt}\selectfont\itshape\color{white}\setlength{\parindent}{0pt}\setlength{\parskip}{0.35em}\rightskip=0pt\relax #2\par}    
@@ -343,7 +340,7 @@ BoldItalicFont = IBMPlexSans_SemiCondensed-BoldItalic.ttf
 	\renewcommand{\section}[1]{%
 		\needspace{6\baselineskip}%
 		\vspace{0.7em}%
-		{\noindent\montserratLight\fontsize{13pt}{14pt}\selectfont\color{white}\MakeTextUppercase{##1}\par}%
+		{\noindent\evelethThin\fontsize{13pt}{14pt}\selectfont\color{white}\MakeTextUppercase{##1}\par}%
 		\nopagebreak[4]%
 		\vspace{0.25em}%
 	}
@@ -391,7 +388,7 @@ BoldItalicFont = IBMPlexSans_SemiCondensed-BoldItalic.ttf
 
 \newcommand{\applysectioncolor}[2]{%
 	\titleformat{\section}
-	{\montserratLight\fontsize{28pt}{28pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
+	{\evelethThin\fontsize{28pt}{28pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesection}
 	{1em}
 	{}
