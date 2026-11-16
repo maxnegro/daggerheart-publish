@@ -5,6 +5,10 @@ books/*
 !books/example/
 !books/example-frame/
 
+# Exclude licensed fonts
+assets/fonts/EvelethCleanThin.ttf
+assets/fonts/EvelethCleanRegular.ttf
+
 # Generated test artifacts
 tests/results/
 tests/baseline/

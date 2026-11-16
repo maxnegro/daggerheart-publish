@@ -157,8 +157,8 @@ BoldItalicFont = IBMPlexSans-BoldItalic.ttf
   \newfontfamily\evelethThin{EvelethCleanThin.ttf}[Path = ./fonts/]
   \newfontfamily\eveleth{EvelethCleanRegular.ttf}[Path = ./fonts/, LetterSpace = -0.1]
 }{%
-  \newfontfamily\evelethThin{Montserrat-Thin.ttf}[Path = ./fonts/]
-  \newfontfamily\eveleth{Montserrat-Light.ttf}[Path = ./fonts/, LetterSpace = -0.1]
+  \newfontfamily\evelethThin{Montserrat-Light.ttf}[Path = ./fonts/, LetterSpace = -0.1]
+  \newfontfamily\eveleth{Montserrat-ExtraBold.ttf}[Path = ./fonts/, LetterSpace = -0.2]
 }
 
 \newfontfamily\ibmplexsemicondensed{IBMPlexSans_SemiCondensed-Regular.ttf}[
