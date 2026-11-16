@@ -157,7 +157,16 @@ Path = ./fonts/,
 \newfontfamily\montserratLight{EvelethCleanThin.ttf}[
 Path = ./fonts/,
 ]
-\newfontfamily\eveleth{EvelethCleanRegular.ttf}[Path=./fonts/]
+\newfontfamily\eveleth{EvelethCleanRegular.ttf}[
+Path = ./fonts/,
+LetterSpace = -0.1
+]
+\newfontfamily\ibmplexsemicondensed{IBMPlexSans_SemiCondensed-Regular.ttf}[
+Path = ./fonts/,
+BoldFont = IBMPlexSans_SemiCondensed-Bold.ttf,
+ItalicFont = IBMPlexSans_SemiCondensed-Italic.ttf,
+BoldItalicFont = IBMPlexSans_SemiCondensed-BoldItalic.ttf
+]
 
 % --- Colors ---
 \definecolor{maintext}{HTML}{000000}
@@ -404,7 +413,7 @@ Path = ./fonts/,
 
 \newcommand{\setsubsubsectioncolor}[1]{%
 	\titleformat{\subsubsection}
-	{\bf\fontsize{15pt}{15pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
+	{\ibmplexsemicondensed\bfseries\fontsize{15pt}{15pt}\selectfont\color{#1}\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\MakeTextUppercase}
 	{\thesubsubsection}
 	{1em}
 	{}
@@ -730,7 +739,7 @@ Path = ./fonts/,
 			}
 			\par\smallskip
 			\ifstrempty{#8}{}{
-				\normalfont\bfseries\fontsize{10pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
+				\ibmplexsemicondensed\bfseries\fontsize{10pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
 				\normalfont\fontsize{8pt}{8pt}\selectfont\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
 
 				#8
@@ -778,7 +787,7 @@ Path = ./fonts/,
 			\par%\smallskip
 			
 			\ifstrempty{#6}{}{
-			\normalfont\bfseries\fontsize{10pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
+			\ibmplexsemicondensed\bfseries\fontsize{10pt}{10pt}\selectfont\MakeTextUppercase{\dghlabelfeatures}
 			\normalfont\fontsize{8pt}{8pt}\selectfont\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000
 			
 			#6
