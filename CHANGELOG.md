@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.10] - 2026-11-16
+
+- refactor(latex): add indent_lists parameter to list rendering (b9edc81)
+- feat(daggerheart): add ordered list support and fix YAML block scalar parsing (979185e)
+- chore: update CHANGELOG for version 0.0.9 (37b88d9)
+
 ## [0.0.9] - 2026-11-16
 
 - chore(pdf): update example.pdf with latest changes (a6e2f44)
