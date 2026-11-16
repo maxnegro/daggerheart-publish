@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.0.9] - 2026-11-16
+
+- chore(pdf): update example.pdf with latest changes (a6e2f44)
+- refactor(fonts): adjust Montserrat fallback mapping and clean up font assets (6e4c89a)
+- chore(fonts): add fallback to Montserrat for non-distributable Eveleth fonts (0eac17d)
+- refactor: rename montserrat font commands to eveleth and update font paths (95a14f1)
+- feat(daggerheart): integrate IBM Plex Sans SemiCondensed fonts (1ac40bb)
+- feat(daggerheart): add boxrule property to squarebox for improved styling (9561e5d)
+- feat(daggerheart): add new fonts and improve text layout (f8a6ada)
+- chore: update CHANGELOG for version 0.0.8 (e6e6754)
+
 ## [0.0.8] - 2026-11-15
 
 - fix(daggerheart): add hanging indentation for feat entries (387c4c5)
