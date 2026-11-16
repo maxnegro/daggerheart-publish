@@ -1296,7 +1296,8 @@ end
 
 -- Walk a list of Pandoc block AST nodes → LaTeX string.
 -- Blocks are separated by \par (safe for both inline and block-level content).
-local function blocks_to_latex(blocks)
+local function blocks_to_latex(blocks, indent_lists)
+  indent_lists = indent_lists or false
   local parts = {}
   for _, block in ipairs(blocks) do
     if block.t == "Para" or block.t == "Plain" then
@@ -1316,35 +1317,45 @@ local function blocks_to_latex(blocks)
       parts[#parts+1] = pandoc.write(pandoc.Pandoc(header_blocks), "latex"):gsub("%s+$", "")
     elseif block.t == "Div" then
       if has_class(block, "center") then
-        local body = blocks_to_latex(block.content or {})
+        local body = blocks_to_latex(block.content or {}, indent_lists)
         parts[#parts+1] = "\\begin{center}\n" .. body .. "\n\\end{center}"
       elseif has_class(block, "right") then
-        local body = blocks_to_latex(block.content or {})
+        local body = blocks_to_latex(block.content or {}, indent_lists)
         parts[#parts+1] = "\\begin{flushright}\n" .. body .. "\n\\end{flushright}"
       elseif has_class(block, "pagebreak") then
         parts[#parts+1] = "\\dghpagebreak"
       elseif has_class(block, "columnbreak") then
         parts[#parts+1] = "\\columnbreak"
       elseif has_class(block, "fullpage") then
-        local body = blocks_to_latex(normalize_break_blocks(normalize_section_color_blocks(block.content or {})))
+        local body = blocks_to_latex(normalize_break_blocks(normalize_section_color_blocks(block.content or {})), indent_lists)
         parts[#parts+1] = "\\dghfullpagestart\n" .. body .. "\n\\dghfullpageend"
       else
-        parts[#parts+1] = blocks_to_latex(block.content or {})
+        parts[#parts+1] = blocks_to_latex(block.content or {}, indent_lists)
       end
     elseif block.t == "BulletList" then
       local items = {}
       for _, item_blocks in ipairs(block.content) do
-        items[#items+1] = "\\item " .. blocks_to_latex(item_blocks)
+        items[#items+1] = "\\item " .. blocks_to_latex(item_blocks, indent_lists)
       end
-      parts[#parts+1] = "\\begin{itemize}\\tightlist\n"
-        .. table.concat(items, "\n") .. "\n\\end{itemize}"
+      if indent_lists then
+        parts[#parts+1] = "\\hspace*{0.5em}\\begin{minipage}{\\dimexpr\\linewidth-0.5em}\\raggedright\\begin{itemize}\\tightlist\\setlength{\\itemsep}{0pt}\\setlength{\\parsep}{0pt}\n"
+          .. table.concat(items, "\n") .. "\n\\end{itemize}\\end{minipage}"
+      else
+        parts[#parts+1] = "\\begin{itemize}\\tightlist\n"
+          .. table.concat(items, "\n") .. "\n\\end{itemize}"
+      end
     elseif block.t == "OrderedList" then
       local items = {}
       for _, item_blocks in ipairs(block.content) do
-        items[#items+1] = "\\item " .. blocks_to_latex(item_blocks)
+        items[#items+1] = "\\item " .. blocks_to_latex(item_blocks, indent_lists)
       end
-      parts[#parts+1] = "\\begin{enumerate}\\tightlist\n"
-        .. table.concat(items, "\n") .. "\n\\end{enumerate}"
+      if indent_lists then
+        parts[#parts+1] = "\\hspace*{0.5em}\\begin{minipage}{\\dimexpr\\linewidth-0.5em}\\raggedright\\begin{enumerate}\\tightlist\\setlength{\\itemsep}{0pt}\\setlength{\\parsep}{0pt}\n"
+          .. table.concat(items, "\n") .. "\n\\end{enumerate}\\end{minipage}"
+      else
+        parts[#parts+1] = "\\begin{enumerate}\\tightlist\n"
+          .. table.concat(items, "\n") .. "\n\\end{enumerate}"
+      end
     elseif block.t == "HorizontalRule" then
       parts[#parts+1] = "\\dghsectionseparator"
     end
@@ -1376,7 +1387,7 @@ local function text_to_latex(text)
   text = table.concat(lines, "\n")
   -- Allow bullet lists immediately after text lines in YAML block scalars.
   local doc = pandoc.read(text, "markdown+lists_without_preceding_blankline")
-  return blocks_to_latex(doc.blocks)
+  return blocks_to_latex(doc.blocks, true)
 end
 
 local FEAT_HANG = "0.5em"
